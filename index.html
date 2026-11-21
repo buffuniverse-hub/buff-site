@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BUFF UNIVERSE 홈페이지</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Jost:ital,wght@1,400;1,500&amp;display=swap">
+<style>
+@font-face{font-family:'Paperozi';src:url(assets/15f71b60fc429fc12cd4dad02bfeed54.woff2) format('woff2');font-weight:300;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2190-2199, U+2212, U+2215}
+@font-face{font-family:'Paperozi';src:url(assets/baf929db95feae93af6a1da4a7a1a414.woff2) format('woff2');font-weight:400;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2190-2199, U+2212, U+2215}
+@font-face{font-family:'Paperozi';src:url(assets/bbe1cc34f57abf0309f993afab89fff5.woff2) format('woff2');font-weight:500;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2190-2199, U+2212, U+2215}
+@font-face{font-family:'Paperozi';src:url(assets/b82fffabb6dffa1ff492975d7f210f72.woff2) format('woff2');font-weight:600;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2190-2199, U+2212, U+2215}
+@font-face{font-family:'Paperozi';src:url(assets/657d7a0aee43a3de255dc11311977da8.woff2) format('woff2');font-weight:700;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2190-2199, U+2212, U+2215}
+@font-face{font-family:'Paperozi';src:url(assets/566af069f54b29382c264cdc08131dff.woff2) format('woff2');font-weight:800;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2190-2199, U+2212, U+2215}
+@font-face{font-family:'Suit';src:url(assets/68732d2c1892b6a9ec57d9dd4142c5a6.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Suit';src:url(assets/eb2e8ae66e3f3493094ce21b4dd93845.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Suit';src:url(assets/e8b5cd933e203d0f2bf3803089a3ad5d.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Suit';src:url(assets/a62b30b0b1071ca3641460274423ca85.woff2) format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Suit';src:url(assets/e86c3ec1a10c4de088901f0e5198d28d.woff2) format('woff2');font-weight:800;font-display:swap}
+body{margin:0;background:#FFFFFF}
+a{color:inherit}a:hover{opacity:.75}
+.buff-kv{background-image:url(assets/b8af4e474ed084eea4fbc789649a1a42.jpg);background-size:cover;background-position:center}
+@property --glow-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes glow-spin{to{--glow-a:360deg}}
+@keyframes glow-orbit{0.0%{box-shadow:10px 0px 14px 0 rgba(255,77,0,0.55),-5px 4px 14px 0 rgba(255,0,60,0.55),-5px -4px 14px 0 rgba(0,194,255,0.55)}12.5%{box-shadow:7px 4px 14px 0 rgba(255,77,0,0.55),-10px 1px 14px 0 rgba(255,0,60,0.55),3px -5px 14px 0 rgba(0,194,255,0.55)}25.0%{box-shadow:0px 5px 14px 0 rgba(255,77,0,0.55),-9px -3px 14px 0 rgba(255,0,60,0.55),9px -3px 14px 0 rgba(0,194,255,0.55)}37.5%{box-shadow:-7px 4px 14px 0 rgba(255,77,0,0.55),-3px -5px 14px 0 rgba(255,0,60,0.55),10px 1px 14px 0 rgba(0,194,255,0.55)}50.0%{box-shadow:-10px 0px 14px 0 rgba(255,77,0,0.55),5px -4px 14px 0 rgba(255,0,60,0.55),5px 4px 14px 0 rgba(0,194,255,0.55)}62.5%{box-shadow:-7px -4px 14px 0 rgba(255,77,0,0.55),10px -1px 14px 0 rgba(255,0,60,0.55),-3px 5px 14px 0 rgba(0,194,255,0.55)}75.0%{box-shadow:0px -5px 14px 0 rgba(255,77,0,0.55),9px 2px 14px 0 rgba(255,0,60,0.55),-9px 2px 14px 0 rgba(0,194,255,0.55)}87.5%{box-shadow:7px -4px 14px 0 rgba(255,77,0,0.55),3px 5px 14px 0 rgba(255,0,60,0.55),-10px -1px 14px 0 rgba(0,194,255,0.55)}100.0%{box-shadow:10px 0px 14px 0 rgba(255,77,0,0.55),-5px 4px 14px 0 rgba(255,0,60,0.55),-5px -4px 14px 0 rgba(0,194,255,0.55)}}
+@keyframes glow-orbit-h{0.0%{box-shadow:10px 0px 14px 0 rgba(255,77,0,0.85),-5px 4px 14px 0 rgba(255,0,60,0.85),-5px -4px 14px 0 rgba(0,194,255,0.85)}12.5%{box-shadow:7px 4px 14px 0 rgba(255,77,0,0.85),-10px 1px 14px 0 rgba(255,0,60,0.85),3px -5px 14px 0 rgba(0,194,255,0.85)}25.0%{box-shadow:0px 5px 14px 0 rgba(255,77,0,0.85),-9px -3px 14px 0 rgba(255,0,60,0.85),9px -3px 14px 0 rgba(0,194,255,0.85)}37.5%{box-shadow:-7px 4px 14px 0 rgba(255,77,0,0.85),-3px -5px 14px 0 rgba(255,0,60,0.85),10px 1px 14px 0 rgba(0,194,255,0.85)}50.0%{box-shadow:-10px 0px 14px 0 rgba(255,77,0,0.85),5px -4px 14px 0 rgba(255,0,60,0.85),5px 4px 14px 0 rgba(0,194,255,0.85)}62.5%{box-shadow:-7px -4px 14px 0 rgba(255,77,0,0.85),10px -1px 14px 0 rgba(255,0,60,0.85),-3px 5px 14px 0 rgba(0,194,255,0.85)}75.0%{box-shadow:0px -5px 14px 0 rgba(255,77,0,0.85),9px 2px 14px 0 rgba(255,0,60,0.85),-9px 2px 14px 0 rgba(0,194,255,0.85)}87.5%{box-shadow:7px -4px 14px 0 rgba(255,77,0,0.85),3px 5px 14px 0 rgba(255,0,60,0.85),-10px -1px 14px 0 rgba(0,194,255,0.85)}100.0%{box-shadow:10px 0px 14px 0 rgba(255,77,0,0.85),-5px 4px 14px 0 rgba(255,0,60,0.85),-5px -4px 14px 0 rgba(0,194,255,0.85)}}
+.glow-btn{position:relative;display:inline-flex;padding:2px;border-radius:9999px;isolation:isolate;text-decoration:none;transition:transform .3s ease;animation:glow-orbit 4s linear infinite}
+.glow-btn:hover{opacity:1;transform:scale(1.02);animation-name:glow-orbit-h}
+.glow-btn::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;background:conic-gradient(from var(--glow-a),#FF4D00,#FF003C,#00C2FF,#FF003C,#FF4D00);animation:glow-spin 4s linear infinite;transition:opacity .3s ease}
+.glow-btn .in{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 28px;border-radius:9999px;background:#0A0A0A;color:#FFFFFF;font-size:19px;font-weight:700;letter-spacing:-0.02em;transition:background-color .3s ease,color .3s ease}
+.glow-btn.sec{animation:none;box-shadow:inset 0 0 0 1.5px #1D1D1F;transition:transform .3s ease,box-shadow .3s ease}
+.glow-btn.sec::before{opacity:0}
+.glow-btn.sec .in{background:transparent;color:#1D1D1F}
+.glow-btn.sec:hover{box-shadow:none;animation:glow-orbit-h 4s linear infinite}
+.glow-btn.sec:hover::before{opacity:1}
+.glow-btn.sec:hover .in{background:#0A0A0A;color:#FFFFFF}
+.marquee-track{animation:client-roll 32s linear infinite}.marquee:hover .marquee-track{animation-play-state:paused}@keyframes client-roll{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 8px))}}@media (prefers-reduced-motion: reduce){.marquee-track{animation:none}}
+.nav-works{position:relative;display:flex;align-items:center}
+.nav-works .wt{text-decoration:none;padding:12px 10px;color:#D2D2D7;position:relative}
+.nav-works .wt::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;background:#FFFFFF;transform:scaleX(0);transition:transform .25s ease}
+.nav-works:hover .wt,.nav-works:focus-within .wt,.nav-works.on .wt{color:#FFFFFF;opacity:1}
+.nav-works:hover .wt::after,.nav-works:focus-within .wt::after,.nav-works.on .wt::after{transform:scaleX(1)}
+.works-panel{position:absolute;left:50%;top:100%;min-width:168px;margin-top:8px;padding:8px;box-sizing:border-box;display:flex;flex-direction:column;background:#FFFFFF;color:#1D1D1F;border:1px solid #D2D2D7;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.14);opacity:0;visibility:hidden;transform:translate(-50%,-6px);transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.works-panel::before{content:"";position:absolute;left:0;right:0;top:-16px;height:16px}
+.nav-works:hover .works-panel,.nav-works:focus-within .works-panel{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.works-panel .wi{font-size:16px;font-weight:500;line-height:1.4;padding:10px 16px;border-radius:8px;color:#424245;text-decoration:none;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
+.works-panel .wi:hover{background:#F5F5F7;color:#1D1D1F;opacity:1}
+.works-panel .wi.cur{color:#1D1D1F;font-weight:700}
+</style>
+
+<script src="config.js"></script>
+</head>
+<body>
+<div id="dc-root"></div>
+<template id="dc-tpl">
+
+<div style="font-family: 'Paperozi', 'Suit', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; color: #1D1D1F; background: #FFFFFF; width: 100%; word-break: keep-all; font-size: 17px; line-height: 1.47">
+
+<!-- GLOBAL NAV -->
+<header style="background: #000000; color: #FFFFFF; position: sticky; top: -1px; z-index: 60; box-shadow: 0 -3px 0 0 #000000">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; min-height: 52px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px">
+<a href="#top" style="display: flex; align-items: center; min-height: 44px"><img src="assets/de541288e60385660bcdb547a13a3d78.png" alt="BUFF" width="76" height="24" style="height: 24px; width: 76px; display: block; object-fit: contain"></a>
+<nav aria-label="주 메뉴" style="display: flex; flex-wrap: wrap; align-items: center; font-size: 14px; font-weight: 500; margin-left: auto; margin-right: -10px">
+<a href="#top" aria-current="page" style="text-decoration: none; padding: 12px 10px; color: #FFFFFF">Home</a>
+<div class="nav-works"><a class="wt" href="Photo.html" aria-haspopup="true">Works</a>
+<div class="works-panel"><a class="wi" href="Photo.html">Photo</a><a class="wi" href="Video.html">Video</a><a class="wi" href="Branding.html">Branding</a></div></div>
+<a href="News.html" style="text-decoration: none; padding: 12px 10px; color: #D2D2D7">News</a>
+<a href="Career.html" style="text-decoration: none; padding: 12px 10px; color: #D2D2D7">Career</a>
+<a href="About.html" style="text-decoration: none; padding: 12px 10px; color: #D2D2D7">About Us</a>
+</nav>
+</div>
+</header>
+
+<!-- HERO -->
+<section id="top" class="buff-kv" style="background-color: #FFFFFF; min-height: 640px; display: flex; align-items: center; justify-content: center; padding: 80px 24px; box-sizing: border-box">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 32px; text-align: center">
+<h1 style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.32em; font-family: 'Jost', sans-serif; font-style: italic; font-weight: 400; font-size: clamp(36px, 5vw, 80px); line-height: 1; color: #1D1D1F">
+<span>we</span>
+<img src="assets/a87a0a50cb72c77fedb5b0091e922cf3.png" alt="BUFF" style="height: 1.32em; width: auto; display: block">
+<span>your moment</span>
+</h1>
+<p style="margin: 0; font-size: 24px; font-weight: 500; line-height: 1.5; color: #1D1D1F">BUFF는 스포츠 전문 커뮤니케이션 에이전시입니다.<br>사진·영상·브랜딩으로 현장의 열기를 전하고, 스포츠 브랜드와 팬을 연결합니다.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center">
+<a href="Photo.html" class="glow-btn"><span class="in">프로젝트 보기</span></a>
+<a href="#contact" class="glow-btn sec"><span class="in">문의하기</span></a>
+</div>
+</div>
+</section>
+
+<!-- RECENT WORKS -->
+<section id="works" style="background: #FFFFFF; padding: 96px 0">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box">
+<div style="margin-bottom: 48px"><h2 style="margin: 0; font-size: 48px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; text-align: center; color: #1D1D1F">Recent Works</h2></div>
+<div data-sb="works-featured" style="display: flex; flex-wrap: wrap; gap: 48px 24px">
+<a href="Photo-LacrosseOpen.html" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">
+<img draggable="false" src="assets/43db6f23b2b466d3f8259534d758a9e8.jpg" alt="2026 라크로스 서울 오픈 경기 사진" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">
+<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">2026 라크로스 서울 오픈</span>
+<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">Branding · Photo</span>
+</a>
+<a href="Video-FutsalHeroes.html" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">
+<img draggable="false" src="assets/1c2a9a020c715831a14bf29ea2a61c89.jpg" alt="포카리스웨트 풋살히어로즈 오프닝 타이틀" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">
+<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">포카리스웨트 풋살히어로즈</span>
+<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">Video</span>
+</a>
+<a href="Branding-KBA.html" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">
+<img draggable="false" src="assets/f9ed75ecf00e9659ecaf32ec676e98b1.jpg" alt="2026 KBA D3 디비전리그 오프닝 대판" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">
+<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">2026 KBA D3 디비전리그</span>
+<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">Branding</span>
+</a>
+<a href="Photo-ILC.html" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">
+<img draggable="false" src="assets/4fb39e8c2bc10b2c4ef746db89eb048e.jpg" alt="2026 ILC 프로탁구리그 SERIES 4 경기 사진" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">
+<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">2026 ILC 프로탁구리그 SERIES 4</span>
+<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">Photo</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- OUR CLIENTS -->
+<section id="clients" style="background: #F5F5F7; padding: 96px 0">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box">
+<div style="margin-bottom: 48px"><h2 style="margin: 0; font-size: 48px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; text-align: center; color: #1D1D1F">Our Clients</h2></div>
+<div class="marquee" style="overflow: hidden; margin: 0 -40px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)"><div data-sb="clients" class="marquee-track" style="display: flex; gap: 16px; width: max-content"><a class="client-item" href="#clients" aria-label="SOOP" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/d97e7b342495e3d3bd9e4e50554c8f43.png" alt="SOOP" style="display: block; width: 54%; max-height: 40%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="KTTP 한국프로탁구연맹" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/7165e257c2ffc7c5d71f0ac8b3bd14cd.png" alt="KTTP 한국프로탁구연맹" style="display: block; width: 56%; max-height: 42%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="한국라크로스협회 Korea Lacrosse Association" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/33f18e8e46606120e9338759288ebf6f.png" alt="한국라크로스협회 Korea Lacrosse Association" style="display: block; width: 62%; max-height: 44%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="대한플래그풋볼연맹 Korea Flag Football Federation" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/e3b474815fafe1de25b490069973b643.png" alt="대한플래그풋볼연맹 Korea Flag Football Federation" style="display: block; width: 44%; max-height: 66%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="서울대학교 럭비부" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/779bc649ab025ba43c851d58f7a80e6a.png" alt="서울대학교 럭비부" style="display: block; width: 40%; max-height: 66%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="KERA" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/51bfe2b034179e62ff3a2db0cf033512.png" alt="KERA" style="display: block; width: 40%; max-height: 66%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="SOOP" aria-hidden="true" tabindex="-1" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/d97e7b342495e3d3bd9e4e50554c8f43.png" alt="" style="display: block; width: 54%; max-height: 40%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="KTTP 한국프로탁구연맹" aria-hidden="true" tabindex="-1" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/7165e257c2ffc7c5d71f0ac8b3bd14cd.png" alt="" style="display: block; width: 56%; max-height: 42%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="한국라크로스협회 Korea Lacrosse Association" aria-hidden="true" tabindex="-1" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/33f18e8e46606120e9338759288ebf6f.png" alt="" style="display: block; width: 62%; max-height: 44%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="대한플래그풋볼연맹 Korea Flag Football Federation" aria-hidden="true" tabindex="-1" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/e3b474815fafe1de25b490069973b643.png" alt="" style="display: block; width: 44%; max-height: 66%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="서울대학교 럭비부" aria-hidden="true" tabindex="-1" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/779bc649ab025ba43c851d58f7a80e6a.png" alt="" style="display: block; width: 40%; max-height: 66%; object-fit: contain"></a><a class="client-item" href="#clients" aria-label="KERA" aria-hidden="true" tabindex="-1" style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center"><img src="assets/dd9ccc45f64b7562c84bfb303ad78d84.png" alt="" style="display: block; width: 44%; max-height: 70%; object-fit: contain"></a></div></div>
+</div>
+</section>
+
+<!-- ABOUT US -->
+
+
+<!-- CAMPAIGN -->
+
+
+<!-- CAREER -->
+<section id="about" style="background: #FFFFFF; padding: 96px 0 0">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box">
+<div style="display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: center; justify-content: center; margin-bottom: 48px">
+<h2 style="margin: 0; font-size: 48px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: #1D1D1F; text-align: center">About Us</h2>
+
+</div>
+<div role="tablist" aria-label="팀 구성원" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 24px 48px; padding-bottom: 80px">
+<sc-for list="{{ people }}" as="p" hint-placeholder-count="3">
+<button type="button" role="tab" aria-selected="{{ p.selected }}" onClick="{{ p.pick }}" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; cursor: pointer; font: inherit; color: #1D1D1F">
+<img src="{{ p.avatar }}" alt="{{ p.name }}" style="{{ p.avatarStyle }}">
+<span style="margin-top: 16px; font-size: 16px; font-weight: 500; color: #6E6E73">{{ p.role }}</span>
+<span style="{{ p.nameStyle }}">{{ p.name }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div style="background: #FFFFFF; border-top: 1px solid #D2D2D7; padding: 96px 0">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 48px 72px">
+<div style="flex: 0 1 400px; min-width: 0">
+<img src="{{ cur.large }}" alt="{{ cur.name }} {{ cur.role }}" style="display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top center; border-radius: 0; background: #F5F5F7">
+</div>
+<div style="flex: 1 1 480px; min-width: 0; min-height: 496px; display: flex; flex-direction: column; justify-content: flex-start; word-break: keep-all">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 16px"><span style="font-size: 64px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: #1D1D1F">{{ cur.name }}</span><span style="font-size: 20px; font-weight: 500; line-height: 1.4; color: #6E6E73">{{ cur.role }}</span></div>
+
+</div>
+<span style="margin-top: 16px; font-size: 19px; font-weight: 500; line-height: 1.4; color: #1D1D1F">{{ cur.en }}</span><p style="margin: 40px 0 0; font-size: 20px; font-weight: 600; line-height: 1.6; color: #C2412F; word-break: keep-all; white-space: pre-line">{{ cur.lead }}</p>
+<p style="margin: 8px 0 0; font-size: 19px; line-height: 1.6; color: #1D1D1F; word-break: keep-all; white-space: pre-line; text-wrap: balance">{{ cur.body }}</p>
+<dl style="margin: 40px 0 0; padding-top: 32px; border-top: 1px solid #D2D2D7; display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: start; gap: 16px 16px; font-size: 18px; line-height: 1.6; color: #1D1D1F">
+<dt style="margin: 0; font-weight: 700; color: #6E6E73">학력</dt><dd style="margin: 0; white-space: pre-line">{{ cur.edu }}</dd>
+<dt style="margin: 0; font-weight: 700; color: #6E6E73">경력</dt><dd style="margin: 0; white-space: pre-line">{{ cur.career }}</dd>
+</dl>
+</div>
+</div>
+</div>
+</section><section id="career" style="padding: 96px 0; background-color: #1d1d1f">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center">
+<h2 style="margin: 0; font-size: 48px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; text-align: center; color: #ffffff">Join the team</h2>
+<p style="margin: 0; max-width: 100%; font-size: 21px; line-height: 1.5; color: #ffffff">스포츠를 좋아하고, 현장에서 발견한 이야기를 어떻게 전할지 함께 고민할 동료를 찾습니다.</p>
+<div style="margin-top: 8px"><a href="Career.html" class="glow-btn"><span class="in">채용 공고 보기</span></a></div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact" style="background: #F5F5F7; color: #1D1D1F">
+<div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; padding-top: 80px; padding-bottom: 40px">
+<div style="display: flex; flex-wrap: wrap; gap: 40px 48px; padding-bottom: 48px; border-bottom: 1px solid #D2D2D7">
+<div style="flex: 1 1 320px; min-width: 0"><h2 style="margin: 0; font-size: 40px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em">Contact us</h2></div>
+<div style="flex: 2 1 560px; min-width: 0; display: flex; flex-wrap: wrap; gap: 32px">
+<div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 17px; font-weight: 700">New Business</h3>
+<a href="mailto:buff.universe@gmail.com" style="color: #C2412F; text-decoration: none">buff.universe@gmail.com</a>
+<h3 style="margin: 24px 0 0; font-size: 17px; font-weight: 700">Careers</h3>
+<a href="mailto:buff.universe@gmail.com" style="color: #C2412F; text-decoration: none">buff.universe@gmail.com</a>
+</div>
+<div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 17px; font-weight: 700">버프유니버스 BUFF UNIVERSE</h3>
+<span>서울 관악구 남부순환로 1921-1 (봉천동, 범산빌딩) 202-E4호</span>
+<div style="margin-top: 16px; display: flex; align-items: center; gap: 16px"><a href="https://www.instagram.com/buff.universe" aria-label="Instagram" style="display: inline-flex; width: 28px; height: 28px; color: #1D1D1F"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"></circle></svg></a><a href="https://www.youtube.com/@buff.universe" aria-label="YouTube" style="display: inline-flex; width: 28px; height: 28px; color: #1D1D1F"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22.5 7.2a2.8 2.8 0 0 0-2-2C18.8 4.8 12 4.8 12 4.8s-6.8 0-8.5.4a2.8 2.8 0 0 0-2 2C1.1 8.9 1.1 12 1.1 12s0 3.1.4 4.8a2.8 2.8 0 0 0 2 2c1.7.4 8.5.4 8.5.4s6.8 0 8.5-.4a2.8 2.8 0 0 0 2-2c.4-1.7.4-4.8.4-4.8s0-3.1-.4-4.8z"></path><path fill="#F5F5F7" d="M9.8 15.1V8.9l5.3 3.1z"></path></svg></a><a href="https://www.linkedin.com/company/buffuniverse/" aria-label="LinkedIn" style="display: inline-flex; width: 28px; height: 28px; color: #1D1D1F"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor"></rect><circle cx="7.6" cy="7.7" r="1.5" fill="#F5F5F7"></circle><rect x="6.3" y="10.2" width="2.6" height="7.6" fill="#F5F5F7"></rect><path fill="#F5F5F7" d="M10.8 10.2h2.5v1.1c.4-.7 1.3-1.3 2.5-1.3 2.4 0 2.9 1.6 2.9 3.6v4.2h-2.6v-3.7c0-.9 0-2-1.2-2s-1.4.9-1.4 1.9v3.8h-2.7z"></path></svg></a><a href="https://kmong.com/@%EB%B2%84%ED%94%84%EC%9C%A0%EB%8B%88%EB%B2%84%EC%8A%A4" aria-label="Kmong" style="display: inline-flex; width: 28px; height: 28px; color: #1D1D1F"><img src="assets/1d2f10cdb911b64692fcac1ce8afa4da.png" alt="Kmong" width="28" height="28" style="display: block; width: 28px; height: 28px; border-radius: 7px"></a></div>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding-top: 32px">
+<a href="#top" style="display: flex; align-items: center; min-height: 44px"><img src="assets/a87a0a50cb72c77fedb5b0091e922cf3.png" alt="BUFF" style="height: 22px; width: auto; display: block"></a>
+<p style="margin: 0; flex: 1 1 0; min-width: 0; text-align: right; font-size: clamp(9px, 0.76vw, 11px); line-height: 1.6; letter-spacing: -0.02em; white-space: nowrap; color: #6E6E73">© BUFF UNIVERSE · 상호 : 버프유니버스(BUFF UNIVERSE) · 대표 : 김동준 · 주소 : 서울 관악구 남부순환로 1921-1 (봉천동, 범산빌딩) 202-E4호 · 사업자등록번호 : 295-24-02126 · 이메일 : buff.universe@gmail.com</p>
+</div>
+
+</div>
+</footer>
+
+</div>
+
+</template>
+<script src="dc-lite.js"></script>
+<script>
+class Component extends DCLogic {
+constructor(props) { super(props); this.state = { sel: 0 }; }
+renderVals() {
+const P = (window.__TEAM&&window.__TEAM.length)?window.__TEAM:[{"name": "김동준", "role": "대표", "en": "Business Development & Operations", "av": "assets/c45760ea6c8bd75500b7fc326622dc69.jpg", "large": "assets/fd2d94b585d4f627813e3a2feb5d054a.jpg", "lead": "BUFF의 신규 비즈니스 발굴과 운영, \n스포츠 프로젝트 기획과 총괄을 맡고 있습니다.", "body": "대외 협력과 파트너십 구축을 담당합니다.", "edu": "現 서울대 글로벌스포츠매니지먼트 석사과정", "career": "現 한국라크로스협회 남자부 심판장\n現 World Lacrosse 국제심판"}, {"name": "김동윤", "role": "사진·디자인 총괄", "en": "Photography, Design & AI Automation", "av": "assets/bc641d8ca9dd8d6604a5a167eb374a1d.jpg", "large": "assets/2c105752ec988e7189e3e5a03b75122c.jpg", "lead": "스포츠 사진 촬영과 비주얼 콘텐츠 제작,\n그래픽 디자인과 브랜드 아이덴티티 구축을 맡고 있습니다.", "body": "마케팅 전략 수립과 콘텐츠 기획,\nAI 기반 업무 자동화 프로그램 기획과 개발도 담당합니다.", "edu": "現 한국외대 태국학 전공 · 광고PR브랜딩 부전공", "career": "前 한국라크로스협회 마케팅·홍보 담당\n前 2025 World Lacrosse Men’s U20 Championship 조직위원회 마케팅 리드"}, {"name": "이승민", "role": "영상 총괄", "en": "Video Production & Post-Production", "av": "assets/253cb3b8d1aceb6f7a198026b8053f0f.jpg", "large": "assets/7721c32c5cf19cfb27b6eaca7b0bf138.jpg", "lead": "스포츠 영상 촬영과 제작, 영상 콘텐츠 기획과 연출을 맡고 있습니다.", "body": "영상 편집과 후반 제작까지 담당합니다.", "edu": "現 한양대 언론정보대학원 석사과정", "career": "前 2026 LACROSSE OKINAWA OPEN 비디오그래퍼"}];
+const sel = this.state.sel;
+const people = P.map((x, i) => ({
+...x,
+avatar: x.av,
+selected: i === sel ? 'true' : 'false',
+pick: () => this.setState({ sel: i }),
+avatarStyle: 'display: block; width: 168px; height: 168px; border-radius: 50%; object-fit: cover; background: #F5F5F7; filter: ' + (i === sel ? 'grayscale(0)' : 'grayscale(1)') + '; opacity: ' + (i === sel ? '1' : '0.85'),
+nameStyle: 'font-size: 26px; font-weight: 700; letter-spacing: -0.01em; color: #1D1D1F; padding-bottom: 2px; border-bottom: 2px solid ' + (i === sel ? '#1D1D1F' : 'transparent')
+}));
+return { people, cur: P[sel] };
+}
+}
+(window.__teamReady||Promise.resolve()).then(function(){dcMount(Component)});
+</script>
+<script src="site.js" defer></script>
+</body>
+</html>
