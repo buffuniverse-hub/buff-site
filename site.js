@@ -58,9 +58,18 @@ function bindLists(){
 
 function pill(t){return '<span style="padding: 8px 14px; border-radius: 999px; background: #F5F5F7; font-size: 15px; font-weight: 500; color: #1D1D1F">#'+esc(t)+'</span>'}
 
-var WK_CSS='.wk-sec{background:#FFFFFF;padding:32px 0 96px}.wk-wrap{max-width:1200px;margin:0 auto;padding:0 40px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start}.wk-side{flex:0 0 340px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:24px;word-break:keep-all}.wk-media{flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:24px}'
- +'@media (min-width:900px){.wk-sec{padding:24px 0 56px}.wk-wrap{flex-wrap:nowrap;height:calc(100vh - 150px);min-height:520px}.wk-side{height:100%;overflow-y:auto;scrollbar-width:none}.wk-side::-webkit-scrollbar{display:none}.wk-media{height:100%;overflow-y:auto;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none}.wk-media::-webkit-scrollbar{display:none}}';
+var WK_CSS='.wk-sec{background:#FFFFFF;padding:32px 0 96px}.wk-wrap{max-width:1200px;margin:0 auto;padding:0 40px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start}.wk-side{flex:0 0 340px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:24px;word-break:keep-all}.wk-mwrap{flex:1 1 480px;min-width:0;position:relative}.wk-media{min-width:0;display:flex;flex-direction:column;gap:24px}.wk-more{display:none}'
+ +'@media (min-width:900px){.wk-sec{padding:24px 0 56px}.wk-wrap{flex-wrap:nowrap;height:calc(100vh - 150px);min-height:520px}.wk-side{height:100%;overflow-y:auto;scrollbar-width:none}.wk-side::-webkit-scrollbar{display:none}.wk-mwrap{height:100%}.wk-media{height:100%;overflow-y:auto;overscroll-behavior:auto;scrollbar-width:none;-ms-overflow-style:none}.wk-more{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:48px;height:48px;border-radius:50%;border:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .25s;animation:wkbob 1.6s ease-in-out infinite;backdrop-filter:blur(6px)}.wk-more.off{opacity:0;pointer-events:none}.wk-more:hover{background:rgba(0,0,0,.9)}@keyframes wkbob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,5px)}}.wk-media::-webkit-scrollbar{display:none}}';
 var PLAY='<span style="position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1D1D1F" d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"></path></svg></span>';
+
+function wireMore(app){
+  var m=app.querySelector('.wk-media'),b=app.querySelector('.wk-more');if(!m||!b)return;
+  function upd(){var more=m.scrollHeight-m.clientHeight>8&&m.scrollTop+m.clientHeight<m.scrollHeight-8;b.classList.toggle('off',!more)}
+  m.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);
+  [].forEach.call(m.querySelectorAll('img'),function(i){if(!i.complete)i.addEventListener('load',upd)});
+  b.onclick=function(){m.scrollBy({top:Math.round(m.clientHeight*.8),behavior:'smooth'})};
+  upd();setTimeout(upd,600);
+}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
@@ -83,7 +92,8 @@ function workDetail(app){
     +((w.tags||[]).length?'<div style="display: flex; flex-wrap: wrap; gap: 8px">'+w.tags.map(pill).join('')+'</div>':'')
     +(w.description?'<div style="border-top: 1px solid #D2D2D7; padding-top: 24px"><div style="font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #1D1D1F">프로젝트 설명</div><div style="font-size: 16px; line-height: 1.75; color: #424245; white-space: pre-line">'+esc(w.description)+'</div></div>':'')
     +(mem?'<div style="border-top: 1px solid #D2D2D7; padding-top: 24px; display: flex; flex-direction: column; gap: 16px"><div style="font-size: 17px; font-weight: 700; color: #1D1D1F">참여 멤버</div>'+mem+'</div>':'')
-    +'</aside><div class="wk-media">'+media+'</div></div></section>';
+    +'</aside><div class="wk-mwrap"><div class="wk-media">'+media+'</div><button type="button" class="wk-more off" aria-label="아래로 더 보기"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div></section>';
+    wireMore(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
 function newsDetail(app){
