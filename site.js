@@ -57,8 +57,12 @@ function bindLists(){
 }
 
 function pill(t){return '<span style="padding: 8px 14px; border-radius: 999px; background: #F5F5F7; font-size: 15px; font-weight: 500; color: #1D1D1F">#'+esc(t)+'</span>'}
+
+var WK_CSS='.wk-sec{background:#FFFFFF;padding:32px 0 96px}.wk-wrap{max-width:1200px;margin:0 auto;padding:0 40px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start}.wk-side{flex:0 0 340px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:24px;word-break:keep-all}.wk-media{flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:24px}'
+ +'@media (min-width:900px){.wk-sec{padding:24px 0 56px}.wk-wrap{flex-wrap:nowrap;height:calc(100vh - 150px);min-height:520px}.wk-side{height:100%;overflow-y:auto;scrollbar-width:none}.wk-side::-webkit-scrollbar{display:none}.wk-media{height:100%;overflow-y:auto;padding-right:10px;overscroll-behavior:auto;scrollbar-width:thin}}';
 var PLAY='<span style="position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1D1D1F" d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"></path></svg></span>';
 function workDetail(app){
+  var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
   if(!id){app.innerHTML='<p style="padding:120px 40px;text-align:center">작업물을 찾을 수 없습니다.</p>';return}
   Promise.all([sbGet('works','select=*&id=eq.'+encodeURIComponent(id)),sbGet('team_members','select=name,role_en,avatar_url&published=eq.true')]).then(function(res){
@@ -74,12 +78,12 @@ function workDetail(app){
       media+='<a href="'+esc(v.url)+'" target="_blank" rel="noopener" aria-label="'+esc((w.title+' '+(v.label||''))+' 영상 재생')+'" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 18px; overflow: hidden; background: #000000; text-decoration: none">'+(poster?'<img src="'+esc(poster)+'" alt="'+esc(w.title+' '+(v.label||''))+'" draggable="false" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">':'')+PLAY+'</a>'});
     (w.images||[]).forEach(function(u){media+='<img src="'+esc(u)+'" alt="'+esc(w.title)+'" style="display: block; width: 100%; border-radius: 18px; '+(w.category==='photo'?'aspect-ratio: 3 / 2; object-fit: cover;':'height: auto;')+' background: #F5F5F7">'});
     app.innerHTML='<section style="background: #FFFFFF; padding: 40px 0 0"><div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box"><a href="'+c[1]+'" style="font-size: 17px; font-weight: 500; color: #6E6E73; text-decoration: none">‹ '+c[0]+'</a></div></section>'
-    +'<section style="background: #FFFFFF; padding: 32px 0 96px"><div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start">'
-    +'<aside style="flex: 0 0 340px; max-width: 100%; min-width: 0; position: sticky; top: 96px; align-self: flex-start; display: flex; flex-direction: column; gap: 24px; word-break: keep-all"><h1 style="margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</h1>'
+    +'<section class="wk-sec"><div class="wk-wrap">'
+    +'<aside class="wk-side"><h1 style="margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</h1>'
     +((w.tags||[]).length?'<div style="display: flex; flex-wrap: wrap; gap: 8px">'+w.tags.map(pill).join('')+'</div>':'')
     +(w.description?'<div style="border-top: 1px solid #D2D2D7; padding-top: 24px"><div style="font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #1D1D1F">프로젝트 설명</div><div style="font-size: 16px; line-height: 1.75; color: #424245; white-space: pre-line">'+esc(w.description)+'</div></div>':'')
     +(mem?'<div style="border-top: 1px solid #D2D2D7; padding-top: 24px; display: flex; flex-direction: column; gap: 16px"><div style="font-size: 17px; font-weight: 700; color: #1D1D1F">참여 멤버</div>'+mem+'</div>':'')
-    +'</aside><div style="flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px">'+media+'</div></div></section>';
+    +'</aside><div class="wk-media">'+media+'</div></div></section>';
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
 function newsDetail(app){
