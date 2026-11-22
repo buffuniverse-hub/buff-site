@@ -1,4 +1,5 @@
 (function(){
+var __M={};function getData(t,q){var k=t+'?'+q;return __M[k]||(__M[k]=window.sbGet(t,q).catch(function(e){delete __M[k];throw e}))}
 var $=function(s,r){return(r||document).querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var br=function(s){return esc(s).replace(/\n/g,'<br>')};
@@ -34,16 +35,24 @@ function bindLists(){
   var jobs=[];
   var wl=$('[data-sb="works-list"]');
   if(wl){var cat=wl.getAttribute('data-cat');
-    jobs.push(sbGet('works','select=*&published=eq.true&category=eq.'+cat+'&order=sort_order.asc,created_at.asc').then(function(r){if(r.length)wl.innerHTML=r.map(workCard).join('')}))}
+    jobs.push(getData('works','select=*&published=eq.true&category=eq.'+cat+'&order=sort_order.asc,created_at.asc').then(function(r){if(r.length)wl.innerHTML=r.map(workCard).join('')}))}
   var wf=$('[data-sb="works-featured"]');
-  if(wf)jobs.push(sbGet('works','select=*&published=eq.true&featured=eq.true&order=sort_order.asc,created_at.asc&limit=4').then(function(r){if(r.length)wf.innerHTML=r.map(workCard).join('')}));
+  if(wf)jobs.push(getData('site_settings','select=*&key=eq.home_featured').catch(function(){return[]}).then(function(rows){
+    var ids=rows[0]&&rows[0].value?String(rows[0].value).split(',').filter(Boolean):[];
+    var q=ids.length?getData('works','select=*&published=eq.true&id=in.('+ids.join(',')+')').then(function(r){return ids.map(function(i){return r.filter(function(w){return w.id===i})[0]}).filter(Boolean)}):getData('works','select=*&published=eq.true&featured=eq.true&order=sort_order.asc,created_at.asc&limit=4');
+    return q}).then(function(r){if(r.length)wf.innerHTML=r.map(workCard).join('')}));
+  if($('[data-sb="home-lead"]'))jobs.push(getData('site_settings','select=*').then(function(rows){
+    var s={};rows.forEach(function(x){s[x.key]=x.value});
+    function t(k,sel,html){var e=$(sel);if(e&&s[k])e.innerHTML=html?br(s[k]):esc(s[k])}
+    t('home_lead','[data-sb="home-lead"]');t('home_tail','[data-sb="home-tail"]');t('home_text','[data-sb="home-text"]',1);t('home_btn1','[data-sb="home-btn1"]');t('home_btn2','[data-sb="home-btn2"]');t('home_works_title','[data-sb="home-works-title"]');
+  }));
   var nl=$('[data-sb="news-list"]');
-  if(nl)jobs.push(sbGet('news','select=*&published=eq.true&order=sort_order.asc,published_at.desc').then(function(r){nl.innerHTML=r.length?r.map(newsRow).join(''):'<p style="text-align:center;color:#6E6E73;font-size:19px;padding:80px 0">등록된 소식이 없습니다.</p>'}));
+  if(nl)jobs.push(getData('news','select=*&published=eq.true&order=sort_order.asc,published_at.desc').then(function(r){nl.innerHTML=r.length?r.map(newsRow).join(''):'<p style="text-align:center;color:#6E6E73;font-size:19px;padding:80px 0">등록된 소식이 없습니다.</p>'}));
   var cl=$('[data-sb="clients"]');
-  if(cl)jobs.push(sbGet('clients','select=*&published=eq.true&order=sort_order.asc').then(function(r){r=r.filter(function(c){return c.logo_url});if(r.length)cl.innerHTML=r.map(function(c){return clientItem(c)}).join('')+r.map(function(c){return clientItem(c,1)}).join('')}));
+  if(cl)jobs.push(getData('clients','select=*&published=eq.true&order=sort_order.asc').then(function(r){r=r.filter(function(c){return c.logo_url});if(r.length)cl.innerHTML=r.map(function(c){return clientItem(c)}).join('')+r.map(function(c){return clientItem(c,1)}).join('')}));
   var ps=$('[data-sb="positions"]');
-  if(ps)jobs.push(sbGet('career_positions','select=*&is_open=eq.true&order=sort_order.asc').then(function(r){if(r.length)ps.innerHTML=r.map(positionCard).join('')}));
-  if($('[data-sb="career-headline"]'))jobs.push(sbGet('site_settings','select=*').then(function(rows){
+  if(ps)jobs.push(getData('career_positions','select=*&is_open=eq.true&order=sort_order.asc').then(function(r){if(r.length)ps.innerHTML=r.map(positionCard).join('')}));
+  if($('[data-sb="career-headline"]'))jobs.push(getData('site_settings','select=*').then(function(rows){
     var s={};rows.forEach(function(x){s[x.key]=x.value});
     var h=$('[data-sb="career-headline"]');
     if(s.career_headline){var m=s.career_headline.match(/^BUFF\s*(.*)$/);
@@ -54,6 +63,7 @@ function bindLists(){
     if(s.contact_email){var a=$('[data-sb="career-email"]');if(a){a.textContent=s.contact_email;a.href='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(s.contact_email)+'&su='+encodeURIComponent('[BUFF 지원] 포트폴리오')}}
   }));
   jobs.forEach(function(j){j.catch(function(e){console.warn('[BUFF]',e)})});
+  return jobs.map(function(j){return j.catch(function(){})});
 }
 
 function pill(t){return '<span style="padding: 8px 14px; border-radius: 999px; background: #F5F5F7; font-size: 15px; font-weight: 500; color: #1D1D1F">#'+esc(t)+'</span>'}
@@ -74,7 +84,7 @@ function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
   if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
-  Promise.all([sbGet('works','select=*&id=eq.'+encodeURIComponent(id)),sbGet('team_members','select=name,role_en,avatar_url&published=eq.true')]).then(function(res){
+  Promise.all([getData('works','select=*&id=eq.'+encodeURIComponent(id)),getData('team_members','select=name,role_en,avatar_url&published=eq.true')]).then(function(res){
     var w=res[0][0],team=res[1];
     if(!w){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+w.title;
@@ -99,7 +109,7 @@ function workDetail(app){
 function newsDetail(app){
   var id=new URLSearchParams(location.search).get('id');
   if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
-  sbGet('news','select=*,works(id,category)&id=eq.'+encodeURIComponent(id)).then(function(r){
+  getData('news','select=*,works(id,category)&id=eq.'+encodeURIComponent(id)).then(function(r){
     var n=r[0];if(!n){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+n.title_line1;
     var yr=n.published_at?String(n.published_at).slice(0,4):'';
@@ -108,13 +118,18 @@ function newsDetail(app){
     +'<section style="background: #FFFFFF; padding: 56px 0 120px"><div style="max-width: 900px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box">'
     +(n.thumbnail_url?'<img src="'+esc(n.thumbnail_url)+'" alt="'+esc(n.title_line1)+'" style="display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 48px">':'')
     +paras+'<div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid #D2D2D7; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px"><a href="News.html" style="font-size: 19px; font-weight: 600; color: #1D1D1F; text-decoration: none">‹ 목록으로</a>'
-    +(n.work_id?'<a href="work.html?id='+esc(n.work_id)+'" style="font-size: 19px; font-weight: 600; color: #C2412F; text-decoration: none">프로젝트 보기 ›</a>':'')+'</div></div></section>';
+    +(n.work_id?'<a href="work.html?id='+esc(n.work_id)+'" style="font-size: 19px; font-weight: 600; color: #1D1D1F; text-decoration: none">프로젝트 보기 ›</a>':'')+'</div></div></section>';
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
 function init(){
   var app=$('#app');
   if(app){var k=app.getAttribute('data-page');if(k==='work')workDetail(app);else if(k==='news')newsDetail(app)}
-  bindLists();
+  var r=$('#dc-root');
+  if(!r){bindLists();return}
+  /* 홈·Career 등은 화면이 나중에 그려지고, 탭 클릭 등으로 다시 그려지면 바인딩이 지워지므로 다시 적용합니다 */
+  var obs=new MutationObserver(function(){clearTimeout(obs.t);obs.t=setTimeout(run,60)});
+  function run(){obs.disconnect();var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
+  if(r.querySelector('[data-sb]'))run();else{var n=0,t=setInterval(function(){if(r.querySelector('[data-sb]')||++n>80){clearInterval(t);run()}},100)}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

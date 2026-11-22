@@ -166,7 +166,7 @@ a{color:inherit}a:hover{opacity:.75}
 <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 16px"><span style="font-size: 64px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: #1D1D1F">{{ cur.name }}</span><span style="font-size: 20px; font-weight: 500; line-height: 1.4; color: #6E6E73">{{ cur.role }}</span></div>
 
 </div>
-<span style="margin-top: 16px; font-size: 19px; font-weight: 500; line-height: 1.4; color: #1D1D1F">{{ cur.en }}</span><p style="margin: 40px 0 0; font-size: 20px; font-weight: 600; line-height: 1.6; color: #C2412F; word-break: keep-all; white-space: pre-line">{{ cur.lead }}</p>
+<span style="margin-top: 16px; font-size: 19px; font-weight: 500; line-height: 1.4; color: #1D1D1F">{{ cur.en }}</span><sc-if value="{{ cur.hasLinks }}"><div style="display: flex; align-items: center; gap: 14px; margin-top: 18px"><sc-for list="{{ cur.links }}" as="l"><a href="{{ l.href }}" target="_blank" rel="noopener" aria-label="{{ l.label }}" style="display: inline-flex; width: 28px; height: 28px"><img src="{{ l.icon }}" width="28" height="28" alt="{{ l.label }}" style="display: block"></a></sc-for></div></sc-if><p style="margin: 40px 0 0; font-size: 20px; font-weight: 600; line-height: 1.6; color: #1D1D1F; word-break: keep-all; white-space: pre-line">{{ cur.lead }}</p>
 <p style="margin: 8px 0 0; font-size: 19px; line-height: 1.6; color: #1D1D1F; word-break: keep-all; white-space: pre-line; text-wrap: balance">{{ cur.body }}</p>
 <dl style="margin: 40px 0 0; padding-top: 32px; border-top: 1px solid #D2D2D7; display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: start; gap: 16px 16px; font-size: 18px; line-height: 1.6; color: #1D1D1F">
 <dt style="margin: 0; font-weight: 700; color: #6E6E73">학력</dt><dd style="margin: 0; white-space: pre-line">{{ cur.edu }}</dd>
@@ -192,9 +192,9 @@ a{color:inherit}a:hover{opacity:.75}
 <div style="flex: 2 1 560px; min-width: 0; display: flex; flex-wrap: wrap; gap: 32px">
 <div style="flex: 1 1 220px; display: flex; flex-direction: column; gap: 8px">
 <h3 style="margin: 0; font-size: 17px; font-weight: 700">New Business</h3>
-<a href="mailto:buff.universe@gmail.com" style="color: #C2412F; text-decoration: none">buff.universe@gmail.com</a>
+<a href="mailto:buff.universe@gmail.com" style="color: #1D1D1F; text-decoration: none">buff.universe@gmail.com</a>
 <h3 style="margin: 24px 0 0; font-size: 17px; font-weight: 700">Careers</h3>
-<a href="mailto:buff.universe@gmail.com" style="color: #C2412F; text-decoration: none">buff.universe@gmail.com</a>
+<a href="mailto:buff.universe@gmail.com" style="color: #1D1D1F; text-decoration: none">buff.universe@gmail.com</a>
 </div>
 <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 8px">
 <h3 style="margin: 0; font-size: 17px; font-weight: 700">버프유니버스 BUFF UNIVERSE</h3>
@@ -259,7 +259,7 @@ cardStyle: 'flex: ' + (i === st ? '2.2' : '1') + ' 1 240px; min-width: 0; min-he
 numStyle: 'font-size: 20px; font-weight: 700; color: ' + (i === st ? '#E5533F' : '#6E6E73'),
 bodyStyle: 'display: ' + (i === st ? 'block' : 'none') + '; font-size: 19px; line-height: 1.7; color: #D2D2D7'
 }));
-return { people, cur: P[sel], senses, steps, curS: { n: '0' + S[sn].n, pos: S[sn].pos } };
+return { people, cur: window.buffLinks(P[sel]), senses, steps, curS: { n: '0' + S[sn].n, pos: S[sn].pos } };
 }
 }
 (window.__teamReady||Promise.resolve()).then(function(){dcMount(Component)});

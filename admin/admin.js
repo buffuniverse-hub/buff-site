@@ -62,8 +62,8 @@ var T={
   fields:[['category','분류','text',{ph:'Photo · Video · Branding · Notice 등',list:['Photo','Video','Branding','Notice']}],['title_line1','제목 1줄 (대회명)','text'],['title_line2','제목 2줄 (진행 내용)','text'],['summary','목록 요약문','textarea',{rows:2}],['body','본문','textarea',{rows:9,help:'빈 줄을 넣으면 문단이 나뉩니다.'}],['thumbnail_url','대표 이미지','image'],['published_at','게시일','date'],['work_id','연결 프로젝트 (선택)','workref'],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{category:'Photo',published:true,sort_order:0,published_at:new Date().toISOString().slice(0,10)}}},
  works:{label:'Works',title:'작업물',order:'category.asc,sort_order.asc,created_at.asc',hint:'Photo · Video · Branding 모두 여기서 관리합니다. 영상 링크를 넣으면 사이트에 재생 버튼이 생깁니다.',
-  list:function(r){return{img:r.thumbnail_url,title:r.title,sub:(r.category||'')+(r.featured?' · 홈 노출':'')}},
-  fields:[['category','분류','select',{opts:CAT}],['title','프로젝트명','text'],['tag','목록 표기 (예: Photo, Branding · Photo)','text'],['description','프로젝트 설명','textarea',{rows:6}],['tags','태그','tags',{help:'쉼표로 구분 (예: 스포츠, 탁구, 프로리그)'}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['images','상세 이미지','imagelist'],['videos','영상 링크 (YouTube)','videos'],['members','참여 멤버','members'],['featured','홈 화면 Recent Works에 노출 (최대 4개 표시)','bool'],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
+  list:function(r){return{img:r.thumbnail_url,title:r.title,sub:(r.category||'')+''}},
+  fields:[['category','분류','select',{opts:CAT}],['title','프로젝트명','text'],['tag','목록 표기 (예: Photo, Branding · Photo)','text'],['description','프로젝트 설명','textarea',{rows:6}],['tags','태그','tags',{help:'쉼표로 구분 (예: 스포츠, 탁구, 프로리그)'}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['images','상세 이미지','imagelist'],['videos','영상 링크 (YouTube)','videos'],['members','참여 멤버','members'],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{category:'photo',published:true,featured:false,sort_order:0,tags:[],images:[],videos:[],members:[]}}},
  clients:{label:'Clients',title:'고객사',order:'sort_order.asc',hint:'홈 화면 Our Clients 로고 목록입니다. 배경이 투명한 PNG를 권장합니다.',
   list:function(r){return{img:r.logo_url,title:r.name,sub:r.url||'링크 없음',contain:true}},
@@ -71,7 +71,7 @@ var T={
   blank:function(){return{published:true,sort_order:0}}},
  team_members:{label:'팀 소개',title:'팀 소개',order:'sort_order.asc',hint:'홈과 About Us 화면의 팀 소개입니다.',
   list:function(r){return{img:r.avatar_url,title:r.name,sub:r.role,round:true}},
-  fields:[['name','이름','text'],['role','직함','text'],['role_en','영문 직무','text'],['avatar_url','프로필 원형 사진','image'],['photo_url','대표 큰 사진 (4:5 권장)','image'],['lead','대표 문장 (강조)','textarea',{rows:3}],['body','소개','textarea',{rows:3}],['education','학력','textarea',{rows:2}],['career','경력','textarea',{rows:4}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
+  fields:[['name','이름','text'],['role','직함','text'],['role_en','영문 직무','text'],['avatar_url','프로필 원형 사진','image'],['photo_url','대표 큰 사진 (4:5 권장)','image'],['lead','대표 문장 (강조)','textarea',{rows:3}],['body','소개','textarea',{rows:3}],['social','SNS 링크 (아이콘으로 표시)','social'],['education','학력','textarea',{rows:2}],['career','경력','textarea',{rows:4}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{published:true,sort_order:0}}},
  career_positions:{label:'Career 포지션',title:'모집 포지션',order:'sort_order.asc',hint:'Career 페이지의 포지션 카드입니다. “모집 중”을 끄면 사이트에서 숨겨집니다.',
   list:function(r){return{title:r.title,sub:r.description}},
@@ -79,16 +79,16 @@ var T={
   blank:function(){return{is_open:true,sort_order:0}}}
 };
 var SETTINGS=[['career_headline','Career 큰 제목','text','“BUFF”로 시작하면 로고 이미지로 표시됩니다.'],['career_subtext','Career 안내 문구','textarea'],['career_team_note','함께 성장 안내문','textarea'],['partner_text','파트너 등록 안내문','textarea'],['contact_email','채용·문의 이메일','text']];
-var TABS=['news','works','clients','team_members','career_positions','settings'];
-var cur='news', cache={};
+var TABS=['home','news','works','clients','team_members','career_positions','settings'];
+var cur='home', cache={};
 
 /* ---------- 화면 ---------- */
-function show(on){$('#login').classList.toggle('hide',on);$('#app').classList.toggle('hide',!on);if(on)go(cur)}
+function show(on){$('#login').classList.toggle('hide',on);$('#app').classList.toggle('hide',!on);$('#viewsite').classList.toggle('hide',!on);$('#logout').classList.toggle('hide',!on);if(on)go(cur)}
 function drawTabs(){
-  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Career 문구':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
+  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Career 문구':k==='home'?'메인':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
   [].forEach.call($('#tabs').children,function(b){b.onclick=function(){go(b.getAttribute('data-k'))}});
 }
-function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
+function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
 
 function drawList(k){
   var d=T[k];
@@ -168,6 +168,13 @@ function field(f,F,ctx){
       l.firstChild.onchange=function(){var a=(F[key]||[]).filter(function(x){return x!==n});if(this.checked)a.push(n);F[key]=a};wrap.appendChild(l)});
     w.appendChild(wrap);
   }
+  else if(type==='social'){
+    var so=F[key]&&typeof F[key]==='object'?F[key]:(F[key]={});
+    [['instagram','Instagram','https://instagram.com/계정'],['youtube','YouTube','https://youtube.com/@채널'],['linkedin','LinkedIn','https://linkedin.com/in/계정'],['x','X (트위터)','https://x.com/계정'],['email','이메일','name@example.com']].forEach(function(n){
+      var r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin-bottom:8px';
+      r.innerHTML='<span style="font-size:14px;font-weight:600">'+n[1]+'</span>';var i=document.createElement('input');i.type='text';i.placeholder=n[2];i.value=so[n[0]]||'';
+      i.oninput=function(){var v=this.value.trim();if(v)so[n[0]]=v;else delete so[n[0]]};r.appendChild(i);w.appendChild(r)});
+  }
   else if(type==='image')imageField(w,F,key);
   else if(type==='imagelist')imageList(w,F,key);
   else if(type==='videos')videoList(w,F,key);
@@ -212,6 +219,53 @@ function videoList(w,F,key){
     $('#addv',box).onclick=function(){a.push({url:'',label:''});draw()};
   }
   draw();
+}
+
+
+/* ---------- 메인(홈) ---------- */
+var HOME=[['home_lead','첫 화면 제목 앞부분','text','로고 앞에 붙는 글자 (예: we)'],['home_tail','첫 화면 제목 뒷부분','text','로고 뒤에 붙는 글자 (예: your moment)'],['home_text','첫 화면 소개 문구','textarea','줄바꿈은 그대로 반영됩니다.'],['home_btn1','첫 번째 버튼 글자','text'],['home_btn2','두 번째 버튼 글자','text']];
+function drawHome(){
+  return Promise.all([rest('GET','site_settings','select=*'),rest('GET','works','select=id,title,tag,category,thumbnail_url,featured,sort_order,created_at&published=eq.true&order=category.asc,sort_order.asc,created_at.asc')]).then(function(r){
+    var cur={};r[0].forEach(function(x){cur[x.key]=x.value});
+    var all=r[1],byId={};all.forEach(function(w){byId[w.id]=w});
+    var ids=cur.home_featured!=null&&cur.home_featured!==''?String(cur.home_featured).split(',').filter(function(i){return byId[i]}):all.filter(function(w){return w.featured}).slice(0,4).map(function(w){return w.id});
+    var orig=JSON.parse(JSON.stringify(byId)),MAX=6;
+    $('#main').innerHTML='<div class="bar"><h2>메인</h2><button class="btn" id="saveH">저장</button></div><p class="hint">홈 화면의 문구와 Recent Works(대표 작업물)를 관리합니다. 비워 두면 기본 문구가 표시됩니다.</p>'
+      +'<div class="sec"><h3>첫 화면 문구</h3><div id="hf"></div></div>'
+      +'<div class="sec"><h3>Recent Works</h3><p class="sub">홈에 보여줄 작업물을 고르고 순서·썸네일·제목을 바꿉니다. 최대 '+MAX+'개.</p><div id="hw"></div><div class="addrow"><select id="hsel"></select><button class="btn line" id="hadd">+ 작업물 추가</button></div></div><div class="err" id="herr"></div>';
+    var hf=$('#hf');
+    HOME.forEach(function(s){hf.appendChild(field([s[0],s[1],s[2],{rows:3,help:s[3]}],cur,{}))});
+    var wt=field(['home_works_title','Recent Works 섹션 제목','text',{ph:'Recent Works'}],cur,{});$('#hw').parentNode.insertBefore(wt,$('#hw'));
+    function drawW(){
+      $('#hw').innerHTML='';
+      if(!ids.length)$('#hw').innerHTML='<div class="empty" style="margin-top:14px;padding:32px">홈에 노출 중인 작업물이 없습니다. 아래에서 추가해 주세요.</div>';
+      ids.forEach(function(id,i){
+        var w=byId[id],c=document.createElement('div');c.className='hw';
+        var th=document.createElement('div');th.className='th';var im=document.createElement('div');th.appendChild(im);imageField(im,w,'thumbnail_url');
+        var mid=document.createElement('div');mid.className='mid';mid.appendChild(field(['title','프로젝트명','text'],w,{}));mid.appendChild(field(['tag','목록 표기 (예: Photo, Branding · Photo)','text'],w,{}));
+        var mv=document.createElement('div');mv.className='mv';
+        mv.innerHTML='<button class="btn line sm" data-a="up"'+(i===0?' disabled':'')+'>↑</button><button class="btn line sm" data-a="dn"'+(i===ids.length-1?' disabled':'')+'>↓</button><button class="btn danger sm" data-a="rm">빼기</button>';
+        [].forEach.call(mv.querySelectorAll('button'),function(b){b.onclick=function(){var t=b.getAttribute('data-a');
+          if(t==='rm')ids.splice(i,1);else{var j=i+(t==='up'?-1:1),x=ids[i];ids[i]=ids[j];ids[j]=x}drawW();drawSel()}});
+        c.appendChild(th);c.appendChild(mid);c.appendChild(mv);$('#hw').appendChild(c);
+      });
+    }
+    function drawSel(){
+      var rest_=all.filter(function(w){return ids.indexOf(w.id)<0});
+      $('#hsel').innerHTML=rest_.length?rest_.map(function(w){return '<option value="'+w.id+'">'+esc(w.title)+' ('+w.category+')</option>'}).join(''):'<option value="">추가할 작업물이 없습니다</option>';
+    }
+    $('#hadd').onclick=function(){var v=$('#hsel').value;if(!v)return;if(ids.length>=MAX){toast('최대 '+MAX+'개까지 노출할 수 있습니다.',1);return}ids.push(v);drawW();drawSel()};
+    drawW();drawSel();
+    $('#saveH').onclick=function(){
+      var b=this;b.disabled=true;$('#herr').textContent='';
+      var keys=HOME.map(function(s){return s[0]}).concat(['home_works_title']);
+      var body=keys.map(function(k){return{key:k,value:cur[k]||''}});body.push({key:'home_featured',value:ids.join(',')});
+      var jobs=[rest('POST','site_settings','on_conflict=key',body,{Prefer:'resolution=merge-duplicates,return=minimal'})];
+      ids.forEach(function(id){var w=byId[id],o=orig[id];
+        if(w.title!==o.title||(w.tag||'')!==(o.tag||'')||(w.thumbnail_url||null)!==(o.thumbnail_url||null))jobs.push(rest('PATCH','works','id=eq.'+id,{title:w.title,tag:w.tag||null,thumbnail_url:w.thumbnail_url||null},{Prefer:'return=minimal'}))});
+      Promise.all(jobs).then(function(){toast('저장했습니다. 사이트에 바로 반영됩니다.');b.disabled=false;ids.forEach(function(id){orig[id]=JSON.parse(JSON.stringify(byId[id]))})}).catch(function(e){$('#herr').textContent=e.message;b.disabled=false});
+    };
+  });
 }
 
 /* ---------- Career 문구 ---------- */
