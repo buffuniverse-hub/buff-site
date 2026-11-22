@@ -130,7 +130,29 @@ function init(){
   var obs=new MutationObserver(function(){clearTimeout(obs.t);obs.t=setTimeout(run,60)});
   function vids(){[].forEach.call(r.querySelectorAll('video'),function(v){v.muted=true;v.defaultMuted=true;v.setAttribute('playsinline','');if(v.paused){var q=v.play();if(q&&q.catch)q.catch(function(){})}})}
   ['touchstart','click','scroll'].forEach(function(e){window.addEventListener(e,vids,{once:true,passive:true})});
-  function run(){obs.disconnect();vids();setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
+  /* 모바일: 자동 롤링은 유지하면서 손으로 잡고 밀어볼 수 있게 합니다 */
+  var mqOn=false;
+  function mqs(){
+    if(mqOn||!window.matchMedia('(max-width:640px)').matches)return;
+    if(!r.querySelector('.mq'))return;mqOn=true;
+    var last=performance.now();
+    function tick(t){
+      var dt=Math.min(t-last,64);last=t;
+      [].forEach.call(document.querySelectorAll('.mq'),function(m,i){
+        var it=m.querySelectorAll('.mq-item');if(it.length<8)return;
+        var set=0;for(var k=1;k<it.length;k++){if(it[k].textContent===it[0].textContent){set=it[k].offsetLeft-it[0].offsetLeft;break}}if(!set)return;
+        var rev=m.classList.contains('rev');
+        if(m._x==null){m._x=rev?set:0;m.scrollLeft=m._x;m.addEventListener('scroll',function(){if(m._self){m._self=false;return}m._hold=performance.now()+1600;m._x=m.scrollLeft},{passive:true});['touchstart','pointerdown'].forEach(function(e){m.addEventListener(e,function(){m._hold=performance.now()+1e9},{passive:true})});['touchend','touchcancel','pointerup'].forEach(function(e){m.addEventListener(e,function(){m._hold=performance.now()+1600},{passive:true})})}
+        if(m._hold&&t<m._hold)return;
+        m._x+=(rev?-1:1)*0.032*dt*(rev?0.8:1)*1;
+        if(m._x>=set)m._x-=set;if(m._x<=0)m._x+=set;
+        m._self=true;m.scrollLeft=m._x;
+      });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  function run(){obs.disconnect();vids();mqs();setTimeout(mqs,500);setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
   if(r.firstElementChild)run();else{var n=0,t=setInterval(function(){if(r.firstElementChild||++n>80){clearInterval(t);run()}},100)}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
