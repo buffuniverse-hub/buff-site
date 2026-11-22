@@ -128,8 +128,10 @@ function init(){
   if(!r){bindLists();return}
   /* 홈·Career 등은 화면이 나중에 그려지고, 탭 클릭 등으로 다시 그려지면 바인딩이 지워지므로 다시 적용합니다 */
   var obs=new MutationObserver(function(){clearTimeout(obs.t);obs.t=setTimeout(run,60)});
-  function run(){obs.disconnect();var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
-  if(r.querySelector('[data-sb]'))run();else{var n=0,t=setInterval(function(){if(r.querySelector('[data-sb]')||++n>80){clearInterval(t);run()}},100)}
+  function vids(){[].forEach.call(r.querySelectorAll('video'),function(v){v.muted=true;v.defaultMuted=true;v.setAttribute('playsinline','');if(v.paused){var q=v.play();if(q&&q.catch)q.catch(function(){})}})}
+  ['touchstart','click','scroll'].forEach(function(e){window.addEventListener(e,vids,{once:true,passive:true})});
+  function run(){obs.disconnect();vids();setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
+  if(r.firstElementChild)run();else{var n=0,t=setInterval(function(){if(r.firstElementChild||++n>80){clearInterval(t);run()}},100)}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
