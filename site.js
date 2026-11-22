@@ -23,7 +23,7 @@ function newsRow(n){
   +'</div></a>';
 }
 function clientItem(c,clone){
-  var img='<img src="'+esc(c.logo_url)+'" alt="'+esc(c.name)+'" style="display: block; width: auto; max-width: 62%; max-height: 56%; object-fit: contain">';
+  var img='<img src="'+esc(c.logo_url)+'" alt="'+esc(c.name)+'" style="display: block; width: auto; max-width: '+(/포카리|pocari/i.test(c.name||'')?'44%':'62%')+'; max-height: '+(/포카리|pocari/i.test(c.name||'')?'40%':'56%')+'; object-fit: contain">';
   return '<a class="client-item" href="'+esc(c.url||'#clients')+'"'+(c.url?' target="_blank" rel="noopener"':'')+' aria-label="'+esc(c.name)+'"'+(clone?' aria-hidden="true" tabindex="-1"':'')+' style="flex: 0 0 auto; width: 240px; aspect-ratio: 4 / 3; background: #FFFFFF; border-radius: 18px; display: flex; align-items: center; justify-content: center">'+img+'</a>';
 }
 function positionCard(p){
