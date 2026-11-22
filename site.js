@@ -183,3 +183,30 @@ function init(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+
+/* contact popup */
+(function(){
+  var TO='buff.universe@gmail.com',el=null;
+  function css(){if(document.getElementById('cm-css'))return;var st=document.createElement('style');st.id='cm-css';
+  st.textContent='#cm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}#cm .cd{position:relative;background:#fff;border-radius:24px;max-width:560px;width:100%;padding:40px 36px 36px;box-sizing:border-box;color:#1D1D1F;font-family:inherit}#cm h3{margin:0 0 6px;font-size:26px;letter-spacing:-.02em}#cm p{margin:0 0 22px;font-size:15px;color:#6E6E73}#cm label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}#cm input,#cm textarea{width:100%;box-sizing:border-box;font:inherit;font-size:17px;border:1px solid #D2D2D7;border-radius:12px;padding:12px 14px;outline:none;background:#fff}#cm input:focus,#cm textarea:focus{border-color:#1D1D1F}#cm textarea{min-height:120px;resize:vertical}#cm .x{position:absolute;top:14px;right:16px;width:36px;height:36px;border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:#6E6E73}#cm .go{display:block;margin-top:22px;text-align:center;background:#1D1D1F;color:#fff;border-radius:980px;padding:14px 20px;font-size:16px;font-weight:600;text-decoration:none;opacity:.35;pointer-events:none}#cm .go.on{opacity:1;pointer-events:auto}@media(max-width:640px){#cm .cd{padding:32px 20px 24px;border-radius:20px}#cm h3{font-size:22px}}';
+  document.head.appendChild(st)}
+  function close(){if(el){el.remove();el=null;document.body.style.overflow=''}}
+  function open(){
+    if(el)return;css();
+    el=document.createElement('div');el.id='cm';
+    el.innerHTML='<div class="cd" role="dialog" aria-modal="true" aria-label="문의하기"><button class="x" aria-label="닫기">×</button><h3>문의하기</h3><p>남겨주시면 메일로 이어집니다. 확인 후 빠르게 답변드릴게요.</p><label>이름 / 소속</label><input id="cm-n" placeholder="홍길동 / 팀·단체명"><label>연락처 (이메일 또는 전화)</label><input id="cm-c" placeholder="example@email.com"><label>문의 내용</label><textarea id="cm-m" placeholder="어떤 종목, 어떤 작업이 필요하신가요?"></textarea><a class="go" id="cm-g" target="_blank" rel="noopener">메일로 문의 보내기</a></div>';
+    document.body.appendChild(el);document.body.style.overflow='hidden';
+    var n=el.querySelector('#cm-n'),c=el.querySelector('#cm-c'),m=el.querySelector('#cm-m'),g=el.querySelector('#cm-g');
+    function upd(){var ok=n.value.trim()&&c.value.trim()&&m.value.trim();g.classList.toggle('on',!!ok);
+      var body='이름/소속: '+n.value.trim()+'\n연락처: '+c.value.trim()+'\n\n'+m.value.trim();
+      g.href='https://mail.google.com/mail/?view=cm&fs=1&to='+TO+'&su='+encodeURIComponent('[BUFF 문의] '+n.value.trim())+'&body='+encodeURIComponent(body)}
+    [n,c,m].forEach(function(i){i.addEventListener('input',upd)});upd();
+    el.addEventListener('click',function(e){if(e.target===el||e.target.className==='x')close()});
+    setTimeout(function(){n.focus()},50);
+  }
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href="#contact"]');
+    if(a){e.preventDefault();open()}
+  },true);
+})();
