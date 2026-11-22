@@ -121,11 +121,37 @@ function newsDetail(app){
     +(n.work_id?'<a href="work.html?id='+esc(n.work_id)+'" style="font-size: 19px; font-weight: 600; color: #1D1D1F; text-decoration: none">프로젝트 보기 ›</a>':'')+'</div></div></section>';
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
+/* 모바일: 줄바꿈(<br>)으로 나눈 문장은 글자를 줄여서 한 줄씩 들어가게 맞춥니다 (너무 작아지면 원래대로 줄바꿈) */
+function fitAll(){
+  var mob=window.matchMedia('(max-width:640px)').matches;
+  [].forEach.call(document.querySelectorAll('p br,h1 br,h2 br,h3 br,div br,span br'),function(b){
+    var el=b.parentElement;if(!el||el._fit===1||el.closest('header,nav,button'))return;
+    el._fit=1;
+  });
+  [].forEach.call(document.querySelectorAll('p,h1,h2,h3,div,span'),function(el){
+    if(el._fit!==1)return;
+    el.style.fontSize='';el.style.whiteSpace='';el.style.letterSpacing='';
+    if(!mob)return;
+    var par=el.parentElement,pc=getComputedStyle(par);
+    var avail=Math.min(par.clientWidth-parseFloat(pc.paddingLeft)-parseFloat(pc.paddingRight),window.innerWidth-40);
+    var base=parseFloat(getComputedStyle(el).fontSize);
+    el.style.whiteSpace='nowrap';
+    var w=el.scrollWidth,mw=0;
+    /* 가장 긴 줄의 실제 폭 */
+    var rg=document.createRange();rg.selectNodeContents(el);[].forEach.call(rg.getClientRects(),function(r){if(r.width>mw)mw=r.width});
+    w=Math.max(mw,0)||w;
+    if(w<=avail){el.style.whiteSpace='';return}
+    var fs=base*avail/w*0.985;
+    if(fs>=10){el.style.fontSize=fs+'px'}else{el.style.whiteSpace=''}
+  });
+}
+var _ft;window.addEventListener('resize',function(){clearTimeout(_ft);_ft=setTimeout(fitAll,150)});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitAll()});
 function init(){
   var app=$('#app');
   if(app){var k=app.getAttribute('data-page');if(k==='work')workDetail(app);else if(k==='news')newsDetail(app)}
   var r=$('#dc-root');
-  if(!r){bindLists();return}
+  if(!r){var pp=bindLists();Promise.all(pp||[]).then(fitAll,fitAll);setTimeout(fitAll,400);return}
   /* 홈·Career 등은 화면이 나중에 그려지고, 탭 클릭 등으로 다시 그려지면 바인딩이 지워지므로 다시 적용합니다 */
   var obs=new MutationObserver(function(){clearTimeout(obs.t);obs.t=setTimeout(run,60)});
   function vids(){[].forEach.call(r.querySelectorAll('video'),function(v){v.muted=true;v.defaultMuted=true;v.setAttribute('playsinline','');if(v.paused){var q=v.play();if(q&&q.catch)q.catch(function(){})}})}
@@ -152,7 +178,7 @@ function init(){
     }
     requestAnimationFrame(tick);
   }
-  function run(){obs.disconnect();vids();mqs();setTimeout(mqs,500);setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
+  function run(){obs.disconnect();vids();mqs();setTimeout(mqs,500);setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){fitAll();obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
   if(r.firstElementChild)run();else{var n=0,t=setInterval(function(){if(r.firstElementChild||++n>80){clearInterval(t);run()}},100)}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
