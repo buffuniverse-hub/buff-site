@@ -200,7 +200,7 @@ function workDetail(app){
     if(vids)media+=nv>1?'<div class="wk-grid">'+vids+'</div>':'<div class="wk-single">'+vids+'</div>';
     var onlyPhoto=(w.categories&&w.categories.length?w.categories:[w.category]).every(function(c){return c==='photo'});
     var imgs=(w.images||[]).map(function(u){return '<img class="wk-ph" src="'+esc(u)+'" alt="'+esc(w.title)+'" style="cursor: zoom-in; display: block; width: 100%; border-radius: 18px; '+'height: auto;'+' background: #F5F5F7">'});
-    if(imgs.length)media+='<div class="'+(onlyPhoto?'wk-just':'wk-grid')+'">'+imgs.join('')+'</div>';
+    if(imgs.length)media+='<div class="wk-just">'+imgs.join('')+'</div>';
     app.innerHTML='<section style="background: #FFFFFF; padding: 32px 0 0"><div class="wk-top"><a href="'+c[1]+'" style="font-size: 15px; font-weight: 500; color: #6E6E73; text-decoration: none; justify-self: start; white-space: nowrap">‹ Works</a>'+'<span></span><span></span></div></section>'
     +'<section class="wk-sec">'
     +'<div class="wk-titlerow"><h1 class="wk-h1">'+esc(w.title)+'</h1>'+''+'</div>'
