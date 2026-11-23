@@ -16,12 +16,12 @@ function workCard(w){
 function newsRow(n){
   var yr=n.published_at?String(n.published_at).slice(0,4):'';
   return '<a class="news-row" href="news-view?id='+esc(n.id)+'" style="border-bottom: 1px solid #D2D2D7; display: flex; align-items: center; gap: 32px; padding: 40px 0; text-decoration: none; color: #1D1D1F">'
+  +(n.thumbnail_url?'<img class="news-th" src="'+esc(n.thumbnail_url)+'" alt="'+esc(n.title_line1)+'" draggable="false" style="flex: 0 0 200px; width: 200px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px; background: #F5F5F7; display: block">':'')
   +'<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 12px; text-align: left">'
   +'<span style="font-size: 17px; font-weight: 600; color: #6E6E73">'+esc(n.category)+(yr?' · '+yr:'')+'</span>'
   +'<span style="font-size: 28px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; word-break: keep-all">'+esc(n.title_line1)+(n.title_line2?'<br>'+esc(n.title_line2):'')+'</span>'
-  +(n.summary?'<span style="font-size: 17px; line-height: 1.6; color: #424245; word-break: keep-all">'+esc(n.summary)+'</span>':'')
+  +(n.summary?'<span style="font-size: 14px; line-height: 1.6; color: #6E6E73; word-break: keep-all">'+esc(n.summary)+'</span>':'')
   +'</div>'
-  +(n.thumbnail_url?'<img class="news-th" src="'+esc(n.thumbnail_url)+'" alt="'+esc(n.title_line1)+'" draggable="false" style="flex: 0 0 200px; width: 200px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px; background: #F5F5F7; display: block">':'')
   +'</a>';
 }
 (function(){if(document.getElementById('nr-css'))return;var st=document.createElement('style');st.id='nr-css';st.textContent='@media(max-width:700px){.news-row{gap:16px!important}.news-row .news-th{flex-basis:96px!important;width:96px!important}.news-row span:nth-child(2){font-size:20px!important}}';document.head.appendChild(st)})();
