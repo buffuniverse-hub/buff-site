@@ -3,11 +3,11 @@ var __M={};function getData(t,q){var k=t+'?'+q;return __M[k]||(__M[k]=window.sbG
 var $=function(s,r){return(r||document).querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var br=function(s){return esc(s).replace(/\n/g,'<br>')};
-var CAT={photo:['Photo','Photo'],video:['Video','Video'],branding:['Branding','Branding']};
+var CAT={photo:['Photo','Works?cat=photo'],video:['Video','Works?cat=video'],branding:['Branding','Works?cat=branding']};
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
 
 function workCard(w){
-  return '<a href="work?id='+esc(w.id)+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
+  return '<a href="work?id='+esc(w.id)+'" data-cat="'+esc(w.category)+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
   +'<img draggable="false" src="'+esc(w.thumbnail_url)+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">'
   +'<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
   +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(w.tag||CAT[w.category][0])+'</span></a>';
@@ -35,7 +35,7 @@ function bindLists(){
   var jobs=[];
   var wl=$('[data-sb="works-list"]');
   if(wl){var cat=wl.getAttribute('data-cat');
-    jobs.push(getData('works','select=*&published=eq.true&category=eq.'+cat+'&order=sort_order.asc,created_at.asc').then(function(r){if(r.length)wl.innerHTML=r.map(workCard).join('')}))}
+    jobs.push(getData('works','select=*&published=eq.true'+(cat==='all'?'':'&category=eq.'+cat)+'&order=sort_order.asc,created_at.asc').then(function(r){if(r.length)wl.innerHTML=r.map(workCard).join('');if(window.__wfApply)window.__wfApply()}))}
   var wf=$('[data-sb="works-featured"]');
   if(wf)jobs.push(getData('site_settings','select=*&key=eq.home_featured').catch(function(){return[]}).then(function(rows){
     var ids=rows[0]&&rows[0].value?String(rows[0].value).split(',').filter(Boolean):[];
@@ -159,6 +159,26 @@ function fitAll(){
 }
 var _ft;window.addEventListener('resize',function(){clearTimeout(_ft);_ft=setTimeout(fitAll,150)});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitAll()});
+
+/* Works 분류 필터 (전체 / 브랜딩 / 사진 / 영상) */
+(function(){
+  function setup(){
+    var g=document.getElementById('works-grid'),bar=document.querySelector('.wf');if(!g||!bar||bar._w)return;bar._w=1;
+    var ok={all:1,branding:1,photo:1,video:1};
+    function cur(){var m=location.search.match(/[?&]cat=([a-z]+)/);return m&&ok[m[1]]?m[1]:'all'}
+    var f=cur();
+    function apply(){
+      var n=0;[].forEach.call(g.children,function(c){var show=f==='all'||c.getAttribute('data-cat')===f;c.style.display=show?'':'none';if(show)n++});
+      [].forEach.call(bar.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b.getAttribute('data-f')===f?'true':'false')});
+      var e=document.getElementById('works-empty');if(e)e.style.display=n?'none':'block';
+    }
+    window.__wfApply=apply;
+    bar.addEventListener('click',function(ev){var b=ev.target.closest('button[data-f]');if(!b)return;f=b.getAttribute('data-f');
+      try{history.replaceState(null,'',location.pathname+(f==='all'?'':'?cat='+f))}catch(e){}apply()});
+    apply();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();
 function reel(){
   [].forEach.call(document.querySelectorAll('#reel'),function(sec){
     if(sec._r)return;var row=sec.querySelector('.reel-row');if(!row)return;sec._r=1;
