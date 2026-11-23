@@ -63,7 +63,7 @@ var T={
   blank:function(){return{category:'Photo',published:true,sort_order:0,published_at:new Date().toISOString().slice(0,10)}}},
  works:{label:'Works',title:'작업물',order:'sort_order.asc,created_at.asc',hint:'카드를 드래그해서 Works 페이지 순서를 바꿉니다. 영상 링크를 넣으면 사이트에 재생 버튼이 생깁니다.',
   list:function(r){return{img:r.thumbnail_url,title:r.title,sub:((r.categories&&r.categories.length?r.categories:[r.category]).join(' · '))}},
-  fields:[['categories','분류 (브랜딩과 사진을 함께 한 프로젝트는 둘 다 선택)','cats'],['title','프로젝트명','text'],['tag','목록 표기 (예: Photo, Branding · Photo)','text'],['client','클라이언트','text',{ph:'예: 포카리스웨트'}],['work_year','기간','text',{ph:'예: 2026 / 2026.09 ~ 2026.10'}],['description','프로젝트 설명','textarea',{rows:6}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['images','상세 이미지','imagelist'],['videos','영상 링크 (YouTube)','videos'],['members','참여 멤버','members'],['pdf_url','포트폴리오 PDF 링크 (구글 드라이브 공유 링크)','text',{ph:'https://drive.google.com/file/d/…/view  ("링크가 있는 모든 사용자"로 공유)'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
+  fields:[['categories','분류 (브랜딩과 사진을 함께 한 프로젝트는 둘 다 선택)','cats'],['title','프로젝트명','text'],['tag','목록 표기 (카드 아래 작은 글씨)','tagsel'],['client','클라이언트','text',{ph:'예: 포카리스웨트'}],['work_year','기간','text',{ph:'예: 2026 / 2026.09 ~ 2026.10'}],['description','프로젝트 설명','textarea',{rows:6}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['images','상세 이미지','imagelist'],['videos','영상 링크 (YouTube)','videos'],['members','참여 멤버','members'],['pdf_url','포트폴리오 PDF 링크 (구글 드라이브 공유 링크)','text',{ph:'https://drive.google.com/file/d/…/view  ("링크가 있는 모든 사용자"로 공유)'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{category:'photo',categories:['photo'],published:true,featured:false,sort_order:0,tags:[],images:[],videos:[],members:[]}}},
  clients:{label:'Clients',title:'고객사',order:'sort_order.asc',hint:'홈 화면 Our Clients 로고 목록입니다. 배경이 투명한 PNG를 권장합니다.',
   list:function(r){return{img:r.logo_url,title:r.name,sub:r.url||'링크 없음',contain:true}},
@@ -175,6 +175,10 @@ function field(f,F,ctx){
   }else if(type==='textarea'){inp=document.createElement('textarea');inp.rows=o.rows||4;inp.value=F[key]||'';inp.oninput=function(){F[key]=this.value};w.appendChild(inp)}
   else if(type==='select'){inp=document.createElement('select');inp.innerHTML=o.opts.map(function(x){return '<option value="'+x[0]+'"'+(F[key]===x[0]?' selected':'')+'>'+esc(x[1])+'</option>'}).join('');inp.onchange=function(){F[key]=this.value};w.appendChild(inp)}
   else if(type==='workref'){inp=document.createElement('select');inp.innerHTML='<option value="">연결 안 함</option>'+ctx.works.map(function(x){return '<option value="'+x.id+'"'+(F[key]===x.id?' selected':'')+'>'+esc(x.title)+' ('+x.category+')</option>'}).join('');inp.onchange=function(){F[key]=this.value||null};w.appendChild(inp)}
+  else if(type==='tagsel'){inp=document.createElement('select');var opts=[['','자동 (첫 분류 기준)'],['Photo','Photo'],['Video','Video'],['Branding','Branding'],['Branding · Photo','Branding · Photo'],['Photo · Video','Photo · Video'],['Branding · Video','Branding · Video'],['Branding · Photo · Video','Branding · Photo · Video']];
+    if(F[key]&&!opts.some(function(o){return o[0]===F[key]}))opts.push([F[key],F[key]]);
+    inp.innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'"'+((F[key]||'')===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('');
+    inp.onchange=function(){F[key]=this.value||null};w.appendChild(inp)}
   else if(type==='cats'){
     var cs=Array.isArray(F[key])&&F[key].length?F[key]:(F[key]=[F.category||'photo']);
     var cw=document.createElement('div');cw.style.cssText='display:flex;flex-wrap:wrap;gap:16px';
