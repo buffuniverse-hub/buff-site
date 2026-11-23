@@ -157,6 +157,7 @@ function openForm(k,data){
       var btn=this;btn.disabled=true;btn.textContent='저장 중…';$('#ferr').textContent='';
       var body={};d.fields.forEach(function(f){body[f[0]]=F[f[0]]===undefined?null:F[f[0]]});
       ['published_at','work_id','url','thumbnail_url'].forEach(function(n){if(body[n]==='')body[n]=null});
+      if('thumb_zoom' in body){body.thumb_x=F.thumb_x==null?50:F.thumb_x;body.thumb_y=F.thumb_y==null?50:F.thumb_y}
       if(k==='works'){var cs0=(body.categories&&body.categories.length)?body.categories:[F.category||'photo'];body.categories=cs0;body.category=cs0[0]}
       if(body.videos)body.videos=body.videos.filter(function(v){return v.url&&v.url.trim()});
       var req=isNew?rest('POST',k,'',body,{Prefer:'return=minimal'}):rest('PATCH',k,'id=eq.'+F.id,body,{Prefer:'return=minimal'});
