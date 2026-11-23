@@ -187,7 +187,8 @@ function fitAll(){
   });
   [].forEach.call(document.querySelectorAll('p,h1,h2,h3,div,span'),function(el){
     if(el._fit!==1)return;
-    el.style.fontSize='';el.style.whiteSpace='';el.style.letterSpacing='';
+    if(el._of===undefined){el._of=el.style.fontSize;el._ow=el.style.whiteSpace;el._ol=el.style.letterSpacing}
+    el.style.fontSize=el._of;el.style.whiteSpace=el._ow;el.style.letterSpacing=el._ol;
     if(!mob)return;
     var par=el.parentElement,pc=getComputedStyle(par);
     var avail=Math.min(par.clientWidth-parseFloat(pc.paddingLeft)-parseFloat(pc.paddingRight),window.innerWidth-40);
@@ -197,9 +198,9 @@ function fitAll(){
     /* 가장 긴 줄의 실제 폭 */
     var rg=document.createRange();rg.selectNodeContents(el);[].forEach.call(rg.getClientRects(),function(r){if(r.width>mw)mw=r.width});
     w=Math.max(mw,0)||w;
-    if(w<=avail){el.style.whiteSpace='';return}
+    if(w<=avail){el.style.whiteSpace=el._ow;return}
     var fs=base*avail/w*0.985;
-    if(fs>=10){el.style.fontSize=fs+'px'}else{el.style.whiteSpace=''}
+    if(fs>=10){el.style.fontSize=fs+'px'}else{el.style.whiteSpace=el._ow}
   });
 }
 var _ft;window.addEventListener('resize',function(){clearTimeout(_ft);_ft=setTimeout(fitAll,150)});
