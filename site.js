@@ -284,7 +284,7 @@ function reel(){
     }
     function slide(w,hid){
       var cat=tagOf(w).toUpperCase();
-      return '<a class="reel-slide" href="work?id='+esc(w.id)+'"><img src="'+esc(w.thumbnail_url)+'" alt="" loading="lazy"'+(hid?' aria-hidden="true"':'')+'><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
+      return '<a class="reel-slide" href="work?id='+esc(w.id)+'"><img src="'+esc(w.thumbnail_url)+'" alt=""'+(hid?' aria-hidden="true"':'')+'><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
     }
     /* 관리자 페이지의 작업물·썸네일과 연동 */
     if(window.sbGet)window.sbGet('works','select=id,title,category,thumbnail_url&published=eq.true&order=sort_order.asc').then(function(rows){
