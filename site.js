@@ -142,7 +142,7 @@ function workDetail(app){
     setMeta(w.title,w.description||'',w.thumbnail_url||(w.images||[])[0]||'');
     var c=CAT[w.category]||CAT.photo;
     var mem=(w.members||[]).map(function(n){var t=team.filter(function(x){return x.name===n})[0]||{};
-      return '<div style="display: flex; align-items: center; gap: 12px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(n)+'" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700; color: #1D1D1F">'+esc(n)+'</span>'+(t.role_en?'<span style="font-size: 14px; color: #6E6E73">'+esc(t.role_en)+'</span>':'')+'</div></div>'}).join('');
+      return '<div style="display: flex; align-items: center; gap: 12px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(n)+'" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 17px; font-weight: 700; color: #1D1D1F">'+esc(n)+'</span>'+'</div></div>'}).join('');
     var media='';
     (Array.isArray(w.videos)?w.videos:[]).forEach(function(v){var i=ytId(v.url);if(!v.url)return;
       var poster=v.poster||(i?'https://i.ytimg.com/vi/'+i+'/maxresdefault.jpg':'');
