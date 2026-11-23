@@ -44,6 +44,12 @@ function shrink(file){
     img.onerror=function(){res(file)};img.src=u;
   });
 }
+function uploadVideo(file){
+  if(file.size>50*1024*1024)return Promise.reject(new Error('영상이 50MB를 넘습니다. 용량을 줄여서(mp4, H.264) 올려 주세요.'));
+  var ext=(file.name.split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'');if(ext==='m4v')ext='mp4';
+  var name='videos/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+  return api('POST','/storage/v1/object/'+BUCKET+'/'+name,file,{'Content-Type':file.type||'video/mp4','x-upsert':'false'}).then(function(){return C.url+'/storage/v1/object/public/'+BUCKET+'/'+name});
+}
 function upload(file,folder){
   if(file.size>25*1024*1024)return Promise.reject(new Error('파일이 너무 큽니다. (25MB 이하)'));
   return shrink(file).then(function(b){
@@ -248,17 +254,19 @@ function imageList(w,F,key){
   }
   draw();
 }
+function isFile(u){return /\.(mp4|mov|webm|m4v)(\?|$)/i.test(String(u||''))}
 function videoList(w,F,key){
   var box=document.createElement('div');w.appendChild(box);F[key]=Array.isArray(F[key])?F[key]:[];
   function draw(){
     var a=F[key];
     box.innerHTML=a.map(function(v,i){var id=ytId(v.url),p=v.poster||(id?'https://i.ytimg.com/vi/'+id+'/mqdefault.jpg':'');
-      return '<div class="vrow"><input type="text" placeholder="유튜브 링크 (https://youtu.be/…)" value="'+esc(v.url)+'" data-i="'+i+'" data-f="url"><input type="text" placeholder="이름 (예: 대구)" value="'+esc(v.label||'')+'" data-i="'+i+'" data-f="label"><button type="button" class="btn danger sm" data-i="'+i+'" data-a="rm">삭제</button>'
-      +'<div class="pv">'+(p?'<img src="'+esc(/^https?:/.test(p)?p:'../'+p)+'" alt="">':'')+'<span>'+(v.poster?'직접 올린 썸네일 사용 중':(id?'유튜브 썸네일 자동 사용':'링크를 입력하면 썸네일이 표시됩니다'))+'</span><button type="button" class="btn line sm" data-i="'+i+'" data-a="poster">썸네일 직접 올리기</button>'+(v.poster?'<button type="button" class="btn line sm" data-i="'+i+'" data-a="noposter">자동으로 되돌리기</button>':'')+'</div></div>'}).join('')+'<button type="button" class="btn line sm" id="addv">+ 영상 링크 추가</button>';
+      return '<div class="vrow"><input type="text" placeholder="유튜브 링크 (https://youtu.be/…) 또는 아래 ‘영상 파일 올리기’" value="'+esc(v.url)+'" data-i="'+i+'" data-f="url"><input type="text" placeholder="이름 (예: 대구)" value="'+esc(v.label||'')+'" data-i="'+i+'" data-f="label"><button type="button" class="btn danger sm" data-i="'+i+'" data-a="rm">삭제</button>'
+      +'<div class="pv">'+(p?'<img src="'+esc(/^https?:/.test(p)?p:'../'+p)+'" alt="">':'')+'<span>'+(v.poster?'직접 올린 썸네일 사용 중':(id?'유튜브 썸네일 자동 사용':isFile(v.url)?'직접 올린 영상 (썸네일은 아래에서 올리면 표시됩니다)':'링크를 입력하면 썸네일이 표시됩니다'))+'</span><button type="button" class="btn line sm" data-i="'+i+'" data-a="poster">썸네일 직접 올리기</button><button type="button" class="btn line sm" data-i="'+i+'" data-a="vfile">영상 파일 올리기</button>'+(v.poster?'<button type="button" class="btn line sm" data-i="'+i+'" data-a="noposter">자동으로 되돌리기</button>':'')+'</div></div>'}).join('')+'<button type="button" class="btn line sm" id="addv">+ 영상 링크 추가</button>';
     [].forEach.call(box.querySelectorAll('input[data-f]'),function(el){el.oninput=function(){a[+el.getAttribute('data-i')][el.getAttribute('data-f')]=el.value};
       if(el.getAttribute('data-f')==='url')el.onchange=draw});
     [].forEach.call(box.querySelectorAll('button[data-a]'),function(b){b.onclick=function(){var i=+b.getAttribute('data-i'),t=b.getAttribute('data-a');
       if(t==='rm'){a.splice(i,1);draw()}else if(t==='noposter'){delete a[i].poster;draw()}
+      else if(t==='vfile'){var vi=document.createElement('input');vi.type='file';vi.accept='video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm,.m4v';vi.onchange=function(){var f=vi.files[0];if(!f)return;toast('영상 업로드 중… 잠시만 기다려 주세요');uploadVideo(f).then(function(u){a[i].url=u;if(!a[i].label)a[i].label='';draw();toast('영상을 올렸습니다. 저장을 눌러 주세요')}).catch(function(e){toast(e.message,1)})};vi.click()}
       else pick(false,function(fs){if(!fs[0])return;upload(fs[0],'works').then(function(u){a[i].poster=u;draw()}).catch(function(e){toast(e.message,1)})})}});
     $('#addv',box).onclick=function(){a.push({url:'',label:''});draw()};
   }
