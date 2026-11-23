@@ -214,9 +214,10 @@ function workDetail(app){
     wireMedia(app);justify(app);fitTitle(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
+function srcLabel(u){u=String(u||'');return /instagram\.com/.test(u)?'인스타그램에서 보기':/youtu\.?be/.test(u)?'유튜브에서 보기':/threads\.(net|com)/.test(u)?'스레드에서 보기':/facebook\.com|fb\.watch/.test(u)?'페이스북에서 보기':/(twitter|x)\.com/.test(u)?'X에서 보기':'원문 보기'}
 function srcBox(tags,url){
   var chips=(tags||[]).filter(Boolean).map(function(t){return '<span class="src-chip" style="display: inline-block; padding: 6px 14px; border-radius: 999px; border: 1px solid #D2D2D7; background: #fff; font-size: 14px; font-weight: 600; color: #1D1D1F">'+esc(t)+'</span>'}).join('');
-  var btn=url?'<a class="src-btn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 22px; border-radius: 999px; background: #1D1D1F; color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; white-space: nowrap">원문 보기 <span aria-hidden="true">↗</span></a>':'';
+  var btn=url?'<a class="src-btn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 22px; border-radius: 999px; background: #1D1D1F; color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; white-space: nowrap">'+srcLabel(url)+' <span aria-hidden="true">↗</span></a>':'';
   if(!chips&&!btn)return '';
   return '<style>@media(max-width:640px){.src-box{margin-top:40px!important;padding:18px 18px 20px!important;border-radius:18px!important;gap:12px!important}.src-chip{font-size:12px!important;padding:4px 10px!important}.src-btn{font-size:13px!important;padding:9px 16px!important}.src-row{gap:12px!important}}</style><div class="src-box" style="margin: 64px 0 0; padding: 28px 32px; background: #F5F5F7; border-radius: 22px; display: flex; flex-direction: column; gap: 16px"><span style="font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #6E6E73">Source</span><div class="src-row" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px"><div style="display: flex; flex-wrap: wrap; gap: 8px">'+chips+'</div>'+btn+'</div></div>';
 }
