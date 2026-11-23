@@ -94,10 +94,10 @@ function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
-  if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
+  if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
   Promise.all([getData('works','select=*&id=eq.'+encodeURIComponent(id)),getData('team_members','select=name,role_en,avatar_url&published=eq.true')]).then(function(res){
     var w=res[0][0],team=res[1];
-    if(!w){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
+    if(!w){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+w.title;
     setMeta(w.title,w.description||'',w.thumbnail_url||(w.images||[])[0]||'');
     var c=CAT[w.category]||CAT.photo;
@@ -120,9 +120,9 @@ function workDetail(app){
 }
 function newsDetail(app){
   var id=new URLSearchParams(location.search).get('id');
-  if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
+  if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
   getData('news','select=*,works(id,category)&id=eq.'+encodeURIComponent(id)).then(function(r){
-    var n=r[0];if(!n){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="index.html" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
+    var n=r[0];if(!n){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+n.title_line1;
     var yr=n.published_at?String(n.published_at).slice(0,4):'';
     var paras=String(n.body||'').split(/\n{2,}/).filter(Boolean).map(function(p){return '<p style="margin: 0 0 24px; font-size: 19px; line-height: 1.8; color: #1D1D1F; word-break: keep-all">'+br(p)+'</p>'}).join('');
@@ -221,4 +221,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     var a=e.target.closest&&e.target.closest('a[href="#contact"]');
     if(a){e.preventDefault();open()}
   },true);
+})();
+
+/* clean home URL */
+(function(){
+  try{if(/\/index\.html$/.test(location.pathname)){history.replaceState(null,'',location.pathname.replace(/index\.html$/,'')+location.search)}}catch(e){}
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href="/"]');
+    if(a&&location.pathname==='/'&&!e.metaKey&&!e.ctrlKey){e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});if(location.hash)history.replaceState(null,'','/')}
+  });
 })();
