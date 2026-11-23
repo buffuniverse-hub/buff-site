@@ -19,9 +19,9 @@ function workCard(w){
 function newsCard(n){
   var d=n.published_at?String(n.published_at).slice(0,10).replace(/-/g,'.'):'';
   return '<a class="nc" href="news-view?id='+esc(n.id)+'">'
-  +'<div class="nc-img">'+(n.thumbnail_url?'<img src="'+esc(n.thumbnail_url)+'" alt="'+esc(n.title_line1)+'" draggable="false" loading="lazy">':'')+'</div>'
+  +'<div class="nc-img">'+(n.thumbnail_url?'<img src="'+esc(n.thumbnail_url)+'" alt="'+esc(n.title_line1)+'" draggable="false" loading="lazy" style="object-position: '+tx(n)+'% '+ty(n)+'%; transform-origin: '+tx(n)+'% '+ty(n)+'%; scale: '+tz(n)/100+'">':'')+'</div>'
   +'<span class="nc-meta">'+esc(n.category)+(d?'<i></i>'+d:'')+'</span>'
-  +'<b class="nc-t">'+esc(n.title_line1)+(n.title_line2?'<br class="mb"> '+esc(n.title_line2):'')+'</b>'
+  +'<b class="nc-t">'+esc(n.title_line1)+(n.title_line2?'<br> '+esc(n.title_line2):'')+'</b>'
   +(n.summary?'<span class="nc-s">'+esc(n.summary)+'</span>':'')
   +'</a>';
 }
