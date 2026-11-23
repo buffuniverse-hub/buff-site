@@ -2,7 +2,7 @@
 var __M={};function getData(t,q){var k=t+'?'+q;return __M[k]||(__M[k]=window.sbGet(t,q).catch(function(e){delete __M[k];throw e}))}
 var $=function(s,r){return(r||document).querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
-var br=function(s){return esc(s).replace(/\n/g,'<br>')};
+var br=function(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:#0066CC;text-decoration:underline;word-break:break-all">$1</a>').replace(/\n/g,'<br>')};
 function tagOf(w){var c=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category],n={branding:'Branding',photo:'Photo',video:'Video'};return ['branding','photo','video'].filter(function(k){return c.indexOf(k)>-1}).map(function(k){return n[k]}).join(' · ')||(CAT[w.category]||[''])[0]}
 var CAT={photo:['Photo','Works?cat=photo'],video:['Video','Works?cat=video'],branding:['Branding','Works?cat=branding']};
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
