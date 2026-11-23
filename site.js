@@ -7,7 +7,7 @@ var CAT={photo:['Photo','Works?cat=photo'],video:['Video','Works?cat=video'],bra
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
 
 function workCard(w){
-  return '<a href="work?id='+esc(w.id)+'" data-cat="'+esc(w.category)+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
+  return '<a href="work?id='+esc(w.id)+'" data-cat="'+esc((w.categories&&w.categories.length?w.categories:[w.category]).join(' '))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
   +'<img draggable="false" src="'+esc(w.thumbnail_url)+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">'
   +'<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
   +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(w.tag||CAT[w.category][0])+'</span></a>';
@@ -108,7 +108,7 @@ function workDetail(app){
       var poster=v.poster||(i?'https://i.ytimg.com/vi/'+i+'/maxresdefault.jpg':'');
       media+='<a href="'+esc(v.url)+'" target="_blank" rel="noopener" aria-label="'+esc((w.title+' '+(v.label||''))+' 영상 재생')+'" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; flex: none; border-radius: 18px; overflow: hidden; background: #000000; text-decoration: none">'+(poster?'<img src="'+esc(poster)+'" alt="'+esc(w.title+' '+(v.label||''))+'" draggable="false" style="display: block; width: 100%; height: 100%; object-fit: contain; background: #000">':'')+PLAY+'</a>'});
     (w.images||[]).forEach(function(u){media+='<img src="'+esc(u)+'" alt="'+esc(w.title)+'" style="display: block; width: 100%; border-radius: 18px; '+(w.category==='photo'?'aspect-ratio: 3 / 2; object-fit: cover;':'height: auto;')+' background: #F5F5F7">'});
-    app.innerHTML='<section style="background: #FFFFFF; padding: 40px 0 0"><div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box"><a href="'+c[1]+'" style="font-size: 17px; font-weight: 500; color: #6E6E73; text-decoration: none">‹ '+c[0]+'</a></div></section>'
+    app.innerHTML='<section style="background: #FFFFFF; padding: 40px 0 0"><div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box"><a href="'+c[1]+'" style="font-size: 17px; font-weight: 500; color: #6E6E73; text-decoration: none">‹ Works</a></div></section>'
     +'<section class="wk-sec"><div class="wk-titlerow"><h1 class="wk-h1">'+esc(w.title)+'</h1>'+(pdfUrl(w.pdf_url)?'<a class="wk-pdf" href="'+esc(pdfUrl(w.pdf_url))+'" target="_blank" rel="noopener" title="포트폴리오 PDF 다운로드" aria-label="포트폴리오 PDF 다운로드"><svg width="36" height="44" viewBox="0 0 36 44" aria-hidden="true"><path d="M4 0h19l13 13v27a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#E5322D"/><path d="M23 0l13 13H27a4 4 0 0 1-4-4z" fill="#F5A3A0"/><text x="18" y="35" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="11" fill="#fff">PDF</text></svg></a>':'')+'</div><div class="wk-wrap">'
     +'<aside class="wk-side">'
     +((w.tags||[]).length?'<div style="display: flex; flex-wrap: wrap; gap: 8px">'+w.tags.map(pill).join('')+'</div>':'')
@@ -168,7 +168,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
     function cur(){var m=location.search.match(/[?&]cat=([a-z]+)/);return m&&ok[m[1]]?m[1]:'all'}
     var f=cur();
     function apply(){
-      var n=0;[].forEach.call(g.children,function(c){var show=f==='all'||c.getAttribute('data-cat')===f;c.style.display=show?'':'none';if(show)n++});
+      var n=0;[].forEach.call(g.children,function(c){var show=f==='all'||(' '+c.getAttribute('data-cat')+' ').indexOf(' '+f+' ')>=0;c.style.display=show?'':'none';if(show)n++});
       [].forEach.call(bar.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b.getAttribute('data-f')===f?'true':'false')});
       var e=document.getElementById('works-empty');if(e)e.style.display=n?'none':'block';
     }
@@ -189,7 +189,7 @@ function reel(){
       row.style.animationDuration=(half/v)+'s';
     }
     function slide(w,hid){
-      var cat=({photo:'PHOTO',video:'VIDEO',branding:'BRANDING'})[w.category]||'';
+      var cat=(w.tag||({photo:'PHOTO',video:'VIDEO',branding:'BRANDING'})[w.category]||'').toUpperCase();
       return '<a class="reel-slide" href="work?id='+esc(w.id)+'"><img src="'+esc(w.thumbnail_url)+'" alt="" loading="lazy"'+(hid?' aria-hidden="true"':'')+'><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
     }
     /* 관리자 페이지의 작업물·썸네일과 연동 */
