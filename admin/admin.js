@@ -69,7 +69,7 @@ var T={
   blank:function(){return{category:'Photo',published:true,sort_order:0,published_at:new Date().toISOString().slice(0,10)}}},
  works:{label:'Works',title:'작업물',order:'sort_order.asc,created_at.asc',hint:'카드를 드래그해서 Works 페이지 순서를 바꿉니다. 영상 링크를 넣으면 사이트에 재생 버튼이 생깁니다.',
   list:function(r){return{img:r.thumbnail_url,title:r.title,sub:((r.categories&&r.categories.length?r.categories:[r.category]).join(' · '))}},
-  fields:[['categories','분류 (브랜딩과 사진을 함께 한 프로젝트는 둘 다 선택)','cats'],['title','프로젝트명','text'],['client','클라이언트','text',{ph:'예: 포카리스웨트'}],['work_year','기간','text',{ph:'예: 2026 / 2026.09 ~ 2026.10'}],['description','프로젝트 설명','textarea',{rows:6}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['thumb_zoom','썸네일 확대 (%)','int',{help:'100 = 원본, 150 = 1.5배 확대 (최대 400). 확대한 뒤 아래 두 칸으로 보이는 위치를 맞추세요.'}],['thumb_x','썸네일 가로 위치 (0 왼쪽 ~ 100 오른쪽, 기본 50)','int'],['thumb_y','썸네일 세로 위치 (0 위 ~ 100 아래, 기본 50)','int'],['images','상세 이미지','imagelist'],['videos','영상 링크 (YouTube)','videos'],['members','참여 멤버','members'],['pdf_url','포트폴리오 PDF 링크 (구글 드라이브 공유 링크)','text',{ph:'https://drive.google.com/file/d/…/view  ("링크가 있는 모든 사용자"로 공유)'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
+  fields:[['categories','분류 (브랜딩과 사진을 함께 한 프로젝트는 둘 다 선택)','cats'],['title','프로젝트명','text'],['client','클라이언트','text',{ph:'예: 포카리스웨트'}],['work_year','기간','text',{ph:'예: 2026 / 2026.09 ~ 2026.10'}],['description','프로젝트 설명','textarea',{rows:6}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['thumb_zoom','썸네일 확대·위치 (슬라이더)','thumbframe'],['images','상세 이미지','imagelist'],['videos','영상 링크 (YouTube)','videos'],['members','참여 멤버','members'],['pdf_url','포트폴리오 PDF 링크 (구글 드라이브 공유 링크)','text',{ph:'https://drive.google.com/file/d/…/view  ("링크가 있는 모든 사용자"로 공유)'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{category:'photo',categories:['photo'],published:true,featured:false,sort_order:0,tags:[],images:[],videos:[],members:[]}}},
  clients:{label:'Clients',title:'고객사',order:'sort_order.asc',hint:'홈 화면 Our Clients 로고 목록입니다. 배경이 투명한 PNG를 권장합니다.',
   list:function(r){return{img:r.logo_url,title:r.name,sub:r.url||'링크 없음',contain:true}},
@@ -222,8 +222,22 @@ function field(f,F,ctx){
   else if(type==='image')imageField(w,F,key);
   else if(type==='imagelist')imageList(w,F,key);
   else if(type==='videos')videoList(w,F,key);
+  else if(type==='thumbframe')thumbFrame(w,F);
   if(o.help){var s=document.createElement('div');s.className='small';s.textContent=o.help;w.appendChild(s)}
   return w;
+}
+function thumbFrame(w,F){
+  if(F.thumb_zoom==null||F.thumb_zoom<100)F.thumb_zoom=100;if(F.thumb_x==null)F.thumb_x=50;if(F.thumb_y==null)F.thumb_y=50;
+  var box=document.createElement('div');w.appendChild(box);
+  box.innerHTML='<div class="tfp" style="width:320px;max-width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:var(--bg);border:1px solid var(--line)"><img alt="" style="display:block;width:100%;height:100%;object-fit:cover"></div>'
+  +[['thumb_zoom','확대',100,300,'%'],['thumb_x','좌우 위치',0,100,''],['thumb_y','상하 위치',0,100,'']].map(function(r){return '<label style="display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px"><span style="width:64px">'+r[1]+'</span><input type="range" data-k="'+r[0]+'" min="'+r[2]+'" max="'+r[3]+'" value="'+F[r[0]]+'" style="flex:1;max-width:240px"><b data-v="'+r[0]+'" style="width:48px">'+F[r[0]]+r[4]+'</b></label>'}).join('')
+  +'<button type="button" class="btn line sm" id="tfreset" style="margin-top:10px">원래대로</button>';
+  var im=box.querySelector('img');
+  function show(){var z=F.thumb_zoom/100,o=F.thumb_x+'% '+F.thumb_y+'%';if(F.thumbnail_url)im.src=srcUrl(F.thumbnail_url);im.style.objectPosition=o;im.style.transformOrigin=o;im.style.transform='scale('+z+')';
+    [].forEach.call(box.querySelectorAll('input[data-k]'),function(el){el.value=F[el.getAttribute('data-k')];box.querySelector('[data-v="'+el.getAttribute('data-k')+'"]').textContent=F[el.getAttribute('data-k')]+(el.getAttribute('data-k')==='thumb_zoom'?'%':'')})}
+  [].forEach.call(box.querySelectorAll('input[data-k]'),function(el){el.oninput=function(){F[el.getAttribute('data-k')]=parseInt(el.value,10);show()}});
+  box.querySelector('#tfreset').onclick=function(){F.thumb_zoom=100;F.thumb_x=50;F.thumb_y=50;show()};
+  box.onmouseenter=show;show();
 }
 function pick(multi,cb){var i=document.createElement('input');i.type='file';i.accept='image/png,image/jpeg,image/webp';i.multiple=!!multi;i.onchange=function(){cb([].slice.call(i.files))};i.click()}
 function imageField(w,F,key){
