@@ -7,9 +7,12 @@ function tagOf(w){var c=Array.isArray(w.categories)&&w.categories.length?w.categ
 var CAT={photo:['Photo','Works?cat=photo'],video:['Video','Works?cat=video'],branding:['Branding','Works?cat=branding']};
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
 
+function tz(w){var v=+w.thumb_zoom;return v>=100&&v<=400?v:100}
+function tx(w){var v=+w.thumb_x;return v>=0&&v<=100&&w.thumb_x!=null?v:50}
+function ty(w){var v=+w.thumb_y;return v>=0&&v<=100&&w.thumb_y!=null?v:50}
 function workCard(w){
   return '<a href="work?id='+esc(w.id)+'" data-cat="'+esc((w.categories&&w.categories.length?w.categories:[w.category]).join(' '))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
-  +'<img draggable="false" src="'+esc(w.thumbnail_url)+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">'
+  +'<div style="overflow: hidden; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px; aspect-ratio: 16 / 9; width: 100%"><img draggable="false" src="'+esc(w.thumbnail_url)+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; height: 100%; object-fit: cover; object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"></div>'
   +'<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
   +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(tagOf(w))+'</span></a>';
 }
