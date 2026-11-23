@@ -168,7 +168,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
     function cur(){var m=location.search.match(/[?&]cat=([a-z]+)/);return m&&ok[m[1]]?m[1]:'all'}
     var f=cur();
     function apply(){
-      var n=0;[].forEach.call(g.children,function(c){var show=f==='all'||(' '+c.getAttribute('data-cat')+' ').indexOf(' '+f+' ')>=0;c.style.display=show?'':'none';if(show)n++});
+      var n=0;[].forEach.call(g.children,function(c){var show=f==='all'||(' '+c.getAttribute('data-cat')+' ').indexOf(' '+f+' ')>=0;c.style.display=show?'flex':'none';if(show)n++});
       [].forEach.call(bar.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b.getAttribute('data-f')===f?'true':'false')});
       var e=document.getElementById('works-empty');if(e)e.style.display=n?'none':'block';
     }
