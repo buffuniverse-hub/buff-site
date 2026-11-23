@@ -182,6 +182,12 @@ function workDetail(app){
     wireMedia(app);fitTitle(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
+function srcBox(tags,url){
+  var chips=(tags||[]).filter(Boolean).map(function(t){return '<span class="src-chip" style="display: inline-block; padding: 6px 14px; border-radius: 999px; border: 1px solid #D2D2D7; background: #fff; font-size: 14px; font-weight: 600; color: #1D1D1F">'+esc(t)+'</span>'}).join('');
+  var btn=url?'<a class="src-btn" href="'+esc(url)+'" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; padding: 12px 22px; border-radius: 999px; background: #1D1D1F; color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; white-space: nowrap">원문 보기 <span aria-hidden="true">↗</span></a>':'';
+  if(!chips&&!btn)return '';
+  return '<style>@media(max-width:640px){.src-box{margin-top:40px!important;padding:18px 18px 20px!important;border-radius:18px!important;gap:12px!important}.src-chip{font-size:12px!important;padding:4px 10px!important}.src-btn{font-size:13px!important;padding:9px 16px!important}.src-row{gap:12px!important}}</style><div class="src-box" style="margin: 64px 0 0; padding: 28px 32px; background: #F5F5F7; border-radius: 22px; display: flex; flex-direction: column; gap: 16px"><span style="font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #6E6E73">Source</span><div class="src-row" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px"><div style="display: flex; flex-wrap: wrap; gap: 8px">'+chips+'</div>'+btn+'</div></div>';
+}
 function newsDetail(app){
   var id=new URLSearchParams(location.search).get('id');
   if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
@@ -211,7 +217,7 @@ function newsDetail(app){
     app.innerHTML='<section style="background: #FFFFFF; padding: 80px 0 0"><div style="max-width: 1040px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center"><span style="font-size: 19px; font-weight: 600; color: #6E6E73">'+esc(n.category)+(yr?' · '+yr:'')+'</span><h1 style="margin: 0; font-size: 40px; font-weight: 700; line-height: 1.3; letter-spacing: -0.02em; color: #1D1D1F; word-break: keep-all">'+esc(n.title_line1)+(n.title_line2?'<br>'+esc(n.title_line2):'')+'</h1></div></section>'
     +'<section style="background: #FFFFFF; padding: 32px 0 120px"><div style="max-width: 900px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box">'
     
-    +paras+'<div id="news-rel"></div><div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid #D2D2D7; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px"><a href="News" style="font-size: 19px; font-weight: 600; color: #1D1D1F; text-decoration: none">‹ 목록으로</a>'
+    +paras+srcBox(Array.isArray(n.source_tags)?n.source_tags:[],n.source_url)+'<div id="news-rel"></div><div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid #D2D2D7; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px"><a href="News" style="font-size: 19px; font-weight: 600; color: #1D1D1F; text-decoration: none">‹ 목록으로</a>'
     +'</div></div></section>';
     if(!document.getElementById('ig-css')){var igs=document.createElement('style');igs.id='ig-css';igs.textContent='@media(max-width:900px){.ig-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:520px){.ig-grid{grid-template-columns:1fr!important}}';document.head.appendChild(igs)}
     function fitIg(){[].forEach.call(document.querySelectorAll('.ig-wrap'),function(w){var f=w.firstChild;if(f&&w.clientWidth)f.style.transform='scale('+(w.clientWidth/400)+')'})}
