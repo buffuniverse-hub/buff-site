@@ -72,7 +72,7 @@ main{max-width:1200px;margin:0 auto;padding:40px 40px 120px}
 .imgbox{display:flex;gap:14px;align-items:center}
 .imgbox img{width:160px;height:90px;object-fit:cover;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
 .imgbox .noimg{width:160px;height:90px;border-radius:12px;background:var(--bg);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:13px}
-.imglist{display:flex;flex-wrap:wrap;gap:12px}
+.row[draggable]{cursor:grab}.row.dragging,.imglist .it.dragging{opacity:.4}.row.over{outline:2px solid #0071E3;outline-offset:-2px}.imglist .it{cursor:grab}.imglist .it.over img{outline:2px solid #0071E3}.imglist .it .mv{display:none}.grip{color:#9a9aa0;font-size:20px;line-height:1;flex:0 0 auto;user-select:none}.row img{pointer-events:none}.imglist .it img{pointer-events:none}.imglist{display:flex;flex-wrap:wrap;gap:12px}
 .imglist .it{position:relative;width:150px}
 .imglist .it img{width:150px;height:96px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block;background:var(--bg)}
 .imglist .it .x{position:absolute;top:6px;right:6px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:1}
