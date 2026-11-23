@@ -224,7 +224,7 @@ function newsDetail(app){
 function fitAll(){
   var mob=window.matchMedia('(max-width:640px)').matches;
   [].forEach.call(document.querySelectorAll('p br,h1 br,h2 br,h3 br,div br,span br'),function(b){
-    var el=b.parentElement;if(!el||el._fit===1||el.closest('header,nav,button'))return;
+    var el=b.parentElement;if(!el||el._fit===1||el.closest('header,nav,button,#top'))return;
     el._fit=1;
   });
   [].forEach.call(document.querySelectorAll('p,h1,h2,h3,div,span'),function(el){
