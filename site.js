@@ -81,7 +81,6 @@ function metaLine(w){
   var sc=String(w.scope||'').split(/\n/).map(function(x){return x.replace(/^[\s\-•·*]+/,'').trim()}).filter(Boolean);
   var it=[];
   if(w.client)it.push(['클라이언트',esc(w.client)]);
-  if(sc.length)it.push(['작업 수행 내역',sc.map(esc).join(', ')]);
   if(w.work_year)it.push(['기간',esc(w.work_year)]);
   if(cs.length)it.push(['분류',cs.map(function(c){return '<a href="Works?cat='+c+'" style="color: inherit; text-decoration: none; border-bottom: 1px solid #D2D2D7">'+CATKO[c]+'</a>'}).join(' · ')]);
   if(!it.length)return '';
