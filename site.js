@@ -81,7 +81,9 @@ function bindLists(){
     if(s.contact_email){var a=$('[data-sb="career-email"]');if(a){a.textContent=s.contact_email;a.href='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(s.contact_email)+'&su='+encodeURIComponent('[BUFF 지원] 포트폴리오')}}
   }));
   jobs.forEach(function(j){j.catch(function(e){console.warn('[BUFF]',e)})});
-  return jobs.map(function(j){return j.catch(function(){})});
+  var reveal=function(){[].forEach.call(document.querySelectorAll('[data-sb]'),function(e){e.classList.add('sb-ready')})};setTimeout(reveal,3000);
+  var res=jobs.map(function(j){return j.catch(function(){})});Promise.all(res).then(reveal);
+  return res;
 }
 
 function pill(t){return '<span style="padding: 8px 14px; border-radius: 999px; background: #F5F5F7; font-size: 15px; font-weight: 500; color: #1D1D1F">#'+esc(t)+'</span>'}
