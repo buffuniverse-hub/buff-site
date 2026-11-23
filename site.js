@@ -108,6 +108,34 @@ function metaLine(w){
   return '<div class="wk-meta">'+it.map(function(r){return '<span><em>'+r[0]+'</em>'+r[1]+'</span>'}).join('')+pdf+'</div>';
 }
 /* 영상: 페이지 안에서 바로 재생 / 사진: 크게 보기 */
+function justify(app){
+  var box=app.querySelector('.wk-just');if(!box)return;
+  if(!document.getElementById('jg-css')){var st=document.createElement('style');st.id='jg-css';st.textContent='.wk-just{display:flex;flex-direction:column;width:100%}.wk-row{display:flex;justify-content:center}.wk-row img{flex:none;display:block;object-fit:cover}';document.head.appendChild(st)}
+  var imgs=[].slice.call(box.querySelectorAll('img.wk-ph'));
+  function layout(){
+    var W=box.clientWidth;if(!W)return;
+    var mob=W<640,gap=mob?10:16,target=mob?210:Math.min(360,W/3.1);
+    var rs=imgs.map(function(im){return im.naturalWidth&&im.naturalHeight?im.naturalWidth/im.naturalHeight:1.5});
+    var rows=[],cur=[],sum=0;
+    for(var i=0;i<imgs.length;i++){
+      cur.push(i);sum+=rs[i];
+      if(sum*target+gap*(cur.length-1)>=W){rows.push(cur);cur=[];sum=0}
+    }
+    if(cur.length)rows.push(cur);
+    box.textContent='';
+    rows.forEach(function(row,ri){
+      var s=0;row.forEach(function(k){s+=rs[k]});
+      var h=(W-gap*(row.length-1))/s;
+      if(ri===rows.length-1&&h>target*1.3)h=target;
+      var d=document.createElement('div');d.className='wk-row';d.style.cssText='gap:'+gap+'px;margin-bottom:'+(ri<rows.length-1?gap:0)+'px';
+      row.forEach(function(k){var im=imgs[k];im.style.width=(rs[k]*h)+'px';im.style.height=h+'px';im.style.maxWidth='none';d.appendChild(im)});
+      box.appendChild(d);
+    });
+  }
+  var t=null;function re(){clearTimeout(t);t=setTimeout(layout,60)}
+  imgs.forEach(function(im){if(!im.complete)im.addEventListener('load',re)});
+  layout();window.addEventListener('resize',re);
+}
 function wireMedia(app){
   [].forEach.call(app.querySelectorAll('.wk-play'),function(a){
     a.addEventListener('click',function(ev){
@@ -171,15 +199,15 @@ function workDetail(app){
     var nv=(Array.isArray(w.videos)?w.videos:[]).filter(function(v){return v&&v.url}).length;
     if(vids)media+=nv>1?'<div class="wk-grid">'+vids+'</div>':'<div class="wk-single">'+vids+'</div>';
     var onlyPhoto=(w.categories&&w.categories.length?w.categories:[w.category]).every(function(c){return c==='photo'});
-    var imgs=(w.images||[]).map(function(u){return '<img class="wk-ph" src="'+esc(u)+'" alt="'+esc(w.title)+'" style="cursor: zoom-in; display: block; width: 100%; border-radius: 18px; '+(onlyPhoto?'aspect-ratio: 3 / 2; object-fit: cover;':'height: auto;')+' background: #F5F5F7">'});
-    if(imgs.length)media+='<div class="wk-grid">'+imgs.join('')+'</div>';
+    var imgs=(w.images||[]).map(function(u){return '<img class="wk-ph" src="'+esc(u)+'" alt="'+esc(w.title)+'" style="cursor: zoom-in; display: block; width: 100%; border-radius: 18px; '+'height: auto;'+' background: #F5F5F7">'});
+    if(imgs.length)media+='<div class="'+(onlyPhoto?'wk-just':'wk-grid')+'">'+imgs.join('')+'</div>';
     app.innerHTML='<section style="background: #FFFFFF; padding: 32px 0 0"><div class="wk-top"><a href="'+c[1]+'" style="font-size: 15px; font-weight: 500; color: #6E6E73; text-decoration: none; justify-self: start; white-space: nowrap">‹ Works</a>'+'<span></span><span></span></div></section>'
     +'<section class="wk-sec">'
     +'<div class="wk-titlerow"><h1 class="wk-h1">'+esc(w.title)+'</h1>'+''+'</div>'
     +metaLine(w)
     +(w.description?'<div class="wk-desc">'+(/\n/.test(w.description)?w.description:w.description.replace(/([.!?。]|다\.)\s+/g,function(m,a){return a+'\n'})).trim().split(/\n\s*\n/).map(function(b){return '<p>'+b.split(/\n/).map(function(l){return esc(l.trim())}).join('<br>')+'</p>'}).join('')+'</div>':'')
     +'<div class="wk-wrap"><div class="wk-media">'+media+'</div></div>'+(mem?'<div class="wk-credit"><em>참여 인물</em><div class="wk-people">'+mem+'</div></div>':'')+'</section>';
-    wireMedia(app);fitTitle(app);
+    wireMedia(app);justify(app);fitTitle(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
 function srcBox(tags,url){
