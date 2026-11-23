@@ -276,10 +276,10 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
 function reel(){
   [].forEach.call(document.querySelectorAll('#reel'),function(sec){
     if(sec._r)return;var row=sec.querySelector('.reel-row');if(!row)return;sec._r=1;
-    /* 속도: 다른 롤링과 같은 px/초 (PC 46.6, 모바일 90) */
+    /* 속도: 다른 롤링과 같은 px/초 (PC 46.6, 모바일 180) */
     function speed(){
       var half=row.scrollWidth/2;if(!half)return;
-      var v=window.matchMedia('(max-width:640px)').matches?90:46.6;
+      var v=window.matchMedia('(max-width:640px)').matches?180:46.6;
       row.style.animationDuration=(half/v)+'s';
     }
     function slide(w,hid){
