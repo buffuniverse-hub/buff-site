@@ -161,15 +161,24 @@ var _ft;window.addEventListener('resize',function(){clearTimeout(_ft);_ft=setTim
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitAll()});
 function reel(){
   [].forEach.call(document.querySelectorAll('#reel'),function(sec){
-    if(sec._r)return;var tr=sec.querySelector('.reel-track');if(!tr)return;sec._r=1;
-    var sl=[].slice.call(tr.children),ds=[].slice.call(sec.querySelectorAll('.reel-dots i')),ix=0,pz=false;
-    function go(i){ix=(i+sl.length)%sl.length;var s=sl[ix];tr.scrollTo({left:s.offsetLeft-(tr.clientWidth-s.clientWidth)/2,behavior:'smooth'})}
-    function mk(){var c=tr.scrollLeft+tr.clientWidth/2,b=0,d=1e9;sl.forEach(function(s,i){var m=Math.abs(s.offsetLeft+s.clientWidth/2-c);if(m<d){d=m;b=i}});ix=b;ds.forEach(function(x,i){x.classList.toggle('on',i===b)})}
-    tr.addEventListener('scroll',function(){clearTimeout(mk.t);mk.t=setTimeout(mk,60)});
-    [].forEach.call(sec.querySelectorAll('.reel-ctrl button'),function(b){b.addEventListener('click',function(){go(ix+(+b.getAttribute('data-d')))})});
-    ['mouseenter','touchstart','focusin'].forEach(function(e){tr.addEventListener(e,function(){pz=true})});
-    ['mouseleave','focusout'].forEach(function(e){tr.addEventListener(e,function(){pz=false})});
-    setInterval(function(){if(!pz&&document.visibilityState==='visible')go(ix+1)},4500);mk();
+    if(sec._r)return;var row=sec.querySelector('.reel-row');if(!row)return;sec._r=1;
+    /* 속도: 다른 롤링과 같은 px/초 (PC 46.6, 모바일 32) */
+    function speed(){
+      var half=row.scrollWidth/2;if(!half)return;
+      var v=window.matchMedia('(max-width:640px)').matches?32:46.6;
+      row.style.animationDuration=(half/v)+'s';
+    }
+    function slide(w,hid){
+      var cat=({photo:'PHOTO',video:'VIDEO',branding:'BRANDING'})[w.category]||'';
+      return '<a class="reel-slide" href="work?id='+esc(w.id)+'"><img src="'+esc(w.thumbnail_url)+'" alt="" loading="lazy"'+(hid?' aria-hidden="true"':'')+'><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
+    }
+    /* 관리자 페이지의 작업물·썸네일과 연동 */
+    if(window.sbGet)window.sbGet('works','select=id,title,category,thumbnail_url&published=eq.true&order=sort_order.asc').then(function(rows){
+      rows=(rows||[]).filter(function(w){return w.thumbnail_url});
+      if(rows.length){row.innerHTML=rows.map(function(w){return slide(w,0)}).join('')+rows.map(function(w){return slide(w,1)}).join('');row.style.animation='none';void row.offsetWidth;row.style.animation='';}
+    }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
+    var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(speed,150)});
+    speed();
   });
 }
 function init(){
