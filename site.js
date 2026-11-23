@@ -155,7 +155,6 @@ function workDetail(app){
     +'<div class="wk-titlerow"><h1 class="wk-h1">'+esc(w.title)+'</h1>'+(pdfUrl(w.pdf_url)?'<a class="wk-pdf" href="'+esc(pdfUrl(w.pdf_url))+'" target="_blank" rel="noopener" title="포트폴리오 PDF 다운로드" aria-label="포트폴리오 PDF 다운로드"><svg width="36" height="44" viewBox="0 0 36 44" aria-hidden="true"><path d="M4 0h19l13 13v27a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#E5322D"/><path d="M23 0l13 13H27a4 4 0 0 1-4-4z" fill="#F5A3A0"/><text x="18" y="35" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="11" fill="#fff">PDF</text></svg></a>':'')+'</div>'
     +metaLine(w)
     +(w.description?'<p class="wk-desc">'+esc(w.description)+'</p>':'')
-    +((w.tags||[]).length?'<div class="wk-tags">'+w.tags.map(pill).join('')+'</div>':'')
     +'<div class="wk-wrap"><div class="wk-media">'+media+'</div></div></section>';
     wireMedia(app);fitTitle(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
