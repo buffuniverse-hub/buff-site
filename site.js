@@ -69,10 +69,49 @@ function bindLists(){
 function pill(t){return '<span style="padding: 8px 14px; border-radius: 999px; background: #F5F5F7; font-size: 15px; font-weight: 500; color: #1D1D1F">#'+esc(t)+'</span>'}
 
 var WK_CSS='.wk-sec{background:#FFFFFF;padding:32px 0 96px}.wk-wrap{max-width:1200px;margin:0 auto;padding:0 40px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start}.wk-side{flex:0 0 340px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:24px;word-break:keep-all}.wk-mwrap{flex:1 1 480px;min-width:0;position:relative}.wk-media{min-width:0;display:flex;flex-direction:column;gap:24px}.wk-media>*{flex:none}.wk-more{display:none}.wk-titlerow{max-width:1200px;margin:0 auto;padding:0 40px 28px;box-sizing:border-box;display:flex;align-items:center;gap:16px}.wk-pdf{flex:0 0 auto;display:block;line-height:0;transition:transform .15s}.wk-pdf:hover{transform:translateY(-2px)}.wk-h1{flex:1 1 auto;min-width:0;margin:0;font-size:40px;font-weight:700;line-height:1.3;letter-spacing:-0.02em;color:#1D1D1F;white-space:nowrap;overflow:hidden}@media(max-width:640px){.wk-titlerow{padding:0 20px 20px}.wk-h1{font-size:26px}.wk-pdf svg{width:26px;height:32px}}'
+ +'.wk-lb{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center}.wk-lb img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:8px}.wk-lb button{position:absolute;border:0;background:rgba(255,255,255,.14);color:#fff;width:48px;height:48px;border-radius:50%;font-size:30px;line-height:1;cursor:pointer}.wk-lb button:hover{background:rgba(255,255,255,.28)}.wk-lb .x{top:20px;right:20px}.wk-lb .p{left:20px;top:50%;margin-top:-24px}.wk-lb .nx{right:20px;top:50%;margin-top:-24px}.wk-lb .n{position:absolute;bottom:20px;left:0;right:0;text-align:center;color:#D2D2D7;font-size:14px}'
  +'@media (min-width:900px){.wk-sec{padding:24px 0 80px}.wk-wrap{flex-wrap:nowrap}.wk-side{position:sticky;top:76px;max-height:calc(100vh - 96px);overflow-y:auto;scrollbar-width:none}.wk-side::-webkit-scrollbar{display:none}}';
 
 var PLAY='<span style="position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1D1D1F" d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"></path></svg></span>';
 
+
+var CATKO={branding:'브랜딩•디자인',photo:'사진',video:'영상'};
+function infoBlock(w){
+  var cs=(w.categories&&w.categories.length?w.categories:[w.category]).filter(function(c){return CATKO[c]});
+  var rows=[];
+  if(cs.length)rows.push(['분류',cs.map(function(c){return '<a href="Works?cat='+c+'" style="color: #1D1D1F; text-decoration: none; border-bottom: 1px solid #D2D2D7">'+CATKO[c]+'</a>'}).join(' · ')]);
+  if(w.client)rows.push(['클라이언트',esc(w.client)]);
+  if(w.work_year)rows.push(['연도',esc(w.work_year)]);
+  if(w.scope)rows.push(['진행 범위',esc(w.scope).replace(/\n/g,'<br>')]);
+  if(!rows.length)return '';
+  return '<dl class="wk-info" style="margin: 0; display: grid; grid-template-columns: 96px 1fr; gap: 14px 12px; font-size: 16px; line-height: 1.6">'+rows.map(function(r){return '<dt style="color: #6E6E73; margin: 0">'+r[0]+'</dt><dd style="margin: 0; color: #1D1D1F; font-weight: 500">'+r[1]+'</dd>'}).join('')+'</dl>';
+}
+/* 영상: 페이지 안에서 바로 재생 / 사진: 크게 보기 */
+function wireMedia(app){
+  [].forEach.call(app.querySelectorAll('.wk-play'),function(a){
+    a.addEventListener('click',function(ev){
+      var id=a.getAttribute('data-yt');if(!id)return;ev.preventDefault();
+      var f=document.createElement('iframe');f.src='https://www.youtube.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;f.title=a.getAttribute('aria-label')||'영상';
+      f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0';a.replaceWith(Object.assign(document.createElement('div'),{className:'wk-frame',style:'position: relative; width: 100%; aspect-ratio: 16 / 9; flex: none; border-radius: 18px; overflow: hidden; background: #000'}));
+      var host=app.querySelector('.wk-frame:not([data-d])');host.setAttribute('data-d','1');host.appendChild(f);
+    });
+  });
+  var ph=[].slice.call(app.querySelectorAll('img.wk-ph'));if(!ph.length)return;
+  var lb=null,ix=0;
+  function show(n){ix=(n+ph.length)%ph.length;lb.querySelector('img').src=ph[ix].src;lb.querySelector('.n').textContent=(ix+1)+' / '+ph.length}
+  function close(){if(!lb)return;document.removeEventListener('keydown',key);lb.remove();lb=null;document.body.style.overflow=''}
+  function key(e){if(e.key==='Escape')close();else if(e.key==='ArrowRight')show(ix+1);else if(e.key==='ArrowLeft')show(ix-1)}
+  function open(n){
+    lb=document.createElement('div');lb.className='wk-lb';
+    lb.innerHTML='<img alt=""><button type="button" class="x" aria-label="닫기">×</button>'+(ph.length>1?'<button type="button" class="p" aria-label="이전">‹</button><button type="button" class="nx" aria-label="다음">›</button><span class="n"></span>':'<span class="n"></span>');
+    document.body.appendChild(lb);document.body.style.overflow='hidden';show(n);document.addEventListener('keydown',key);
+    lb.addEventListener('click',function(e){var t=e.target;if(t.classList.contains('p'))show(ix-1);else if(t.classList.contains('nx'))show(ix+1);else if(t.tagName!=='IMG')close()});
+    var x0=null;lb.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+    lb.addEventListener('touchend',function(e){if(x0==null)return;var d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>50)show(ix+(d<0?1:-1));x0=null});
+  }
+  ph.forEach(function(p,n){p.addEventListener('click',function(){open(n)})});
+}
 function wireMore(app){
   var m=app.querySelector('.wk-media'),b=app.querySelector('.wk-more');if(!m||!b)return;
   function upd(){var more=m.scrollHeight-m.clientHeight>8&&m.scrollTop+m.clientHeight<m.scrollHeight-8;b.classList.toggle('off',!more)}
@@ -106,16 +145,17 @@ function workDetail(app){
     var media='';
     (Array.isArray(w.videos)?w.videos:[]).forEach(function(v){var i=ytId(v.url);if(!v.url)return;
       var poster=v.poster||(i?'https://i.ytimg.com/vi/'+i+'/maxresdefault.jpg':'');
-      media+='<a href="'+esc(v.url)+'" target="_blank" rel="noopener" aria-label="'+esc((w.title+' '+(v.label||''))+' 영상 재생')+'" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; flex: none; border-radius: 18px; overflow: hidden; background: #000000; text-decoration: none">'+(poster?'<img src="'+esc(poster)+'" alt="'+esc(w.title+' '+(v.label||''))+'" draggable="false" style="display: block; width: 100%; height: 100%; object-fit: contain; background: #000">':'')+PLAY+'</a>'});
-    (w.images||[]).forEach(function(u){media+='<img src="'+esc(u)+'" alt="'+esc(w.title)+'" style="display: block; width: 100%; border-radius: 18px; '+(w.category==='photo'?'aspect-ratio: 3 / 2; object-fit: cover;':'height: auto;')+' background: #F5F5F7">'});
+      media+='<figure class="wk-vid" style="margin: 0; display: flex; flex-direction: column; gap: 12px"><a class="wk-play" data-yt="'+esc(i)+'" href="'+esc(v.url)+'" target="_blank" rel="noopener" aria-label="'+esc((w.title+' '+(v.label||''))+' 영상 재생')+'" style="position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; flex: none; border-radius: 18px; overflow: hidden; background: #000000; text-decoration: none">'+(poster?'<img src="'+esc(poster)+'" alt="'+esc(w.title+' '+(v.label||''))+'" draggable="false" style="display: block; width: 100%; height: 100%; object-fit: contain; background: #000">':'')+PLAY+'</a>'+(v.label?'<figcaption style="font-size: 17px; font-weight: 600; color: #1D1D1F">'+esc(v.label)+'</figcaption>':'')+'</figure>'});
+    (w.images||[]).forEach(function(u){media+='<img class="wk-ph" src="'+esc(u)+'" alt="'+esc(w.title)+'" style="cursor: zoom-in; display: block; width: 100%; border-radius: 18px; '+(w.category==='photo'?'aspect-ratio: 3 / 2; object-fit: cover;':'height: auto;')+' background: #F5F5F7">'});
     app.innerHTML='<section style="background: #FFFFFF; padding: 40px 0 0"><div style="max-width: 1200px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box"><a href="'+c[1]+'" style="font-size: 17px; font-weight: 500; color: #6E6E73; text-decoration: none">‹ Works</a></div></section>'
     +'<section class="wk-sec"><div class="wk-titlerow"><h1 class="wk-h1">'+esc(w.title)+'</h1>'+(pdfUrl(w.pdf_url)?'<a class="wk-pdf" href="'+esc(pdfUrl(w.pdf_url))+'" target="_blank" rel="noopener" title="포트폴리오 PDF 다운로드" aria-label="포트폴리오 PDF 다운로드"><svg width="36" height="44" viewBox="0 0 36 44" aria-hidden="true"><path d="M4 0h19l13 13v27a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#E5322D"/><path d="M23 0l13 13H27a4 4 0 0 1-4-4z" fill="#F5A3A0"/><text x="18" y="35" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="11" fill="#fff">PDF</text></svg></a>':'')+'</div><div class="wk-wrap">'
     +'<aside class="wk-side">'
+    +infoBlock(w)
     +((w.tags||[]).length?'<div style="display: flex; flex-wrap: wrap; gap: 8px">'+w.tags.map(pill).join('')+'</div>':'')
     +(w.description?'<div style="border-top: 1px solid #D2D2D7; padding-top: 24px"><div style="font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #1D1D1F">프로젝트 설명</div><div style="font-size: 16px; line-height: 1.75; color: #424245; white-space: pre-line">'+esc(w.description)+'</div></div>':'')
     +(mem?'<div style="border-top: 1px solid #D2D2D7; padding-top: 24px; display: flex; flex-direction: column; gap: 16px"><div style="font-size: 17px; font-weight: 700; color: #1D1D1F">참여 멤버</div>'+mem+'</div>':'')
     +'</aside><div class="wk-mwrap"><div class="wk-media">'+media+'</div><button type="button" class="wk-more off" aria-label="아래로 더 보기"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div></section>';
-    wireMore(app);fitTitle(app);
+    wireMore(app);wireMedia(app);fitTitle(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
 function newsDetail(app){
