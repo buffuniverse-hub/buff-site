@@ -177,7 +177,7 @@ function workDetail(app){
     +'<section class="wk-sec">'
     +'<div class="wk-titlerow"><h1 class="wk-h1">'+esc(w.title)+'</h1>'+''+'</div>'
     +metaLine(w)
-    +(w.description?'<div class="wk-desc">'+(/\n/.test(w.description)?w.description:w.description.replace(/([.!?。]|다\.)\s+/g,function(m,a){return a+'\n'})).trim().split(/\n+/).map(function(l){return '<p>'+esc(l.trim())+'</p>'}).join('')+'</div>':'')
+    +(w.description?'<div class="wk-desc">'+(/\n/.test(w.description)?w.description:w.description.replace(/([.!?。]|다\.)\s+/g,function(m,a){return a+'\n'})).trim().split(/\n\s*\n/).map(function(b){return '<p>'+b.split(/\n/).map(function(l){return esc(l.trim())}).join('<br>')+'</p>'}).join('')+'</div>':'')
     +'<div class="wk-wrap"><div class="wk-media">'+media+'</div></div>'+(mem?'<div class="wk-credit"><em>참여 인물</em><div class="wk-people">'+mem+'</div></div>':'')+'</section>';
     wireMedia(app);fitTitle(app);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
