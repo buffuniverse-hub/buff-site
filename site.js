@@ -159,6 +159,19 @@ function fitAll(){
 }
 var _ft;window.addEventListener('resize',function(){clearTimeout(_ft);_ft=setTimeout(fitAll,150)});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitAll()});
+function reel(){
+  [].forEach.call(document.querySelectorAll('#reel'),function(sec){
+    if(sec._r)return;var tr=sec.querySelector('.reel-track');if(!tr)return;sec._r=1;
+    var sl=[].slice.call(tr.children),ds=[].slice.call(sec.querySelectorAll('.reel-dots i')),ix=0,pz=false;
+    function go(i){ix=(i+sl.length)%sl.length;var s=sl[ix];tr.scrollTo({left:s.offsetLeft-(tr.clientWidth-s.clientWidth)/2,behavior:'smooth'})}
+    function mk(){var c=tr.scrollLeft+tr.clientWidth/2,b=0,d=1e9;sl.forEach(function(s,i){var m=Math.abs(s.offsetLeft+s.clientWidth/2-c);if(m<d){d=m;b=i}});ix=b;ds.forEach(function(x,i){x.classList.toggle('on',i===b)})}
+    tr.addEventListener('scroll',function(){clearTimeout(mk.t);mk.t=setTimeout(mk,60)});
+    [].forEach.call(sec.querySelectorAll('.reel-ctrl button'),function(b){b.addEventListener('click',function(){go(ix+(+b.getAttribute('data-d')))})});
+    ['mouseenter','touchstart','focusin'].forEach(function(e){tr.addEventListener(e,function(){pz=true})});
+    ['mouseleave','focusout'].forEach(function(e){tr.addEventListener(e,function(){pz=false})});
+    setInterval(function(){if(!pz&&document.visibilityState==='visible')go(ix+1)},4500);mk();
+  });
+}
 function init(){
   var app=$('#app');
   if(app){var k=app.getAttribute('data-page');if(k==='work')workDetail(app);else if(k==='news')newsDetail(app)}
@@ -190,7 +203,7 @@ function init(){
     }
     requestAnimationFrame(tick);
   }
-  function run(){obs.disconnect();vids();mqs();setTimeout(mqs,500);setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){fitAll();obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
+  function run(){obs.disconnect();vids();reel();mqs();setTimeout(mqs,500);setTimeout(vids,600);var p=bindLists();Promise.all(p||[]).then(function(){},function(){}).then(function(){fitAll();obs.takeRecords();obs.observe(r,{childList:true,subtree:true})})}
   if(r.firstElementChild)run();else{var n=0,t=setInterval(function(){if(r.firstElementChild||++n>80){clearInterval(t);run()}},100)}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
