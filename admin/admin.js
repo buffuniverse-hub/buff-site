@@ -59,7 +59,7 @@ var CAT=[['branding','브랜딩•디자인'],['photo','사진'],['video','영�
 var T={
  news:{label:'News',title:'뉴스',order:'sort_order.asc,published_at.desc',hint:'카드를 드래그해서 순서를 바꿉니다. 제목은 두 줄로 입력하세요. (1줄: 대회명 / 2줄: 진행 내용)',
   list:function(r){return{img:r.thumbnail_url,title:r.title_line1+(r.title_line2?' · '+r.title_line2:''),sub:r.category+' · '+(r.published_at||'')}},
-  fields:[['category','분류','text',{ph:'Photo · Video · Branding · Notice 등',list:['Photo','Video','Branding','Notice']}],['title_line1','제목 1줄 (대회명)','text'],['title_line2','제목 2줄 (진행 내용)','text'],['summary','목록 요약문','textarea',{rows:2}],['body','본문','textarea',{rows:9,help:'빈 줄을 넣으면 문단이 나뉩니다. ## 로 시작하는 줄은 소제목입니다. 유튜브·인스타그램(게시물/릴스) 주소만 한 줄로 적으면 영상·게시물이 바로 보입니다. 그 외 주소만 적으면 바로가기 버튼이 됩니다. 출처는 “출처: 태그1 | 태그2” 줄과 주소 줄을 이어서 적으세요.'}],['thumbnail_url','대표 이미지','image'],['embeds','인스타그램·유튜브 링크','lines',{rows:3,help:'칸 하나에 링크 하나씩 넣고, 더 넣으려면 “+ 링크 추가”를 누르세요. 인스타그램 게시물·릴스, 유튜브 영상 주소를 넣으면 뉴스 본문 아래에 바로 재생·표시됩니다.'}],['published_at','게시일','date'],['related_work_ids','연관 프로젝트 (선택)','workrefs',{help:'뉴스 아래에 카드로 보여줄 프로젝트를 고르세요. 여러 개 추가할 수 있습니다.'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
+  fields:[['category','분류','text',{ph:'Photo · Video · Branding · Notice 등',list:['Photo','Video','Branding','Notice']}],['title_line1','제목 1줄 (대회명)','text'],['title_line2','제목 2줄 (진행 내용)','text'],['summary','목록 요약문','textarea',{rows:2}],['body','본문','textarea',{rows:9,help:'빈 줄을 넣으면 문단이 나뉩니다. ## 로 시작하는 줄은 소제목입니다. 유튜브·인스타그램(게시물/릴스) 주소만 한 줄로 적으면 영상·게시물이 바로 보입니다. 그 외 주소만 적으면 바로가기 버튼이 됩니다. 출처는 “출처: 태그1 | 태그2” 줄과 주소 줄을 이어서 적으세요.'}],['thumbnail_url','대표 이미지','image'],['members','참여 인물','members'],['embeds','인스타그램·유튜브 링크','lines',{rows:3,help:'칸 하나에 링크 하나씩 넣고, 더 넣으려면 “+ 링크 추가”를 누르세요. 인스타그램 게시물·릴스, 유튜브 영상 주소를 넣으면 뉴스 본문 아래에 바로 재생·표시됩니다.'}],['published_at','게시일','date'],['related_work_ids','연관 프로젝트 (선택)','workrefs',{help:'뉴스 아래에 카드로 보여줄 프로젝트를 고르세요. 여러 개 추가할 수 있습니다.'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{category:'Photo',published:true,sort_order:0,published_at:new Date().toISOString().slice(0,10)}}},
  works:{label:'Works',title:'작업물',order:'sort_order.asc,created_at.asc',hint:'카드를 드래그해서 Works 페이지 순서를 바꿉니다. 영상 링크를 넣으면 사이트에 재생 버튼이 생깁니다.',
   list:function(r){return{img:r.thumbnail_url,title:r.title,sub:((r.categories&&r.categories.length?r.categories:[r.category]).join(' · '))}},
@@ -139,7 +139,7 @@ function move(k,rows,i,dir){
 /* ---------- 입력 폼 ---------- */
 function openForm(k,data){
   var d=T[k],isNew=!data.id,F=data;
-  Promise.all([k==='news'?rest('GET','works','select=id,title,category&order=title.asc'):null,k==='works'?rest('GET','team_members','select=name&order=sort_order.asc'):null]).then(function(ex){
+  Promise.all([k==='news'?rest('GET','works','select=id,title,category&order=title.asc'):null,(k==='works'||k==='news')?rest('GET','team_members','select=name&order=sort_order.asc'):null]).then(function(ex){
     var works=ex[0]||[],team=ex[1]||[];
     var h='<div class="ov"><div class="panel"><h3>'+esc(d.title)+(isNew?' 추가':' 수정')+'</h3><div id="fe"></div><div class="err" id="ferr"></div><div class="foot"><button class="btn line" id="cancel">취소</button><button class="btn" id="save">저장</button></div></div></div>';
     $('#modal').innerHTML=h;
