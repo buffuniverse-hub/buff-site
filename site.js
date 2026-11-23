@@ -3,6 +3,7 @@ var __M={};function getData(t,q){var k=t+'?'+q;return __M[k]||(__M[k]=window.sbG
 var $=function(s,r){return(r||document).querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var br=function(s){return esc(s).replace(/\n/g,'<br>')};
+function tagOf(w){var c=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category],n={branding:'Branding',photo:'Photo',video:'Video'};return ['branding','photo','video'].filter(function(k){return c.indexOf(k)>-1}).map(function(k){return n[k]}).join(' · ')||(CAT[w.category]||[''])[0]}
 var CAT={photo:['Photo','Works?cat=photo'],video:['Video','Works?cat=video'],branding:['Branding','Works?cat=branding']};
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
 
@@ -10,7 +11,7 @@ function workCard(w){
   return '<a href="work?id='+esc(w.id)+'" data-cat="'+esc((w.categories&&w.categories.length?w.categories:[w.category]).join(' '))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
   +'<img draggable="false" src="'+esc(w.thumbnail_url)+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px">'
   +'<span style="pointer-events: none; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
-  +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(w.tag||CAT[w.category][0])+'</span></a>';
+  +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(tagOf(w))+'</span></a>';
 }
 function newsRow(n){
   var yr=n.published_at?String(n.published_at).slice(0,4):'';
@@ -233,7 +234,7 @@ function reel(){
       row.style.animationDuration=(half/v)+'s';
     }
     function slide(w,hid){
-      var cat=(w.tag||({photo:'PHOTO',video:'VIDEO',branding:'BRANDING'})[w.category]||'').toUpperCase();
+      var cat=tagOf(w).toUpperCase();
       return '<a class="reel-slide" href="work?id='+esc(w.id)+'"><img src="'+esc(w.thumbnail_url)+'" alt="" loading="lazy"'+(hid?' aria-hidden="true"':'')+'><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
     }
     /* 관리자 페이지의 작업물·썸네일과 연동 */
