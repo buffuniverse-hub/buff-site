@@ -191,7 +191,7 @@ function newsDetail(app){
     
     app.innerHTML='<section style="background: #FFFFFF; padding: 96px 0 0"><div style="max-width: 1040px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center"><span style="font-size: 19px; font-weight: 600; color: #6E6E73">'+esc(n.category)+(yr?' · '+yr:'')+'</span><h1 style="margin: 0; font-size: 40px; font-weight: 700; line-height: 1.3; letter-spacing: -0.02em; color: #1D1D1F; word-break: keep-all">'+esc(n.title_line1)+(n.title_line2?'<br>'+esc(n.title_line2):'')+'</h1></div></section>'
     +'<section style="background: #FFFFFF; padding: 56px 0 120px"><div style="max-width: 900px; margin: 0 auto; padding-left: 40px; padding-right: 40px; box-sizing: border-box">'
-    +(n.thumbnail_url?'<img src="'+esc(n.thumbnail_url)+'" alt="'+esc(n.title_line1)+'" style="display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 18px; background: #F5F5F7; margin-bottom: 48px">':'')
+    
     +paras+'<div id="news-rel"></div><div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid #D2D2D7; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px"><a href="News" style="font-size: 19px; font-weight: 600; color: #1D1D1F; text-decoration: none">‹ 목록으로</a>'
     +'</div></div></section>';
     if(!document.getElementById('ig-css')){var igs=document.createElement('style');igs.id='ig-css';igs.textContent='@media(max-width:900px){.ig-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:520px){.ig-grid{grid-template-columns:1fr!important}}';document.head.appendChild(igs)}
