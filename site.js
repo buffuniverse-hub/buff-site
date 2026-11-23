@@ -62,7 +62,7 @@ function bindLists(){
   if($('[data-sb="home-lead"]'))jobs.push(getData('site_settings','select=*').then(function(rows){
     var s={};rows.forEach(function(x){s[x.key]=x.value});
     function t(k,sel,html){var e=$(sel);if(e&&s[k])e.innerHTML=html?br(s[k]):esc(s[k])}
-    t('home_lead','[data-sb="home-lead"]');t('home_tail','[data-sb="home-tail"]');t('home_text','[data-sb="home-text"]',1);t('home_btn1','[data-sb="home-btn1"]');t('home_btn2','[data-sb="home-btn2"]');t('home_works_title','[data-sb="home-works-title"]');
+    t('home_lead','[data-sb="home-lead"]');t('home_tail','[data-sb="home-tail"]');t('home_text','[data-sb="home-text"]',1);(function(e){if(e&&!e.querySelector('br.mb'))e.innerHTML=e.innerHTML.replace(/(전하고,)\s*/,'$1<br class="mb"> ')})($('[data-sb="home-text"]'));t('home_btn1','[data-sb="home-btn1"]');t('home_btn2','[data-sb="home-btn2"]');t('home_works_title','[data-sb="home-works-title"]');
   }));
   var nl=$('[data-sb="news-list"]');
   if(nl)jobs.push(getData('news','select=*&published=eq.true&order=sort_order.asc,published_at.desc').then(function(r){renderNews(nl,r)}));
