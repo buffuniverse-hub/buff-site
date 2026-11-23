@@ -171,7 +171,9 @@ function newsDetail(app){
     document.title='BUFF UNIVERSE — '+n.title_line1;
     var yr=n.published_at?String(n.published_at).slice(0,4):'';
     var LOGO='<img src="assets/a87a0a50cb72c77fedb5b0091e922cf3.png" alt="BUFF" style="display:inline-block;height:0.78em;width:auto;vertical-align:baseline;transform:translateY(0.02em)">';
-    var paras=String(n.body||'').split(/\n{2,}/).filter(Boolean).map(function(p){
+    var bparts=String(n.body||'').split(/\n{2,}/).filter(Boolean),emb=(Array.isArray(n.embeds)?n.embeds:[]).map(function(u){return String(u||'').trim()}).filter(function(u){return /^https?:\/\/\S+$/.test(u)}),si=bparts.findIndex(function(p){return /^출처\s*:/.test(p.trim())});
+    if(emb.length){if(si<0)si=bparts.length;bparts=bparts.slice(0,si).concat(emb,bparts.slice(si))}
+    var paras=bparts.map(function(p){
       var lines=p.split('\n'),src=lines.filter(function(l){return /^https?:\/\/\S+$/.test(l.trim())||/^출처\s*:/.test(l.trim())}).length===lines.length;
       var u1=p.trim(),ym=u1.match(/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:[^\s#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})[^\s]*$/),im=u1.match(/^https?:\/\/(?:www\.)?instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([\w-]+)[^\s]*$/);
       if(ym){var sh=/shorts\//.test(u1);return '<div style="margin: 8px auto 32px; width: 100%; '+(sh?'max-width: 360px; aspect-ratio: 9 / 16':'aspect-ratio: 16 / 9')+'; border-radius: 18px; overflow: hidden; background: #000"><iframe src="https://www.youtube-nocookie.com/embed/'+ym[1]+'?rel=0" title="YouTube" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="display: block; width: 100%; height: 100%; border: 0"></iframe></div>'}
