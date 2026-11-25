@@ -153,5 +153,6 @@ function draw(keep){
   bind();paint();window.addEventListener('resize',scale);if(S.id)stamp('저장된 문서 · '+(S.status==='issued'?'발행':'작성 중'));
   return Promise.resolve();
 }
+window.openInvoiceTab=function(){showList();return Promise.resolve()};
 window.drawInvoice=function(keep){if(keep||DB)return draw(keep);return window.buffRest('GET','invoice_settings','select=value&key=eq.defaults').then(function(rows){DB=(rows&&rows[0]&&rows[0].value)||{};return draw(keep)})};
 })();

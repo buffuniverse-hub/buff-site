@@ -95,7 +95,7 @@ function drawTabs(){
   $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Career 문구':k==='home'?'메인':k==='invoice'?'인보이스•견적서':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
   [].forEach.call($('#tabs').children,function(b){b.onclick=function(){go(b.getAttribute('data-k'))}});
 }
-function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():k==='invoice'?window.drawInvoice():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
+function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():k==='invoice'?window.openInvoiceTab():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
 
 function drawList(k){
   var d=T[k];
