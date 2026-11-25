@@ -4,7 +4,7 @@ var LS='buff_invoice_defaults_v2',LOGO='../assets/de541288e60385660bcdb547a13a3d
 var P={title:['SERVICE INVOICE',''],from:['공급자','FROM'],bill:['공급받는 자','BILL TO'],det:['인보이스 정보','INVOICE DETAILS'],
  fl:[['상호','Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
  bl:[['고객명/업체명','Client Name / Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
- dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms']],
+ dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms'],['담당자','Contact']],
  th:[['No',''],['서비스/용역 내역','Description of Service'],['기간/수량','Period / Qty'],['단가','Unit Price'],['금액','Amount']],
  tot:[['공급가액','Subtotal'],['세액','Tax / VAT'],['총 청구금액','Total Due']],
  pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호/SWIFT','Account No. / SWIFT']],note:['비고','NOTES']};
@@ -61,7 +61,7 @@ function page(){
     else rows+='<tr><td></td><td></td><td></td><td></td></tr>'}
   var W=['40%','20%','21%','19%'];
   var th=t.th.slice(1).map(function(h,i){if(i===2&&vmNote())h=[h[0]+' ('+vmNote()+')',''];return '<th style="width:'+W[i]+';text-align:'+(i===0?'left':i===1?'center':'right')+'">'+E(h[0])+(h[1]?'<small>'+E(h[1])+'</small>':'')+'</th>'}).join('');
-  var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms];
+  var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms,S.fNm];
   var bill=[S.cCo,S.cNm?'담당자 / Attn: '+S.cNm:'',S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
   var tot=function(i,v,c){return '<tr'+(c?' class="T"':'')+'><td>'+E(t.tot[i][0])+(t.tot[i][1]?'<small>'+E(t.tot[i][1])+'</small>':'')+(i===1?' '+vatLabel():'')+'</td><td>'+v+'</td></tr>'};
   return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+'</div>'
@@ -71,7 +71,7 @@ function page(){
   +'<table class="ivtot"><tbody>'+tot(0,money(tt.sub))+tot(1,money(tt.vat))+tot(2,money(tt.tot),1)+'</tbody></table>'
   +'<div class="ivn"><p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>'
   +(S.notes?'<p>'+E(S.notes)+'</p>':'')+'<p class="ty">'+'감사합니다. Thank you for your business!'+'</p></div></div>'
-  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+(S.fNm?'담당자 / Contact: '+E(S.fNm)+'<br>':'')+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
+  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
 }
 function scale(){var b=document.getElementById('ivbox'),s=document.getElementById('ivsc');if(!b||!s)return;var k=Math.min(1,(b.clientWidth-32)/794);s.style.transform='scale('+k+')';s.style.width='794px';s.parentNode.style.height=(s.scrollHeight*k+32)+'px'}
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
