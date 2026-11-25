@@ -182,6 +182,7 @@ function setMeta(t,d,img){
 }
 function pdfUrl(u){u=String(u||'').trim();if(!u)return '';var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)||u.match(/[?&]id=([^&#]+)/);if(/drive\.google\.com|docs\.google\.com/.test(u)&&m)return 'https://drive.google.com/uc?export=download&id='+m[1];return u}
 function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f(){h.style.fontSize='';var fs=parseFloat(getComputedStyle(h).fontSize);while(h.scrollWidth>h.clientWidth&&fs>14){fs-=1;h.style.fontSize=fs+'px'}}f();window.addEventListener('resize',f);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)}
+function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
@@ -192,6 +193,7 @@ function workDetail(app){
     document.title='BUFF UNIVERSE — '+w.title;
     setMeta(w.title,w.description||'',w.thumbnail_url||(w.images||[])[0]||'');
     var c=CAT[w.category]||CAT.photo;
+    if(String(w.template)==='2'){loadW2(function(ok){if(ok)window.renderWork2(app,w,c[1]);else app.innerHTML='<p style="padding:120px 40px;text-align:center">'+(window.BUFF_EN?'Could not load the page. Please try again later.':'불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')+'</p>'});return}
     var mem=(w.members||[]).map(function(n){var t=team.filter(function(x){return x.name===n||x.ko_name===n})[0]||{};
       return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(t.name||n)+'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 14px; font-weight: 700; color: #1D1D1F">'+esc(t.name||n)+'</span></div>'}).join('');
     var media='';
