@@ -328,6 +328,18 @@ function reel(){
     }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
     var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(speed,150)});
     speed();
+    /* 모바일: iOS·안드로이드 모두 같은 속도가 되도록 CSS 대신 시간 기준(px/초)으로 직접 굴립니다. 다른 롤링(.mq)과 같은 32px/초 */
+    var mm=window.matchMedia('(max-width:640px)'),last=performance.now();
+    function mtick(t){
+      var dt=Math.min(t-last,64);last=t;
+      if(mm.matches){
+        row._js=1;if(row.style.animationName!=='none')row.style.animation='none';
+        var gap=parseFloat(getComputedStyle(row).columnGap||getComputedStyle(row).gap)||0,half=(row.scrollWidth+gap)/2;
+        if(half>gap){row._x=((row._x||0)+0.032*dt)%half;row.style.transform='translate3d('+(-row._x).toFixed(2)+'px,0,0)';}
+      }else if(row._js){row._js=0;row._x=0;row.style.animation='';row.style.transform='';}
+      requestAnimationFrame(mtick);
+    }
+    requestAnimationFrame(mtick);
   });
 }
 function init(){
