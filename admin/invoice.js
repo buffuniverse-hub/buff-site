@@ -102,7 +102,7 @@ function scale(){var b=document.getElementById('ivbox'),s=document.getElementByI
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
 
 function inp(id,lab,val,type,ph){return '<label>'+lab+'</label><input type="'+(type||'text')+'" data-k="'+id+'" value="'+E(val)+'"'+(ph?' placeholder="'+E(ph)+'"':'')+'>'}
-var UNITS=['건 / case','경기 / match','행사 / event','장 / photos','편 / video','시간 / hrs','일 / days','개월 / mo','명 / person','개 / pcs'];
+var UNITS=['건 / case','경기 / match','대회 / event','장 / photos','편 / video','시간 / hrs','일 / days','개월 / mo','명 / person','개 / pcs'];
 function unitCtl(it,i){if(it.custom)return '<input type="text" data-i="'+i+'" data-f="unit" value="'+E(it.unit)+'" placeholder="직접 입력">';return '<select data-i="'+i+'" data-f="unit"><option value="">선택 안 함</option>'+UNITS.map(function(u){return '<option'+(it.unit===u?' selected':'')+'>'+u+'</option>'}).join('')+'<option value="__custom">직접 입력…</option></select>'}
 function itemsForm(){return S.items.map(function(it,i){return '<div class="ivit"><div class="h"><span>항목 '+(i+1)+'</span><button class="btn danger sm" data-del="'+i+'" type="button">삭제</button></div>'
  +'<label>서비스/용역 내역</label><input type="text" data-i="'+i+'" data-f="desc" value="'+E(it.desc)+'">'
