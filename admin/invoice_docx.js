@@ -23,13 +23,13 @@ window.buffInvoiceDocx=function(g){
     var right=[];T.dl.forEach(function(h,i){right.push(p([r(h[0],{size:19,bold:true})].concat(sub(h)),{align:D.AlignmentType.RIGHT,after:20}));right.push(p(r(dv[i]||' ',{size:19}),{align:D.AlignmentType.RIGHT,after:150}))});
     var head=tbl([5400,W-5400],[new D.TableRow({children:[cell(left,5400,{va:D.VerticalAlign.TOP,ml:0,mt:0}),cell(right,W-5400,{va:D.VerticalAlign.TOP,mr:0,mt:0})]})]);
     // items
-    var cols=[4650,1650,1900,W-4650-1650-1900];
+    var cols=[4150,1900,2050,W-4150-1900-2050];
     var al=[D.AlignmentType.LEFT,D.AlignmentType.CENTER,D.AlignmentType.RIGHT,D.AlignmentType.RIGHT];
     var th=T.th.slice(1).map(function(h,i){if(i===2&&g.vmNote())h=[h[0]+' ('+g.vmNote()+')',''];return cell(p([r(h[0],{size:18,bold:true,color:'FFFFFF'})].concat(h[1]?[r('  '+h[1],{size:13,color:'B0B0B8'})]:[]),{align:al[i]}),cols[i],{fill:BLACK,borders:{top:{style:D.BorderStyle.SINGLE,size:4,color:BLACK},bottom:{style:D.BorderStyle.SINGLE,size:4,color:BLACK},left:{style:D.BorderStyle.SINGLE,size:4,color:BLACK},right:{style:D.BorderStyle.SINGLE,size:4,color:BLACK}},mt:110,mb:110})});
     var rows=[new D.TableRow({tableHeader:true,children:th})];
     var n=Math.max(5,S.items.length);
     for(var i=0;i<n;i++){var it=S.items[i],has=it&&(it.desc||it.price||it.qty),amt=has?(+it.qty||0)*(+it.price||0):0;
-      rows.push(new D.TableRow({cantSplit:true,height:{value:700,rule:D.HeightRule.ATLEAST},children:[
+      rows.push(new D.TableRow({cantSplit:true,height:{value:600,rule:D.HeightRule.ATLEAST},children:[
         cell([p(r(has?it.desc:'',{size:19,color:'3A3A3F'}))].concat(has&&it.sub?[p(r(it.sub,{size:14,color:PH}),{before:20})]:[]),cols[0],{borders:GB}),
         cell(p(r(has?(it.qty+(it.unit?' '+it.unit:'')):'',{size:19,color:'3A3A3F'}),{align:al[1]}),cols[1],{borders:GB}),
         cell(p(r(has?money(it.price):'',{size:19,color:'3A3A3F'}),{align:al[2]}),cols[2],{borders:GB}),
@@ -45,12 +45,12 @@ window.buffInvoiceDocx=function(g){
     var pay=[];var pls=[S.bank,S.holder,S.acct];
     pay.push(p([r(T.pay[0],{size:18,bold:true})].concat(sub(T.pay)),{after:30}));
     pls.forEach(function(v,i){if(v)pay.push(p(r(T.pl[i][0]+': '+v,{size:18,color:'4A4A4F'})))});
-    if(S.notes)pay.push(p(r(S.notes,{size:18,color:'4A4A4F'}),{before:140}));
-    pay.push(p(r(KO?'감사합니다. Thank you for your business!':'Thank you for your business!',{size:18,bold:true}),{before:140}));
+    if(S.notes)String(S.notes).split('\n').forEach(function(l,i){pay.push(p(r(l,{size:18,color:'4A4A4F'}),{before:i?0:140}))});
+    pay.push(p(r('감사합니다. Thank you for your business!',{size:18,bold:true}),{before:140}));
     // footer band
     var FB=11906;
     var fl=[new D.Paragraph({children:[new D.ImageRun({type:'png',data:a[2],transformation:{width:127,height:40},altText:{title:'BUFF',description:'BUFF logo',name:'logo'}})]})];
-    var fr=[p(r(S.fCo,{size:19,bold:true,color:'FFFFFF'}),{align:D.AlignmentType.RIGHT}),p(r(S.fAd,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(S.fEm,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(T.fl[3][0]+': '+S.fTx,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT})];
+    var fr=[p(r(S.fCo,{size:19,bold:true,color:'FFFFFF'}),{align:D.AlignmentType.RIGHT}),p(r(S.fAd,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(S.fEm,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(T.fl[3][0]+' / '+T.fl[3][1]+': '+S.fTx,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT})];
     var band=tbl([4200,FB-4200],[new D.TableRow({height:{value:2250,rule:D.HeightRule.EXACT},children:[cell(fl,4200,{fill:BLACK,ml:M+0,mt:0,mb:0}),cell(fr,FB-4200,{fill:BLACK,mr:M,mt:0,mb:0})]})],{indent:{size:-M,type:D.WidthType.DXA}});
     var foot=new D.Footer({children:[band]});
     var doc=new D.Document({
@@ -58,7 +58,7 @@ window.buffInvoiceDocx=function(g){
       creator:'BUFF UNIVERSE',title:'BUFF UNIVERSE Invoice '+(S.no||''),
       styles:{default:{document:{run:{font:'Paperozi',size:19,color:INK}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:840,bottom:2500,left:M,right:M,header:0,footer:0}}},footers:{default:foot},
-        children:[p(r(T.title,{size:68,bold:true}),{line:300}),gap(480),head,gap(420),items,gap(340),totals,gap(380),].concat(pay)}]});
+        children:[p(r(T.title[0],{size:68,bold:true}),{line:300}),p(r(T.title[1],{size:20,color:PH}),{before:80}),gap(360),head,gap(320),items,gap(280),totals,gap(300),].concat(pay)}]});
     return D.Packer.toBlob(doc);
   });
 };

@@ -1,25 +1,19 @@
 /* BUFF 인보이스 발급기 — 입력 → 실시간 미리보기 → PDF 저장(인쇄) */
 (function(){
-var LS='buff_invoice_defaults_v1',LOGO='../assets/de541288e60385660bcdb547a13a3d78.png';
-var TX={
- ko:{title:'SERVICE INVOICE',from:['공급자','FROM'],bill:['공급받는 자','BILL TO'],det:['인보이스 정보','INVOICE DETAILS'],
-  fl:[['상호','Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
-  bl:[['고객명/업체명','Client Name / Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
-  dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms']],
-  th:[['No',''],['서비스/용역 내역','DESCRIPTION OF SERVICE'],['기간/수량','QTY'],['단가','UNIT PRICE'],['금액','AMOUNT']],
-  tot:[['공급가액','SUBTOTAL'],['세액 (VAT)','TAX / VAT'],['총 청구금액','TOTAL DUE']],
-  pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호/SWIFT','Account No. / SWIFT']],note:['비고','NOTES']},
- en:{title:'SERVICE INVOICE',from:['FROM',''],bill:['BILL TO',''],det:['INVOICE DETAILS',''],
-  fl:[['Company',''],['Address',''],['Email / Tel',''],['Tax ID / Reg. No.','']],
-  bl:[['Client Name / Company',''],['Address',''],['Email / Tel',''],['Tax ID / Reg. No.','']],
-  dl:[['Invoice No.',''],['Issue Date',''],['Due Date',''],['Payment Terms','']],
-  th:[['No',''],['Description of Service',''],['Period / Qty',''],['Unit Price',''],['Amount','']],
-  tot:[['Subtotal',''],['Tax / VAT',''],['Total Due','']],
-  pay:['PAYMENT',''],pl:[['Bank Name',''],['Account Holder',''],['Account No. / SWIFT','']],note:['NOTES','']}
-};
+var LS='buff_invoice_defaults_v2',LOGO='../assets/de541288e60385660bcdb547a13a3d78.png';
+var P={title:['서비스 인보이스','SERVICE INVOICE'],from:['공급자','FROM'],bill:['공급받는 자','BILL TO'],det:['인보이스 정보','INVOICE DETAILS'],
+ fl:[['상호','Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
+ bl:[['고객명/업체명','Client Name / Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
+ dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms']],
+ th:[['No',''],['서비스/용역 내역','Description of Service'],['기간/수량','Period / Qty'],['단가','Unit Price'],['금액','Amount']],
+ tot:[['공급가액','Subtotal'],['세액','Tax / VAT'],['총 청구금액','Total Due']],
+ pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호/SWIFT','Account No. / SWIFT']],note:['비고','NOTES']};
+function mk(l){var ko=l==='ko',f=function(x){return Array.isArray(x[0])?x.map(f):(ko||!x[1]?[x[0],x[1]]:[x[1],x[0]])};
+  var o={};Object.keys(P).forEach(function(k){o[k]=f(P[k])});return o}
+var TX={ko:mk('ko'),en:mk('en')};
 var DEF={lang:'ko',cur:'KRW',vm:'ex',
- fCo:'BUFF UNIVERSE (버프유니버스)',fAd:'서울 관악구 남부순환로 1921-1 (봉천동, 범산빌딩) 202-E4호',fEm:'buff.universe@gmail.com',fTx:'295-24-02126',
- bank:'',holder:'김동준 (BUFF UNIVERSE)',acct:'',notes:'결제 기한 내에 위 계좌로 입금해 주세요.'};
+ fCo:'BUFF UNIVERSE',fAd:'202-E4, Beomsan Bldg., 1921-1 Nambusunhwan-ro, Gwanak-gu, Seoul',fEm:'buff.universe@gmail.com',fTx:'295-24-02126',
+ bank:'',holder:'Dongjun Kim (BUFF UNIVERSE)',acct:'',notes:'결제 기한 내에 위 계좌로 입금해 주세요.\nPlease transfer to the account above by the due date.'};
 var S;
 function ld(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){return Object.assign({},DEF)}}
 function sv(){try{var o={};['lang','cur','vm','fCo','fAd','fEm','fTx','bank','holder','acct','notes'].forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
@@ -37,14 +31,14 @@ function totals(){var s=0;S.items.forEach(function(it){s+=(+it.qty||0)*(+it.pric
   else{sub=s;v=0;tot=s}
   return{sub:sub,vat:v,tot:tot}}
 function vmNote(){var ko=S.lang==='ko';return S.vm==='in'?(ko?'VAT 포함':'incl. VAT'):S.vm==='ex'?(ko?'VAT 별도':'excl. VAT'):''}
-function vatLabel(){var ko=S.lang==='ko';return S.vm==='none'?(ko?'없음':'None'):'10%'}
+function vatLabel(){return S.vm==='none'?'없음/None':'10%'}
 window.buffInv={get:function(){return{S:S,TX:TX,tt:totals(),money:money,fmtD:fmtD,vmNote:vmNote,vatLabel:vatLabel}}};
 
 var CSS='.ivw{display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start}.ivw .sec{margin-bottom:16px;padding:22px}.ivw label{margin-top:12px}.ivw .sec h3{font-size:17px;margin-bottom:2px}'
 +'.ivit{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#fafafa}.ivit .g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.ivit .g label{margin-top:6px;font-size:11px}.ivit input{padding:8px 10px;font-size:14px}.ivit .h{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute);font-weight:600}'
 +'.ivpv{position:sticky;top:112px}.ivbox{background:#e8e8ed;border-radius:18px;padding:16px;overflow:hidden}.ivsc{transform-origin:top left}'
 +'.ivpage{width:794px;height:1123px;background:#fff;color:#1D1D1F;font-family:Paperozi,sans-serif;display:flex;flex-direction:column;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}.ivpage *{box-sizing:border-box}'
-+'.ivc{padding:56px 56px 0;flex:1}.ivttl{font-size:36px;font-weight:700;letter-spacing:.01em;line-height:1}.ivhead{display:flex;justify-content:space-between;margin-top:34px;font-size:12px;line-height:1.55}'
++'.ivc{padding:56px 56px 0;flex:1}.ivttl{font-size:36px;font-weight:700;letter-spacing:.01em;line-height:1}.ivsub{font-size:12px;color:#8E8E93;margin-top:8px;letter-spacing:.06em}.ivhead{display:flex;justify-content:space-between;margin-top:34px;font-size:12px;line-height:1.55}'
 +'.ivhead .k{font-weight:700;font-size:12px}.ivhead .k small{font-weight:400;color:#8E8E93;font-size:10px;margin-left:5px}.ivhead .g{color:#4a4a4f}.ivhead .rt{text-align:right}.ivhead .rt>div{margin-bottom:10px}.ivhead .rt .g{color:#1D1D1F}'
 +'.ivt{width:100%;border-collapse:collapse;margin-top:26px;font-size:12px}.ivt th{background:#0A0A0A;color:#fff;font-size:11px;padding:8px 10px;text-align:left;font-weight:700;border:1px solid #0A0A0A}.ivt th small{font-weight:400;color:#B0B0B8;font-size:9px;margin-left:4px}.ivt td{border:1px solid #1D1D1F;padding:6px 10px;height:46px;vertical-align:middle;color:#3a3a3f}.ivt .c{text-align:center}.ivt .r{text-align:right}.ivt .s{font-size:10px;color:#8E8E93;margin-top:2px}'
 +'.ivtot{margin:22px 0 0 auto;width:46%;border-collapse:collapse;font-size:12px}.ivtot td{border:1px solid #1D1D1F;padding:8px 10px}.ivtot td:first-child{color:#4a4a4f;width:52%}.ivtot td:first-child small{font-size:9px;color:#9A9AA0;margin-left:4px}.ivtot td:last-child{text-align:right}.ivtot .T td{background:#0A0A0A;color:#fff;font-weight:700;font-size:14px;border-color:#0A0A0A}.ivtot .T td:first-child{color:#fff}.ivtot .T small{color:#B0B0B8}'
@@ -60,19 +54,19 @@ function page(){
     if(it&&(it.desc||it.price||it.qty)){var amt=(+it.qty||0)*(+it.price||0);
       rows+='<tr><td>'+E(it.desc)+(it.sub?'<div class="s">'+E(it.sub)+'</div>':'')+'</td><td class="c">'+E(it.qty)+(it.unit?' '+E(it.unit):'')+'</td><td class="r">'+money(it.price)+'</td><td class="r">'+money(amt)+'</td></tr>'}
     else rows+='<tr><td></td><td></td><td></td><td></td></tr>'}
-  var W=['46%','16%','19%','19%'];
+  var W=['40%','20%','21%','19%'];
   var th=t.th.slice(1).map(function(h,i){if(i===2&&vmNote())h=[h[0]+' ('+vmNote()+')',''];return '<th style="width:'+W[i]+';text-align:'+(i===0?'left':i===1?'center':'right')+'">'+E(h[0])+(h[1]?'<small>'+E(h[1])+'</small>':'')+'</th>'}).join('');
   var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms];
   var bill=[S.cCo,S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
   var tot=function(i,v,c){return '<tr'+(c?' class="T"':'')+'><td>'+E(t.tot[i][0])+(t.tot[i][1]?'<small>'+E(t.tot[i][1])+'</small>':'')+(i===1?' '+vatLabel():'')+'</td><td>'+v+'</td></tr>'};
-  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+t.title+'</div>'
+  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+'</div><div class="ivsub">'+E(t.title[1])+'</div>'
   +'<div class="ivhead"><div><div class="k">'+E(t.bill[0])+ph(t.bill)+'</div><div class="g">'+(bill||'&nbsp;')+'</div></div>'
   +'<div class="rt">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+ph(h)+'</div><div class="g">'+E(dv[i])+'</div></div>'}).join('')+'</div></div>'
   +'<table class="ivt"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'
   +'<table class="ivtot"><tbody>'+tot(0,money(tt.sub))+tot(1,money(tt.vat))+tot(2,money(tt.tot),1)+'</tbody></table>'
   +'<div class="ivn"><p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>'
-  +(S.notes?'<p>'+E(S.notes)+'</p>':'')+'<p class="ty">'+(ko?'감사합니다. Thank you for your business!':'Thank you for your business!')+'</p></div></div>'
-  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+': '+E(S.fTx)+'</div></div></div>';
+  +(S.notes?'<p>'+E(S.notes)+'</p>':'')+'<p class="ty">'+'감사합니다. Thank you for your business!'+'</p></div></div>'
+  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
 }
 function scale(){var b=document.getElementById('ivbox'),s=document.getElementById('ivsc');if(!b||!s)return;var k=Math.min(1,(b.clientWidth-32)/794);s.style.transform='scale('+k+')';s.style.width='794px';s.parentNode.style.height=(s.scrollHeight*k+32)+'px'}
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
@@ -92,7 +86,7 @@ window.drawInvoice=function(){
   m.innerHTML='<style>'+CSS+'</style><div class="bar ivbar"><h2>인보이스 발급</h2><button class="btn line" id="ivreset" type="button">새로 작성</button><button class="btn line" id="ivprint" type="button">PDF로 저장 / 인쇄</button><button class="btn" id="ivdocx" type="button">Word(docx) 저장</button></div>'
   +'<p class="hint ivbar">입력하면 오른쪽 미리보기가 바로 바뀝니다. “PDF로 저장 / 인쇄”를 누른 뒤 대상(프린터)을 “PDF로 저장”으로 선택하세요. 공급자·계좌 정보는 이 브라우저에 저장됩니다.</p>'
   +'<div class="ivw"><div class="ivform"><div class="sec"><h3>기본</h3>'
-  +'<label>언어</label><select data-k="lang"><option value="ko">국문 (영문 병기)</option><option value="en">English</option></select>'
+  +'<label>대표 언어 (국·영문 병기)</label><select data-k="lang"><option value="ko">국문 위 · 영문 아래</option><option value="en">영문 위 · 국문 아래</option></select>'
   +'<div class="grid2"><div><label>통화</label><select data-k="cur"><option value="KRW">KRW (₩)</option><option value="USD">USD ($)</option></select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
   +inp('no','인보이스 번호',S.no)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+inp('terms','결제 조건',S.terms,'text','예: Net 14 / 수령 즉시')+'</div>'
   +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
