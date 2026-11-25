@@ -77,10 +77,12 @@ function scale(){var b=document.getElementById('ivbox'),s=document.getElementByI
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
 
 function inp(id,lab,val,type,ph){return '<label>'+lab+'</label><input type="'+(type||'text')+'" data-k="'+id+'" value="'+E(val)+'"'+(ph?' placeholder="'+E(ph)+'"':'')+'>'}
+var UNITS=['식 / lot','건 / case','경기 / match','장 / photos','편 / video','시간 / hrs','일 / days','개월 / mo','명 / person','개 / pcs'];
+function unitCtl(it,i){if(it.custom)return '<input type="text" data-i="'+i+'" data-f="unit" value="'+E(it.unit)+'" placeholder="직접 입력">';return '<select data-i="'+i+'" data-f="unit"><option value="">선택 안 함</option>'+UNITS.map(function(u){return '<option'+(it.unit===u?' selected':'')+'>'+u+'</option>'}).join('')+'<option value="__custom">직접 입력…</option></select>'}
 function itemsForm(){return S.items.map(function(it,i){return '<div class="ivit"><div class="h"><span>항목 '+(i+1)+'</span><button class="btn danger sm" data-del="'+i+'" type="button">삭제</button></div>'
  +'<label>서비스/용역 내역</label><input type="text" data-i="'+i+'" data-f="desc" value="'+E(it.desc)+'">'
  +'<label>상세 설명 (선택)</label><input type="text" data-i="'+i+'" data-f="sub" value="'+E(it.sub)+'">'
- +'<div class="g"><div><label>수량</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="qty" value="'+E(it.qty)+'"></div><div><label>단위 (선택)</label><input type="text" data-i="'+i+'" data-f="unit" value="'+E(it.unit)+'" placeholder="식 / hrs"></div><div><label>단가</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="price" value="'+E(it.price)+'"></div></div></div>'}).join('')}
+ +'<div class="g"><div><label>수량</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="qty" value="'+E(it.qty)+'"></div><div><label>단위 (선택)</label>'+unitCtl(it,i)+'</div><div><label>단가</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="price" value="'+E(it.price)+'"></div></div></div>'}).join('')}
 
 function loadScript(u){return new Promise(function(res,rej){var x=document.createElement('script');x.src=u;x.onload=res;x.onerror=function(){rej(new Error(u+' 로드 실패'))};document.head.appendChild(x)})}
 function loadDocx(){var v='?v='+Date.now();return loadScript('vendor/docx.iife.js').then(function(){return loadScript('invoice_docx.js'+v)})}
@@ -109,7 +111,7 @@ window.drawInvoice=function(){
       tm.classList.toggle('hide',S.ts!=='custom');
       if(k==='ts'||k==='due'||k==='issue'){if(S.ts==='custom'&&k!=='terms'&&!S.terms)S.terms=''}
       sv()}
-    else if(t.getAttribute('data-f')){S.items[+t.getAttribute('data-i')][t.getAttribute('data-f')]=t.value}
+    else if(t.getAttribute('data-f')){var it=S.items[+t.getAttribute('data-i')];if(t.getAttribute('data-f')==='unit'&&t.tagName==='SELECT'&&t.value==='__custom'){it.custom=true;it.unit='';redraw();return}it[t.getAttribute('data-f')]=t.value}
     paint()});
   m.querySelector('.ivform').addEventListener('change',function(e){if(/^(lang|cur|vm|ts)$/.test(e.target.getAttribute('data-k')||''))paint()});
   function redraw(){document.getElementById('ivitems').innerHTML=itemsForm();bind();paint()}
