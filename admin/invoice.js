@@ -12,11 +12,11 @@ function mk(l){var ko=l==='ko',f=function(x){return Array.isArray(x[0])?x.map(f)
   var o={};Object.keys(P).forEach(function(k){o[k]=f(P[k])});return o}
 var TX={ko:mk('ko'),en:mk('en')};
 var DEF={lang:'ko',cur:'KRW',vm:'ex',
- fCo:'BUFF UNIVERSE',fAd:'202-E4, Beomsan Bldg., 1921-1 Nambusunhwan-ro, Gwanak-gu, Seoul',fEm:'buff.universe@gmail.com',fTx:'295-24-02126',
+ fCo:'BUFF UNIVERSE',fAd:'202-E4, Beomsan Bldg., 1921-1 Nambusunhwan-ro, Gwanak-gu, Seoul',fNm:'Dongjun Kim',fEm:'buff.universe@gmail.com',fTx:'295-24-02126',
  bank:'',holder:'Dongjun Kim (BUFF UNIVERSE)',acct:'',notes:'결제 기한 내에 위 계좌로 입금해 주세요.\nPlease transfer to the account above by the due date.'};
 var S;
 function ld(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){return Object.assign({},DEF)}}
-function sv(){try{var o={};['lang','cur','vm','fCo','fAd','fEm','fTx','bank','holder','acct','notes'].forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
+function sv(){try{var o={};['lang','cur','vm','fCo','fAd','fNm','fEm','fTx','bank','holder','acct','notes'].forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
 function E(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function today(d){d=d||new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
 function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return today(d)}
@@ -62,7 +62,7 @@ function page(){
   var W=['40%','20%','21%','19%'];
   var th=t.th.slice(1).map(function(h,i){if(i===2&&vmNote())h=[h[0]+' ('+vmNote()+')',''];return '<th style="width:'+W[i]+';text-align:'+(i===0?'left':i===1?'center':'right')+'">'+E(h[0])+(h[1]?'<small>'+E(h[1])+'</small>':'')+'</th>'}).join('');
   var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms];
-  var bill=[S.cCo,S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
+  var bill=[S.cCo,S.cNm?'담당자 / Attn: '+S.cNm:'',S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
   var tot=function(i,v,c){return '<tr'+(c?' class="T"':'')+'><td>'+E(t.tot[i][0])+(t.tot[i][1]?'<small>'+E(t.tot[i][1])+'</small>':'')+(i===1?' '+vatLabel():'')+'</td><td>'+v+'</td></tr>'};
   return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+'</div>'
   +'<div class="ivhead"><div><div class="k">'+E(t.bill[0])+ph(t.bill)+'</div><div class="g">'+(bill||'&nbsp;')+'</div></div>'
@@ -71,7 +71,7 @@ function page(){
   +'<table class="ivtot"><tbody>'+tot(0,money(tt.sub))+tot(1,money(tt.vat))+tot(2,money(tt.tot),1)+'</tbody></table>'
   +'<div class="ivn"><p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>'
   +(S.notes?'<p>'+E(S.notes)+'</p>':'')+'<p class="ty">'+'감사합니다. Thank you for your business!'+'</p></div></div>'
-  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
+  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+(S.fNm?'담당자 / Contact: '+E(S.fNm)+'<br>':'')+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
 }
 function scale(){var b=document.getElementById('ivbox'),s=document.getElementById('ivsc');if(!b||!s)return;var k=Math.min(1,(b.clientWidth-32)/794);s.style.transform='scale('+k+')';s.style.width='794px';s.parentNode.style.height=(s.scrollHeight*k+32)+'px'}
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
@@ -86,7 +86,7 @@ function loadScript(u){return new Promise(function(res,rej){var x=document.creat
 function loadDocx(){var v='?v='+Date.now();return loadScript('vendor/docx.iife.js').then(function(){return loadScript('invoice_docx.js'+v)})}
 window.drawInvoice=function(){
   S=ld();S.no=nextNo();S.issue=today();S.due=addDays(14);S.ts='14';S.terms=termText('14');
-  S.cCo='';S.cAd='';S.cEm='';S.cTx='';S.items=[{desc:'',sub:'',qty:1,unit:'',price:''}];
+  S.cCo='';S.cNm='';S.cAd='';S.cEm='';S.cTx='';S.items=[{desc:'',sub:'',qty:1,unit:'',price:''}];
   var m=document.getElementById('main');
   m.innerHTML='<style>'+CSS+'</style><div class="bar ivbar"><h2>인보이스 발급</h2><button class="btn line" id="ivreset" type="button">새로 작성</button><button class="btn line" id="ivprint" type="button">PDF로 저장 / 인쇄</button><button class="btn" id="ivdocx" type="button">Word(docx) 저장</button></div>'
   +'<p class="hint ivbar">입력하면 오른쪽 미리보기가 바로 바뀝니다. “PDF로 저장 / 인쇄”를 누른 뒤 대상(프린터)을 “PDF로 저장”으로 선택하세요. 공급자·계좌 정보는 이 브라우저에 저장됩니다.</p>'
@@ -94,10 +94,10 @@ window.drawInvoice=function(){
   +'<label>대표 언어 (국·영문 병기)</label><select data-k="lang"><option value="ko">국문 위 · 영문 아래</option><option value="en">영문 위 · 국문 아래</option></select>'
   +'<div class="grid2"><div><label>통화</label><select data-k="cur">'+Object.keys(CUR).map(function(k){return '<option value="'+k+'">'+CUR[k][2]+'</option>'}).join('')+'</select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
   +inp('no','인보이스 번호',S.no)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','', 'text','예: 50% 선금, 50% 납품 후')+'</div>'+'</div>'
-  +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
+  +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cNm','담당자명 (선택)',S.cNm)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
   +'<div class="sec"><h3>서비스 내역</h3><div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:12px">+ 항목 추가</button></div>'
   +'<div class="sec"><h3>입금 계좌 · 비고</h3>'+inp('bank','은행명',S.bank)+inp('holder','예금주',S.holder)+inp('acct','계좌번호 / SWIFT',S.acct)+'<label>비고</label><textarea data-k="notes" style="min-height:80px">'+E(S.notes)+'</textarea></div>'
-  +'<div class="sec"><h3>공급자 (BUFF)</h3>'+inp('fCo','상호',S.fCo)+inp('fAd','주소',S.fAd)+inp('fEm','이메일 / 연락처',S.fEm)+inp('fTx','사업자등록번호',S.fTx)+'</div></div>'
+  +'<div class="sec"><h3>공급자 (BUFF)</h3>'+inp('fCo','상호',S.fCo)+inp('fAd','주소',S.fAd)+inp('fNm','담당자명',S.fNm)+inp('fEm','이메일 / 연락처',S.fEm)+inp('fTx','사업자등록번호',S.fTx)+'</div></div>'
   +'<div class="ivpv"><div class="ivbox" id="ivbox"><div><div class="ivsc" id="ivsc"></div></div></div></div></div>';
   [].forEach.call(m.querySelectorAll('select[data-k]'),function(s){s.value=S[s.getAttribute('data-k')]});
   m.querySelector('.ivform').addEventListener('input',function(e){var t=e.target,k=t.getAttribute('data-k');
