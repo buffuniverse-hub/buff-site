@@ -186,14 +186,14 @@ function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
   if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
-  Promise.all([getData('works','select=*&id=eq.'+encodeURIComponent(id)),getData('team_members','select=name,role_en,avatar_url&published=eq.true')]).then(function(res){
+  Promise.all([getData('works','select=*&id=eq.'+encodeURIComponent(id)),getData('team_members','select=name,name_en,role_en,avatar_url&published=eq.true')]).then(function(res){
     var w=res[0][0],team=res[1];
     if(!w){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+w.title;
     setMeta(w.title,w.description||'',w.thumbnail_url||(w.images||[])[0]||'');
     var c=CAT[w.category]||CAT.photo;
-    var mem=(w.members||[]).map(function(n){var t=team.filter(function(x){return x.name===n})[0]||{};
-      return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(n)+'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 14px; font-weight: 700; color: #1D1D1F">'+esc(n)+'</span></div>'}).join('');
+    var mem=(w.members||[]).map(function(n){var t=team.filter(function(x){return x.name===n||x.ko_name===n})[0]||{};
+      return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(t.name||n)+'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 14px; font-weight: 700; color: #1D1D1F">'+esc(t.name||n)+'</span></div>'}).join('');
     var media='';
     var vids='';
     (Array.isArray(w.videos)?w.videos:[]).forEach(function(v){var i=ytId(v.url);if(!v.url)return;
@@ -224,7 +224,7 @@ function srcBox(tags,url){
 function newsDetail(app){
   var id=new URLSearchParams(location.search).get('id');
   if(!id){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
-  Promise.all([getData('news','select=*,works(id,category)&id=eq.'+encodeURIComponent(id)),getData('team_members','select=name,avatar_url&published=eq.true').catch(function(){return[]})]).then(function(rr){
+  Promise.all([getData('news','select=*,works(id,category)&id=eq.'+encodeURIComponent(id)),getData('team_members','select=name,name_en,avatar_url&published=eq.true').catch(function(){return[]})]).then(function(rr){
     var r=rr[0],team=rr[1]||[];
     var n=r[0];if(!n){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 소식은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+n.title_line1;
@@ -234,7 +234,7 @@ function newsDetail(app){
     var mem=(Array.isArray(n.members)?n.members:[]);
     if(emb.length||mem.length){if(si<0)si=bparts.length;bparts=bparts.slice(0,si).concat(mem.length?['\u0002MEM']:[],emb,bparts.slice(si))}
     var paras=bparts.map(function(p){
-      if(p==='\u0002MEM')return '\u0003<div style="margin: 40px 0 0; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center"><span style="font-size: 13px; font-weight: 600; letter-spacing: 0.18em; color: #6E6E73">참여 인물</span><div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px">'+mem.map(function(nm){var t=team.filter(function(x){return x.name===nm})[0]||{};return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(nm)+'" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 16px; font-weight: 700; color: #1D1D1F">'+esc(nm)+'</span></div>'}).join('')+'</div></div>';
+      if(p==='\u0002MEM')return '\u0003<div style="margin: 40px 0 0; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center"><span style="font-size: 13px; font-weight: 600; letter-spacing: 0.18em; color: #6E6E73">참여 인물</span><div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px">'+mem.map(function(nm){var t=team.filter(function(x){return x.name===nm||x.ko_name===nm})[0]||{};return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(t.name||nm)+'" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 16px; font-weight: 700; color: #1D1D1F">'+esc(t.name||nm)+'</span></div>'}).join('')+'</div></div>';
       var lines=p.split('\n'),src=lines.filter(function(l){return /^https?:\/\/\S+$/.test(l.trim())||/^출처\s*:/.test(l.trim())}).length===lines.length;
       var u1=p.trim(),ym=u1.match(/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:[^\s#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})[^\s]*$/),im=u1.match(/^https?:\/\/(?:www\.)?instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([\w-]+)[^\s]*$/);
       if(ym){var sh=/shorts\//.test(u1);return '<div style="margin: 40px auto 56px; width: 100%; '+(sh?'max-width: 360px; aspect-ratio: 9 / 16':'aspect-ratio: 16 / 9')+'; border-radius: 18px; overflow: hidden; background: #000"><iframe src="https://www.youtube-nocookie.com/embed/'+ym[1]+'?rel=0" title="YouTube" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="display: block; width: 100%; height: 100%; border: 0"></iframe></div>'}
@@ -322,7 +322,7 @@ function reel(){
       return '<a class="reel-slide" href="work?id='+esc(w.id)+'"><img src="'+esc(w.thumbnail_url)+'" alt=""'+(hid?' aria-hidden="true"':'')+'><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
     }
     /* 관리자 페이지의 작업물·썸네일과 연동 */
-    if(window.sbGet)window.sbGet('works','select=id,title,category,thumbnail_url&published=eq.true&order=sort_order.asc').then(function(rows){
+    if(window.sbGet)window.sbGet('works','select=id,title,title_en,category,thumbnail_url&published=eq.true&order=sort_order.asc').then(function(rows){
       rows=(rows||[]).filter(function(w){return w.thumbnail_url});
       if(rows.length){row.innerHTML=rows.map(function(w){return slide(w,0)}).join('')+rows.map(function(w){return slide(w,1)}).join('');row.style.animation='none';void row.offsetWidth;row.style.animation='';}
     }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
@@ -401,4 +401,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     var a=e.target.closest&&e.target.closest('a[href="/"]');
     if(a&&location.pathname==='/'&&!e.metaKey&&!e.ctrlKey){e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});if(location.hash)history.replaceState(null,'','/')}
   });
+})();
+
+/* KO / EN 전환 링크: 지금 보고 있는 같은 페이지의 다른 언어 주소로 연결 */
+(function(){
+  function sync(){
+    var a=document.querySelector('header nav a.lang');if(!a)return;
+    var p=location.pathname,en=/^\/en(\/|$)/.test(p);
+    var t=en?(p.replace(/^\/en/,'')||'/'):('/en'+(p==='/'?'/':p));
+    a.href=t+location.search+location.hash;
+  }
+  sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,600);
 })();

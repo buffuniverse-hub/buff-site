@@ -3,9 +3,20 @@ window.BUFF_CONFIG={
   url:'https://cexwmuhsjfxzemnwtwjc.supabase.co',
   key:'sb_publishable_V8fG5OEfxvqBBuCgDlmQ7w_LhdX_gyd'
 };
+/* 영문 페이지(<html lang="en">)에서는 *_en 칸에 값이 있으면 그 값을 원래 칸 대신 씁니다. 비어 있으면 한글을 그대로 보여줍니다. */
+window.BUFF_EN=document.documentElement.lang==='en';
 window.sbGet=function(table,query){
   var c=window.BUFF_CONFIG;
-  return fetch(c.url+'/rest/v1/'+table+'?'+(query||''),{headers:{apikey:c.key}}).then(function(r){if(!r.ok)throw new Error(table+' '+r.status);return r.json()});
+  return fetch(c.url+'/rest/v1/'+table+'?'+(query||''),{headers:{apikey:c.key}}).then(function(r){if(!r.ok)throw new Error(table+' '+r.status);return r.json()}).then(function(rows){
+    if(window.BUFF_EN&&Array.isArray(rows))rows.forEach(function(r){Object.keys(r).forEach(function(k){if(/_en$/.test(k)&&k!=='role_en'){var v=r[k];if(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length)){r['ko_'+k.slice(0,-3)]=r[k.slice(0,-3)];r[k.slice(0,-3)]=v}}})});
+    if(window.BUFF_EN&&table==='site_settings'&&Array.isArray(rows)){
+      /* 영문 페이지: 설정 문구는 *_en 키만 사용(없으면 페이지에 들어 있는 영문 기본 문구가 그대로 보임) */
+      var keep={home_featured:1,contact_email:1,home_works_title:1},out=[];
+      rows.forEach(function(r){if(keep[r.key])out.push(r);else if(/_en$/.test(r.key)&&r.value)out.push({key:r.key.slice(0,-3),value:r.value})});
+      return out;
+    }
+    return rows;
+  });
 };
 /* 팀 소개(탭)는 화면이 그려지기 전에 필요해서 미리 불러옵니다. 실패하면 기본 내용을 씁니다. */
 window.__teamReady=Promise.race([
