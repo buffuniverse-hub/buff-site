@@ -1,7 +1,7 @@
 /* BUFF 인보이스 발급기 — 입력 → 실시간 미리보기 → PDF 저장(인쇄) */
 (function(){
 var LS='buff_invoice_defaults_v2',LOGO='../assets/de541288e60385660bcdb547a13a3d78.png';
-var P={title:['서비스 인보이스','SERVICE INVOICE'],from:['공급자','FROM'],bill:['공급받는 자','BILL TO'],det:['인보이스 정보','INVOICE DETAILS'],
+var P={title:['SERVICE INVOICE',''],from:['공급자','FROM'],bill:['공급받는 자','BILL TO'],det:['인보이스 정보','INVOICE DETAILS'],
  fl:[['상호','Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
  bl:[['고객명/업체명','Client Name / Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
  dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms']],
@@ -59,7 +59,7 @@ function page(){
   var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms];
   var bill=[S.cCo,S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
   var tot=function(i,v,c){return '<tr'+(c?' class="T"':'')+'><td>'+E(t.tot[i][0])+(t.tot[i][1]?'<small>'+E(t.tot[i][1])+'</small>':'')+(i===1?' '+vatLabel():'')+'</td><td>'+v+'</td></tr>'};
-  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+'</div><div class="ivsub">'+E(t.title[1])+'</div>'
+  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+'</div>'
   +'<div class="ivhead"><div><div class="k">'+E(t.bill[0])+ph(t.bill)+'</div><div class="g">'+(bill||'&nbsp;')+'</div></div>'
   +'<div class="rt">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+ph(h)+'</div><div class="g">'+E(dv[i])+'</div></div>'}).join('')+'</div></div>'
   +'<table class="ivt"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'

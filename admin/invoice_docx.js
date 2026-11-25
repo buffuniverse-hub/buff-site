@@ -58,7 +58,7 @@ window.buffInvoiceDocx=function(g){
       creator:'BUFF UNIVERSE',title:'BUFF UNIVERSE Invoice '+(S.no||''),
       styles:{default:{document:{run:{font:'Paperozi',size:19,color:INK}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:840,bottom:2500,left:M,right:M,header:0,footer:0}}},footers:{default:foot},
-        children:[p(r(T.title[0],{size:68,bold:true}),{line:300}),p(r(T.title[1],{size:20,color:PH}),{before:80}),gap(360),head,gap(320),items,gap(280),totals,gap(300),].concat(pay)}]});
+        children:[p(r(T.title[0],{size:68,bold:true}),{line:300}),gap(360),head,gap(320),items,gap(280),totals,gap(300),].concat(pay)}]});
     return D.Packer.toBlob(doc);
   });
 };
