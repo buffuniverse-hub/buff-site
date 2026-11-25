@@ -4,7 +4,7 @@ var LS='buff_invoice_defaults_v3',LOGO='../assets/de541288e60385660bcdb547a13a3d
 var P={title:['SERVICE INVOICE',''],from:['공급자','FROM'],bill:['공급받는 자','BILL TO'],det:['인보이스 정보','INVOICE DETAILS'],
  fl:[['상호','Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
  bl:[['고객명/업체명','Client Name / Company'],['주소','Address'],['이메일/연락처','Email / Tel'],['사업자등록번호','Tax ID / Reg. No.']],
- dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms'],['담당자','Contact']],
+ dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms'],['프로젝트 담당자','Project Lead']],
  th:[['No',''],['서비스/용역 내역','Description of Service'],['기간/수량','Period / Qty'],['단가','Unit Price'],['금액','Amount']],
  tot:[['공급가액','Subtotal'],['세액','Tax / VAT'],['총 청구금액','Total Due']],
  pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호/SWIFT','Account No. / SWIFT']],note:['비고','NOTES']};
@@ -95,7 +95,7 @@ window.drawInvoice=function(){
   +'<div class="ivw"><div class="ivform"><div class="sec"><h3>기본</h3>'
   +'<label>대표 언어 (국·영문 병기)</label><select data-k="lang"><option value="ko">국문 위 · 영문 아래</option><option value="en">영문 위 · 국문 아래</option></select>'
   +'<div class="grid2"><div><label>통화</label><select data-k="cur">'+Object.keys(CUR).map(function(k){return '<option value="'+k+'">'+CUR[k][2]+'</option>'}).join('')+'</select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
-  +inp('no','인보이스 번호',S.no)+inp('fNm','담당자명 (BUFF 담당자)',S.fNm)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','', 'text','예: 50% 선금, 50% 납품 후')+'</div>'+'</div>'
+  +inp('no','인보이스 번호',S.no)+inp('fNm','프로젝트 담당자명 (Project Lead)',S.fNm)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','', 'text','예: 50% 선금, 50% 납품 후')+'</div>'+'</div>'
   +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cNm','담당자명 (선택)',S.cNm)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
   +'<div class="sec"><h3>서비스 내역</h3><div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:12px">+ 항목 추가</button></div>'
   +'<div class="sec"><h3>입금 계좌 · 비고</h3>'+inp('bank','은행명',S.bank)+inp('holder','예금주',S.holder)+inp('acct','계좌번호 / SWIFT',S.acct)+'<label>비고</label><textarea data-k="notes" style="min-height:80px">'+E(S.notes)+'</textarea></div>'
