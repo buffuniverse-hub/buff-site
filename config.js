@@ -8,6 +8,7 @@ window.BUFF_EN=document.documentElement.lang==='en';
 window.sbGet=function(table,query){
   var c=window.BUFF_CONFIG;
   return fetch(c.url+'/rest/v1/'+table+'?'+(query||''),{headers:{apikey:c.key}}).then(function(r){if(!r.ok)throw new Error(table+' '+r.status);return r.json()}).then(function(rows){
+    (function fx(o){if(Array.isArray(o)){for(var i=0;i<o.length;i++){if(typeof o[i]==='string'){if(/^assets\//.test(o[i]))o[i]='/'+o[i]}else fx(o[i])}}else if(o&&typeof o==='object'){for(var k in o){var v=o[k];if(typeof v==='string'){if(/^assets\//.test(v))o[k]='/'+v}else fx(v)}}})(rows);
     if(window.BUFF_EN&&Array.isArray(rows))rows.forEach(function(r){Object.keys(r).forEach(function(k){if(/_en$/.test(k)&&k!=='role_en'){var v=r[k];if(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length)){r['ko_'+k.slice(0,-3)]=r[k.slice(0,-3)];r[k.slice(0,-3)]=v}}})});
     if(window.BUFF_EN&&table==='site_settings'&&Array.isArray(rows)){
       /* 영문 페이지: 설정 문구는 *_en 키만 사용(없으면 페이지에 들어 있는 영문 기본 문구가 그대로 보임) */
