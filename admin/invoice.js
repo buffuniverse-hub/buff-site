@@ -17,12 +17,12 @@ var TX={
   tot:[['Subtotal',''],['Tax / VAT',''],['Total Due','']],
   pay:['PAYMENT',''],pl:[['Bank Name',''],['Account Holder',''],['Account No. / SWIFT','']],note:['NOTES','']}
 };
-var DEF={lang:'ko',cur:'KRW',vat:10,
+var DEF={lang:'ko',cur:'KRW',vm:'ex',
  fCo:'BUFF UNIVERSE (버프유니버스)',fAd:'서울 관악구 남부순환로 1921-1 (봉천동, 범산빌딩) 202-E4호',fEm:'buff.universe@gmail.com',fTx:'295-24-02126',
  bank:'',holder:'김동준 (BUFF UNIVERSE)',acct:'',notes:'결제 기한 내에 위 계좌로 입금해 주세요.'};
 var S;
 function ld(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){return Object.assign({},DEF)}}
-function sv(){try{var o={};['lang','cur','vat','fCo','fAd','fEm','fTx','bank','holder','acct','notes'].forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
+function sv(){try{var o={};['lang','cur','vm','fCo','fAd','fEm','fTx','bank','holder','acct','notes'].forEach(function(k){o[k]=S[k]});localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
 function E(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function today(d){d=d||new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
 function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return today(d)}
@@ -31,44 +31,48 @@ function money(n){n=+n||0;return S.cur==='KRW'?'₩'+Math.round(n).toLocaleStrin
 function nextNo(){var y=new Date().getFullYear(),k='buff_invoice_seq_'+y,n=1;try{n=(+localStorage.getItem(k)||0)+1}catch(e){}return 'BUFF-'+y+'-'+('00'+n).slice(-3)}
 function bump(){var y=new Date().getFullYear(),k='buff_invoice_seq_'+y;try{var m=(S.no||'').match(/^BUFF-(\d{4})-(\d+)$/);if(m&&+m[1]===y)localStorage.setItem(k,String(Math.max(+localStorage.getItem(k)||0,+m[2])))}catch(e){}}
 
-function totals(){var sub=0;S.items.forEach(function(it){sub+=(+it.qty||0)*(+it.price||0)});var v=sub*(+S.vat||0)/100;return{sub:sub,vat:v,tot:sub+v}}
+function totals(){var s=0;S.items.forEach(function(it){s+=(+it.qty||0)*(+it.price||0)});var sub,v,tot;
+  if(S.vm==='in'){tot=s;sub=S.cur==='KRW'?Math.round(s/1.1):Math.round(s/1.1*100)/100;v=tot-sub}
+  else if(S.vm==='ex'){sub=s;v=S.cur==='KRW'?Math.round(s*.1):Math.round(s*10)/100;tot=sub+v}
+  else{sub=s;v=0;tot=s}
+  return{sub:sub,vat:v,tot:tot}}
+function vmNote(){var ko=S.lang==='ko';return S.vm==='in'?(ko?'VAT 포함':'incl. VAT'):S.vm==='ex'?(ko?'VAT 별도':'excl. VAT'):''}
+function vatLabel(){var ko=S.lang==='ko';return S.vm==='none'?(ko?'없음':'None'):'10%'}
+window.buffInv={get:function(){return{S:S,TX:TX,tt:totals(),money:money,fmtD:fmtD,vmNote:vmNote,vatLabel:vatLabel}}};
 
 var CSS='.ivw{display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start}.ivw .sec{margin-bottom:16px;padding:22px}.ivw label{margin-top:12px}.ivw .sec h3{font-size:17px;margin-bottom:2px}'
 +'.ivit{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#fafafa}.ivit .g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.ivit .g label{margin-top:6px;font-size:11px}.ivit input{padding:8px 10px;font-size:14px}.ivit .h{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute);font-weight:600}'
 +'.ivpv{position:sticky;top:112px}.ivbox{background:#e8e8ed;border-radius:18px;padding:16px;overflow:hidden}.ivsc{transform-origin:top left}'
-+'.ivpage{width:794px;min-height:1123px;background:#fff;color:#1D1D1F;font-family:Paperozi,sans-serif;display:flex;flex-direction:column;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
-+'.ivpage *{box-sizing:border-box}.ivb{background:#0A0A0A;height:96px;padding:0 52px;display:flex;align-items:center;justify-content:space-between}.ivb img{height:36px;width:114px;object-fit:contain}.ivb b{color:#fff;font-size:26px;letter-spacing:.14em;font-weight:700}'
-+'.ivc{padding:30px 52px 0;flex:1}.ivtwo{display:grid;grid-template-columns:1fr 1fr;gap:28px}.ivh{font-size:11px;font-weight:700;color:#6E6E73;letter-spacing:.06em;margin-bottom:4px}.ivh i{font-style:normal;font-weight:400;color:#9A9AA0;margin-left:6px;font-size:10px}'
-+'.ivf{display:grid;grid-template-columns:104px 1fr;border-bottom:1px solid #D2D2D7;padding:6px 0;font-size:12.5px;align-items:center;min-height:34px}.ivf .l{font-size:11px;color:#6E6E73;line-height:1.2}.ivf .l small{display:block;font-size:8.5px;color:#9A9AA0}.ivf .v{word-break:break-word;line-height:1.35}'
-+'.ivd{display:grid;grid-template-columns:repeat(4,1fr);background:#F5F5F7;padding:11px 14px;margin-top:20px;gap:10px}.ivd .k{font-size:9.5px;font-weight:700;color:#8E8E93}.ivd .k small{font-weight:400;color:#9A9AA0}.ivd .v{font-size:13px;margin-top:3px}'
-+'.ivt{width:100%;border-collapse:collapse;margin-top:22px;font-size:12.5px}.ivt th{background:#0A0A0A;color:#fff;font-size:11px;padding:9px 8px;font-weight:700}.ivt th small{font-weight:400;color:#B0B0B8;font-size:8.5px;margin-left:4px}.ivt td{border-bottom:1px solid #D2D2D7;padding:8px;height:52px;vertical-align:middle}.ivt .n{text-align:center;color:#6E6E73;width:36px}.ivt .c{text-align:center}.ivt .r{text-align:right}.ivt .s{font-size:10px;color:#6E6E73;margin-top:2px}'
-+'.ivtot{margin:14px 0 0 auto;width:52%;font-size:12.5px}.ivtot div{display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid #D2D2D7}.ivtot .k{color:#6E6E73}.ivtot .k small{font-size:8.5px;color:#9A9AA0;margin-left:4px}.ivtot .T{background:#0A0A0A;color:#fff;border:0;padding:10px 12px;font-weight:700;font-size:15px}.ivtot .T .k{color:#fff;font-size:13px}.ivtot .T .k small{color:#B0B0B8}'
-+'.ivp{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:22px;background:#fff}.ivp>div{background:#F5F5F7;padding:16px 18px;font-size:12px}.ivp .r{display:flex;gap:10px;margin-top:5px}.ivp .r span{font-size:9.5px;color:#8E8E93;font-weight:700;min-width:70px;padding-top:2px}.ivp p{margin:5px 0 0;line-height:1.5;white-space:pre-wrap}'
-+'.ivfoot{margin:0 52px;padding:10px 0 24px;border-top:1px solid #D2D2D7;font-size:9.5px;color:#6E6E73}.ivfoot b{color:#1D1D1F;margin-right:8px}'
-+'@media print{@page{size:A4;margin:0}html,body{background:#fff!important;padding:0!important}header.top,nav.tabs,.ivform,.toast,.ivbar{display:none!important}main{padding:0!important;max-width:none!important}.ivw{display:block}.ivpv{position:static}.ivbox{padding:0;background:#fff;border-radius:0;overflow:visible}.ivbox>div{height:auto!important}.ivsc{transform:none!important;width:auto!important;height:auto!important}.ivpage{width:210mm;min-height:295mm}body{height:auto!important}}';
++'.ivpage{width:794px;height:1123px;background:#fff;color:#1D1D1F;font-family:Paperozi,sans-serif;display:flex;flex-direction:column;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}.ivpage *{box-sizing:border-box}'
++'.ivc{padding:56px 56px 0;flex:1}.ivttl{font-size:36px;font-weight:700;letter-spacing:.01em;line-height:1}.ivhead{display:flex;justify-content:space-between;margin-top:34px;font-size:12px;line-height:1.55}'
++'.ivhead .k{font-weight:700;font-size:12px}.ivhead .k small{font-weight:400;color:#8E8E93;font-size:10px;margin-left:5px}.ivhead .g{color:#4a4a4f}.ivhead .rt{text-align:right}.ivhead .rt>div{margin-bottom:10px}.ivhead .rt .g{color:#1D1D1F}'
++'.ivt{width:100%;border-collapse:collapse;margin-top:26px;font-size:12px}.ivt th{background:#0A0A0A;color:#fff;font-size:11px;padding:8px 10px;text-align:left;font-weight:700;border:1px solid #0A0A0A}.ivt th small{font-weight:400;color:#B0B0B8;font-size:9px;margin-left:4px}.ivt td{border:1px solid #1D1D1F;padding:6px 10px;height:46px;vertical-align:middle;color:#3a3a3f}.ivt .c{text-align:center}.ivt .r{text-align:right}.ivt .s{font-size:10px;color:#8E8E93;margin-top:2px}'
++'.ivtot{margin:22px 0 0 auto;width:46%;border-collapse:collapse;font-size:12px}.ivtot td{border:1px solid #1D1D1F;padding:8px 10px}.ivtot td:first-child{color:#4a4a4f;width:52%}.ivtot td:first-child small{font-size:9px;color:#9A9AA0;margin-left:4px}.ivtot td:last-child{text-align:right}.ivtot .T td{background:#0A0A0A;color:#fff;font-weight:700;font-size:14px;border-color:#0A0A0A}.ivtot .T td:first-child{color:#fff}.ivtot .T small{color:#B0B0B8}'
++'.ivn{margin-top:26px;font-size:11.5px;line-height:1.6;color:#4a4a4f;max-width:52%}.ivn .k{font-weight:700;color:#1D1D1F}.ivn .k small{font-weight:400;color:#8E8E93;font-size:10px;margin-left:5px}.ivn p{margin:0 0 8px;white-space:pre-wrap}.ivn .ty{font-weight:700;color:#1D1D1F}'
++'.ivfoot{background:#0A0A0A;color:#fff;height:150px;padding:0 56px;display:flex;align-items:center;justify-content:space-between}.ivfoot img{height:40px;width:127px;object-fit:contain}.ivfoot .a{text-align:right;font-size:11px;line-height:1.65;color:#E5E5EA}.ivfoot .a b{font-size:12px;color:#fff}'
++'@media print{@page{size:A4;margin:0}html,body{background:#fff!important;padding:0!important}header.top,nav.tabs,.ivform,.toast,.ivbar{display:none!important}main{padding:0!important;max-width:none!important}.ivw{display:block}.ivpv{position:static}.ivbox{padding:0;background:#fff;border-radius:0;overflow:visible}.ivbox>div{height:auto!important}.ivsc{transform:none!important;width:auto!important;height:auto!important}.ivpage{width:210mm;height:296mm}body{height:auto!important}}';
 
-function ph(h){return h[1]?'<i>'+E(h[1])+'</i>':''}
-function fld(h,v){return '<div class="ivf"><div class="l">'+E(h[0])+(h[1]?'<small>'+E(h[1])+'</small>':'')+'</div><div class="v">'+E(v)+'</div></div>'}
+function ph(h){return h[1]?'<small>'+E(h[1])+'</small>':''}
 function page(){
-  var t=TX[S.lang],tt=totals(),rows='';
+  var t=TX[S.lang],tt=totals(),rows='',ko=S.lang==='ko';
   var n=Math.max(5,S.items.length);
   for(var i=0;i<n;i++){var it=S.items[i];
     if(it&&(it.desc||it.price||it.qty)){var amt=(+it.qty||0)*(+it.price||0);
-      rows+='<tr><td class="n">'+(i+1)+'</td><td>'+E(it.desc)+(it.sub?'<div class="s">'+E(it.sub)+'</div>':'')+'</td><td class="c">'+E(it.qty)+(it.unit?' '+E(it.unit):'')+'</td><td class="r">'+money(it.price)+'</td><td class="r">'+money(amt)+'</td></tr>'}
-    else rows+='<tr><td class="n">'+(i+1)+'</td><td></td><td></td><td></td><td></td></tr>'}
-  var th=t.th.map(function(h,i){return '<th style="text-align:'+(i===0||i===2?'center':i===1?'left':'right')+'">'+E(h[0])+(h[1]?'<small>'+E(h[1])+'</small>':'')+'</th>'}).join('');
+      rows+='<tr><td>'+E(it.desc)+(it.sub?'<div class="s">'+E(it.sub)+'</div>':'')+'</td><td class="c">'+E(it.qty)+(it.unit?' '+E(it.unit):'')+'</td><td class="r">'+money(it.price)+'</td><td class="r">'+money(amt)+'</td></tr>'}
+    else rows+='<tr><td></td><td></td><td></td><td></td></tr>'}
+  var W=['46%','16%','19%','19%'];
+  var th=t.th.slice(1).map(function(h,i){if(i===2&&vmNote())h=[h[0]+' ('+vmNote()+')',''];return '<th style="width:'+W[i]+';text-align:'+(i===0?'left':i===1?'center':'right')+'">'+E(h[0])+(h[1]?'<small>'+E(h[1])+'</small>':'')+'</th>'}).join('');
   var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms];
-  return '<div class="ivpage"><div class="ivb"><img src="'+LOGO+'" alt="BUFF"><b>'+t.title+'</b></div><div class="ivc">'
-  +'<div class="ivtwo"><div><div class="ivh">'+E(t.from[0])+ph(t.from)+'</div>'+[S.fCo,S.fAd,S.fEm,S.fTx].map(function(v,i){return fld(t.fl[i],v)}).join('')+'</div>'
-  +'<div><div class="ivh">'+E(t.bill[0])+ph(t.bill)+'</div>'+[S.cCo,S.cAd,S.cEm,S.cTx].map(function(v,i){return fld(t.bl[i],v)}).join('')+'</div></div>'
-  +'<div class="ivd">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+(h[1]?' · <small>'+E(h[1])+'</small>':'')+'</div><div class="v">'+E(dv[i])+'</div></div>'}).join('')+'</div>'
+  var bill=[S.cCo,S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
+  var tot=function(i,v,c){return '<tr'+(c?' class="T"':'')+'><td>'+E(t.tot[i][0])+(t.tot[i][1]?'<small>'+E(t.tot[i][1])+'</small>':'')+(i===1?' '+vatLabel():'')+'</td><td>'+v+'</td></tr>'};
+  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+t.title+'</div>'
+  +'<div class="ivhead"><div><div class="k">'+E(t.bill[0])+ph(t.bill)+'</div><div class="g">'+(bill||'&nbsp;')+'</div></div>'
+  +'<div class="rt">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+ph(h)+'</div><div class="g">'+E(dv[i])+'</div></div>'}).join('')+'</div></div>'
   +'<table class="ivt"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'
-  +'<div class="ivtot"><div><span class="k">'+E(t.tot[0][0])+(t.tot[0][1]?'<small>'+t.tot[0][1]+'</small>':'')+'</span><span>'+money(tt.sub)+'</span></div>'
-  +'<div><span class="k">'+E(t.tot[1][0])+(t.tot[1][1]?'<small>'+t.tot[1][1]+'</small>':'')+(+S.vat?' '+(+S.vat)+'%':'')+'</span><span>'+money(tt.vat)+'</span></div>'
-  +'<div class="T"><span class="k">'+E(t.tot[2][0])+(t.tot[2][1]?'<small>'+t.tot[2][1]+'</small>':'')+'</span><span>'+money(tt.tot)+'</span></div></div>'
-  +'<div class="ivp"><div><div class="ivh">'+E(t.pay[0])+ph(t.pay)+'</div>'+[S.bank,S.holder,S.acct].map(function(v,i){return '<div class="r"><span>'+E(t.pl[i][0])+'</span><div>'+E(v)+'</div></div>'}).join('')+'</div>'
-  +'<div><div class="ivh">'+E(t.note[0])+ph(t.note)+'</div><p>'+E(S.notes)+'</p></div></div></div>'
-  +'<div class="ivfoot"><b>BUFF UNIVERSE</b>buffuniverse.co.kr · buff.universe@gmail.com</div></div>';
+  +'<table class="ivtot"><tbody>'+tot(0,money(tt.sub))+tot(1,money(tt.vat))+tot(2,money(tt.tot),1)+'</tbody></table>'
+  +'<div class="ivn"><p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>'
+  +(S.notes?'<p>'+E(S.notes)+'</p>':'')+'<p class="ty">'+(ko?'감사합니다. Thank you for your business!':'Thank you for your business!')+'</p></div></div>'
+  +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+': '+E(S.fTx)+'</div></div></div>';
 }
 function scale(){var b=document.getElementById('ivbox'),s=document.getElementById('ivsc');if(!b||!s)return;var k=Math.min(1,(b.clientWidth-32)/794);s.style.transform='scale('+k+')';s.style.width='794px';s.parentNode.style.height=(s.scrollHeight*k+32)+'px'}
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
@@ -79,15 +83,17 @@ function itemsForm(){return S.items.map(function(it,i){return '<div class="ivit"
  +'<label>상세 설명 (선택)</label><input type="text" data-i="'+i+'" data-f="sub" value="'+E(it.sub)+'">'
  +'<div class="g"><div><label>수량</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="qty" value="'+E(it.qty)+'"></div><div><label>단위 (선택)</label><input type="text" data-i="'+i+'" data-f="unit" value="'+E(it.unit)+'" placeholder="식 / hrs"></div><div><label>단가</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="price" value="'+E(it.price)+'"></div></div></div>'}).join('')}
 
+function loadScript(u){return new Promise(function(res,rej){var x=document.createElement('script');x.src=u;x.onload=res;x.onerror=function(){rej(new Error(u+' 로드 실패'))};document.head.appendChild(x)})}
+function loadDocx(){var v='?v='+Date.now();return loadScript('vendor/docx.iife.js').then(function(){return loadScript('invoice_docx.js'+v)})}
 window.drawInvoice=function(){
   S=ld();S.no=nextNo();S.issue=today();S.due=addDays(14);S.terms='Net 14';
   S.cCo='';S.cAd='';S.cEm='';S.cTx='';S.items=[{desc:'',sub:'',qty:1,unit:'',price:''}];
   var m=document.getElementById('main');
-  m.innerHTML='<style>'+CSS+'</style><div class="bar ivbar"><h2>인보이스 발급</h2><button class="btn line" id="ivreset" type="button">새로 작성</button><button class="btn" id="ivprint" type="button">PDF로 저장 / 인쇄</button></div>'
+  m.innerHTML='<style>'+CSS+'</style><div class="bar ivbar"><h2>인보이스 발급</h2><button class="btn line" id="ivreset" type="button">새로 작성</button><button class="btn line" id="ivprint" type="button">PDF로 저장 / 인쇄</button><button class="btn" id="ivdocx" type="button">Word(docx) 저장</button></div>'
   +'<p class="hint ivbar">입력하면 오른쪽 미리보기가 바로 바뀝니다. “PDF로 저장 / 인쇄”를 누른 뒤 대상(프린터)을 “PDF로 저장”으로 선택하세요. 공급자·계좌 정보는 이 브라우저에 저장됩니다.</p>'
   +'<div class="ivw"><div class="ivform"><div class="sec"><h3>기본</h3>'
   +'<label>언어</label><select data-k="lang"><option value="ko">국문 (영문 병기)</option><option value="en">English</option></select>'
-  +'<div class="grid2"><div><label>통화</label><select data-k="cur"><option value="KRW">KRW (₩)</option><option value="USD">USD ($)</option></select></div><div><label>부가세</label><select data-k="vat"><option value="10">10% 포함 계산</option><option value="0">없음 (0%)</option></select></div></div>'
+  +'<div class="grid2"><div><label>통화</label><select data-k="cur"><option value="KRW">KRW (₩)</option><option value="USD">USD ($)</option></select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
   +inp('no','인보이스 번호',S.no)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+inp('terms','결제 조건',S.terms,'text','예: Net 14 / 수령 즉시')+'</div>'
   +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
   +'<div class="sec"><h3>서비스 내역</h3><div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:12px">+ 항목 추가</button></div>'
@@ -96,12 +102,13 @@ window.drawInvoice=function(){
   +'<div class="ivpv"><div class="ivbox" id="ivbox"><div><div class="ivsc" id="ivsc"></div></div></div></div></div>';
   [].forEach.call(m.querySelectorAll('select[data-k]'),function(s){s.value=S[s.getAttribute('data-k')]});
   m.querySelector('.ivform').addEventListener('input',function(e){var t=e.target,k=t.getAttribute('data-k');
-    if(k){S[k]=t.tagName==='SELECT'&&k==='vat'?+t.value:t.value;sv()}
+    if(k){S[k]=t.value;sv()}
     else if(t.getAttribute('data-f')){S.items[+t.getAttribute('data-i')][t.getAttribute('data-f')]=t.value}
     paint()});
-  m.querySelector('.ivform').addEventListener('change',function(e){if(e.target.getAttribute('data-k')==='lang'||e.target.getAttribute('data-k')==='cur')paint()});
+  m.querySelector('.ivform').addEventListener('change',function(e){if(/^(lang|cur|vm)$/.test(e.target.getAttribute('data-k')||''))paint()});
   function redraw(){document.getElementById('ivitems').innerHTML=itemsForm();bind();paint()}
   function bind(){[].forEach.call(document.querySelectorAll('[data-del]'),function(b){b.onclick=function(){S.items.splice(+b.getAttribute('data-del'),1);if(!S.items.length)S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()}})}
+  document.getElementById('ivdocx').onclick=function(){var b=this;b.disabled=true;var o=b.textContent;b.textContent='만드는 중…';bump();(window.buffInvoiceDocx?Promise.resolve():loadDocx()).then(function(){return window.buffInvoiceDocx(window.buffInv.get())}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BUFF_Invoice_'+S.no+(S.cCo?'_'+S.cCo.replace(/[\\/:*?"<>|]/g,''):'')+'.docx';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}).catch(function(e){alert('docx 생성 실패: '+e.message)}).then(function(){b.disabled=false;b.textContent=o})};
   document.getElementById('ivadd').onclick=function(){S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()};
   document.getElementById('ivreset').onclick=function(){if(confirm('입력한 내용을 지우고 새로 작성할까요?'))window.drawInvoice()};
   document.getElementById('ivprint').onclick=function(){bump();var old=document.title;document.title='BUFF_Invoice_'+S.no+(S.cCo?'_'+S.cCo.replace(/[\\/:*?"<>|]/g,''):'');window.print();setTimeout(function(){document.title=old},500)};
