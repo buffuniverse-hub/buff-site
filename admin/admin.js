@@ -85,16 +85,16 @@ var T={
   blank:function(){return{is_open:true,sort_order:0}}}
 };
 var SETTINGS=[['career_headline','Career 큰 제목','text','“BUFF”로 시작하면 로고 이미지로 표시됩니다.'],['career_subtext','Career 안내 문구','textarea'],['career_team_note','함께 성장 안내문','textarea'],['partner_text','파트너 등록 안내문','textarea'],['contact_email','채용·문의 이메일','text']];
-var TABS=['home','news','works','clients','team_members','career_positions','settings'];
+var TABS=['home','news','works','clients','team_members','career_positions','settings','invoice'];
 var cur='home', cache={};
 
 /* ---------- 화면 ---------- */
 function show(on){$('#login').classList.toggle('hide',on);$('#app').classList.toggle('hide',!on);$('#viewsite').classList.toggle('hide',!on);$('#logout').classList.toggle('hide',!on);if(on)go(cur)}
 function drawTabs(){
-  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Career 문구':k==='home'?'메인':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
+  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Career 문구':k==='home'?'메인':k==='invoice'?'인보이스':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
   [].forEach.call($('#tabs').children,function(b){b.onclick=function(){go(b.getAttribute('data-k'))}});
 }
-function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
+function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():k==='invoice'?window.drawInvoice():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
 
 function drawList(k){
   var d=T[k];
