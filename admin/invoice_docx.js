@@ -4,7 +4,7 @@ var D=window.docx;
 var INK='1D1D1F',GRAY='6E6E73',BLACK='0A0A0A',PH='8E8E93';
 function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(u+' '+r.status);return r.arrayBuffer()}).then(function(b){return new Uint8Array(b)})}
 window.buffInvoiceDocx=function(g){
-  var S=g.S,T=g.TX[S.lang],tt=g.tt,money=g.money,KO=S.lang==='ko';
+  var S=g.S,T=g.T||g.TX[S.lang],tt=g.tt,money=g.money,KO=S.lang==='ko';
   return Promise.all([get('vendor/Paperozi.ttf'),get('vendor/PaperoziBold.ttf'),get('vendor/logo_white.png')]).then(function(a){
     var NONE={style:D.BorderStyle.NONE,size:0,color:'FFFFFF'},NB={top:NONE,bottom:NONE,left:NONE,right:NONE};
     var LN={style:D.BorderStyle.SINGLE,size:4,color:INK},GB={top:LN,bottom:LN,left:LN,right:LN};
@@ -42,11 +42,11 @@ window.buffInvoiceDocx=function(g){
         cell(p(r(v,{size:strong?22:19,bold:strong,color:strong?'FFFFFF':INK}),{align:D.AlignmentType.RIGHT}),tw[1],{fill:strong?BLACK:undefined,borders:bd,mt:100,mb:100})]})};
     var totals=tbl(tw,[trow(0,money(tt.sub)),trow(1,money(tt.vat)),trow(2,money(tt.tot),true)],{alignment:D.AlignmentType.RIGHT});
     // notes
-    var pay=[];var pls=[S.bank,S.holder,S.acct];
-    pay.push(p([r(T.pay[0],{size:18,bold:true})].concat(sub(T.pay)),{after:30}));
-    pls.forEach(function(v,i){if(v)pay.push(p(r(T.pl[i][0]+': '+v,{size:18,color:'4A4A4F'})))});
-    if(S.notes)String(S.notes).split('\n').forEach(function(l,i){pay.push(p(r(l,{size:18,color:'4A4A4F'}),{before:i?0:140}))});
-    pay.push(p(r('감사합니다. Thank you for your business!',{size:18,bold:true}),{before:140}));
+    var QT=S.doc==='qt',pay=[];var pls=[S.bank,S.holder,S.acct];
+    if(!QT){pay.push(p([r(T.pay[0],{size:18,bold:true})].concat(sub(T.pay)),{after:30}));
+    pls.forEach(function(v,i){if(v)pay.push(p(r(T.pl[i][0]+': '+v,{size:18,color:'4A4A4F'})))});}
+    if(g.notes)String(g.notes).split('\n').forEach(function(l,i){pay.push(p(r(l,{size:18,color:'4A4A4F'}),{before:i?0:140}))});
+    pay.push(p(r(QT?'견적서를 검토해 주셔서 감사합니다. Thank you for your consideration.':'감사합니다. Thank you for your business!',{size:18,bold:true}),{before:140}));
     // footer band
     var FB=11906;
     var fl=[new D.Paragraph({children:[new D.ImageRun({type:'png',data:a[2],transformation:{width:127,height:40},altText:{title:'BUFF',description:'BUFF logo',name:'logo'}})]})];
@@ -55,7 +55,7 @@ window.buffInvoiceDocx=function(g){
     var foot=new D.Footer({children:[band]});
     var doc=new D.Document({
       fonts:[{name:'Paperozi',data:a[0],characterSet:D.CharacterSet.HANGUL},{name:'Paperozi Bold',data:a[1],characterSet:D.CharacterSet.HANGUL}],
-      creator:'BUFF UNIVERSE',title:'BUFF UNIVERSE Invoice '+(S.no||''),
+      creator:'BUFF UNIVERSE',title:'BUFF UNIVERSE '+(S.doc==='qt'?'Quotation ':'Invoice ')+(S.no||''),
       styles:{default:{document:{run:{font:'Paperozi',size:19,color:INK}}}},
       sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:840,bottom:2500,left:M,right:M,header:0,footer:0}}},footers:{default:foot},
         children:[p(r(T.title[0],{size:68,bold:true}),{line:300}),gap(360),head,gap(320),items,gap(280),totals,gap(300),].concat(pay)}]});
