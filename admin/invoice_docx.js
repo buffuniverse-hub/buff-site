@@ -42,7 +42,7 @@ window.buffInvoiceDocx=function(g){
         cell(p(r(v,{size:strong?22:19,bold:strong,color:strong?'FFFFFF':INK}),{align:D.AlignmentType.RIGHT}),tw[1],{fill:strong?BLACK:undefined,borders:bd,mt:100,mb:100})]})};
     var totals=tbl(tw,[trow(0,money(tt.sub)),trow(1,money(tt.vat)),trow(2,money(tt.tot),true)],{alignment:D.AlignmentType.RIGHT});
     // notes
-    var QT=S.doc==='qt',pay=[];var pls=[S.bank,S.holder,S.acct];
+    var QT=S.doc==='qt',pay=[];var pls=[S.bank,S.holder,S.acct,S.swift];
     if(!QT){pay.push(p([r(T.pay[0],{size:18,bold:true})].concat(sub(T.pay)),{after:30}));
     pls.forEach(function(v,i){if(v)pay.push(p(r(T.pl[i][0]+': '+v,{size:18,color:'4A4A4F'})))});}
     if(g.notes)String(g.notes).split('\n').forEach(function(l,i){pay.push(p(r(l,{size:18,color:'4A4A4F'}),{before:i?0:140}))});
