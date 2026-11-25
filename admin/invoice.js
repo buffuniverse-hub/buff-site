@@ -10,7 +10,7 @@ var P={title:['SERVICE INVOICE',''],from:['공급자','FROM'],bill:['공급받�
  pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호/SWIFT','Account No. / SWIFT']],note:['비고','NOTES']};
 function mk(l){var ko=l==='ko',f=function(x){return Array.isArray(x[0])?x.map(f):(ko||!x[1]?[x[0],x[1]]:[x[1],x[0]])};
   var o={};Object.keys(P).forEach(function(k){o[k]=f(P[k])});return o}
-var TX={ko:mk('ko'),en:mk('en')};
+var TX={ko:mk('ko'),en:mk('en')};TX.ko.title=TX.en.title=['SERVICE INVOICE','인보이스'];
 var DEF={lang:'ko',cur:'KRW',vm:'ex',
  fCo:'BUFF UNIVERSE',fAd:'202-E4, Beomsan Bldg., 1921-1 Nambusunhwan-ro, Gwanak-gu, Seoul',fNm:'Dongjun Kim',fEm:'buff.universe@gmail.com',fTx:'295-24-02126',
  bank:'KB Kookmin Bank (KB국민은행)',holder:'Dongjun Kim (BUFF UNIVERSE)',acct:'206037-04-014946',qnotes:'본 견적서는 유효기간 내에 수락해 주시면 작업을 진행하겠습니다.\nThis quotation is valid until the date above.',notes:'결제 기한 내에 위 계좌로 입금해 주세요.\nPlease transfer to the account above by the due date.'};
@@ -40,7 +40,7 @@ function totals(){var s=0;S.items.forEach(function(it){s+=(+it.qty||0)*(+it.pric
 function vmNote(){var ko=S.lang==='ko';return S.vm==='in'?(ko?'VAT 포함':'incl. VAT'):S.vm==='ex'?(ko?'VAT 별도':'excl. VAT'):''}
 function vatLabel(){return S.vm==='none'?'없음/None':'10%'}
 function tx(){var t=TX[S.lang];if(!qt())return t;var ko=S.lang==='ko',c=JSON.parse(JSON.stringify(t));
-  c.title=['QUOTATION',''];c.dl[0]=ko?['견적서 번호','Quote No.']:['Quote No.','견적서 번호'];c.dl[2]=ko?['견적 유효기간','Valid Until']:['Valid Until','견적 유효기간'];
+  c.title=['QUOTATION','견적서'];c.dl[0]=ko?['견적서 번호','Quote No.']:['Quote No.','견적서 번호'];c.dl[2]=ko?['견적 유효기간','Valid Until']:['Valid Until','견적 유효기간'];
   c.tot[2]=ko?['총 견적금액','Total']:['Total','총 견적금액'];return c}
 window.buffInv={get:function(){return{notes:nt(),S:S,T:tx(),TX:TX,tt:totals(),money:money,fmtD:fmtD,vmNote:vmNote,vatLabel:vatLabel}}};
 
@@ -48,7 +48,7 @@ var CSS='.ivw{display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:
 +'.ivit{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#fafafa}.ivit .g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.ivit .g label{margin-top:6px;font-size:11px}.ivit input{padding:8px 10px;font-size:14px}.ivit .h{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute);font-weight:600}'
 +'.ivpv{position:sticky;top:112px}.ivbox{background:#e8e8ed;border-radius:18px;padding:16px;overflow:hidden}.ivsc{transform-origin:top left}'
 +'.ivpage{width:794px;height:1123px;background:#fff;color:#1D1D1F;font-family:Paperozi,sans-serif;display:flex;flex-direction:column;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}.ivpage *{box-sizing:border-box}'
-+'.ivc{padding:56px 56px 0;flex:1}.ivttl{font-size:36px;font-weight:700;letter-spacing:.01em;line-height:1}.ivsub{font-size:12px;color:#8E8E93;margin-top:8px;letter-spacing:.06em}.ivhead{display:flex;justify-content:space-between;margin-top:34px;font-size:12px;line-height:1.55}'
++'.ivc{padding:56px 56px 0;flex:1}.ivts{font-size:15px;font-weight:300;color:#1D1D1F;letter-spacing:.32em;margin-left:18px;vertical-align:baseline}.ivttl{font-size:36px;font-weight:700;letter-spacing:.01em;line-height:1}.ivsub{font-size:12px;color:#8E8E93;margin-top:8px;letter-spacing:.06em}.ivhead{display:flex;justify-content:space-between;margin-top:34px;font-size:12px;line-height:1.55}'
 +'.ivhead .k{font-weight:700;font-size:12px}.ivhead .k small{font-weight:400;color:#8E8E93;font-size:10px;margin-left:5px}.ivhead .g{color:#4a4a4f}.ivhead .rt{text-align:right}.ivhead .rt>div{margin-bottom:10px}.ivhead .rt .g{color:#1D1D1F}'
 +'.ivt{width:100%;border-collapse:collapse;margin-top:26px;font-size:12px}.ivt th{background:#0A0A0A;color:#fff;font-size:11px;padding:8px 10px;text-align:left;font-weight:700;border:1px solid #0A0A0A}.ivt th small{font-weight:400;color:#B0B0B8;font-size:9px;margin-left:4px}.ivt td{border:1px solid #1D1D1F;padding:6px 10px;height:46px;vertical-align:middle;color:#3a3a3f}.ivt .c{text-align:center}.ivt .r{text-align:right}.ivt .s{font-size:10px;color:#8E8E93;margin-top:2px}'
 +'.ivtot{margin:22px 0 0 auto;width:46%;border-collapse:collapse;font-size:12px}.ivtot td{border:1px solid #1D1D1F;padding:8px 10px}.ivtot td:first-child{color:#4a4a4f;width:52%}.ivtot td:first-child small{font-size:9px;color:#9A9AA0;margin-left:4px}.ivtot td:last-child{text-align:right}.ivtot .T td{background:#0A0A0A;color:#fff;font-weight:700;font-size:14px;border-color:#0A0A0A}.ivtot .T td:first-child{color:#fff}.ivtot .T small{color:#B0B0B8}'
@@ -69,7 +69,7 @@ function page(){
   var dv=[S.no,fmtD(S.issue),fmtD(S.due),S.terms,S.fNm];
   var bill=[S.cCo,S.cNm?'담당자 / Attn: '+S.cNm:'',S.cAd,S.cEm,S.cTx].filter(Boolean).map(E).join('<br>');
   var tot=function(i,v,c){return '<tr'+(c?' class="T"':'')+'><td>'+E(t.tot[i][0])+(t.tot[i][1]?'<small>'+E(t.tot[i][1])+'</small>':'')+(i===1?' '+vatLabel():'')+'</td><td>'+v+'</td></tr>'};
-  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+'</div>'
+  return '<div class="ivpage"><div class="ivc"><div class="ivttl">'+E(t.title[0])+(t.title[1]?'<span class="ivts">'+E(t.title[1])+'</span>':'')+'</div>'
   +'<div class="ivhead"><div><div class="k">'+E(t.bill[0])+ph(t.bill)+'</div><div class="g">'+(bill||'&nbsp;')+'</div></div>'
   +'<div class="rt">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+ph(h)+'</div><div class="g">'+E(dv[i])+'</div></div>'}).join('')+'</div></div>'
   +'<table class="ivt"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'
