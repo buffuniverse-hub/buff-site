@@ -21,15 +21,18 @@ function E(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'
 function today(d){d=d||new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
 function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return today(d)}
 function fmtD(s){return s?s.replace(/-/g,'. ')+'.':''}
-function money(n){n=+n||0;return S.cur==='KRW'?'₩'+Math.round(n).toLocaleString('en-US'):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+var CUR={KRW:['₩',0,'원화 KRW (₩)'],USD:['US$',2,'미국 달러 USD (US$)'],EUR:['€',2,'유로 EUR (€)'],JPY:['JP¥',0,'일본 엔 JPY (JP¥)'],GBP:['£',2,'영국 파운드 GBP (£)'],CNY:['CN¥',2,'중국 위안 CNY (CN¥)'],THB:['฿',2,'태국 바트 THB (฿)'],SGD:['S$',2,'싱가포르 달러 SGD (S$)'],AUD:['A$',2,'호주 달러 AUD (A$)']};
+function dec(){return (CUR[S.cur]||CUR.KRW)[1]}
+function rnd(x){var m=Math.pow(10,dec());return Math.round(x*m)/m}
+function money(n){n=+n||0;var c=CUR[S.cur]||CUR.KRW;return c[0]+n.toLocaleString('en-US',{minimumFractionDigits:c[1],maximumFractionDigits:c[1]})}
 function nextNo(){var y=new Date().getFullYear(),k='buff_invoice_seq_'+y,n=1;try{n=(+localStorage.getItem(k)||0)+1}catch(e){}return 'BUFF-'+y+'-'+('00'+n).slice(-3)}
 function bump(){var y=new Date().getFullYear(),k='buff_invoice_seq_'+y;try{var m=(S.no||'').match(/^BUFF-(\d{4})-(\d+)$/);if(m&&+m[1]===y)localStorage.setItem(k,String(Math.max(+localStorage.getItem(k)||0,+m[2])))}catch(e){}}
 
 function termText(v){return v==='0'?'Due on receipt · 수령 즉시':'Net '+v+' · 발행 후 '+v+'일 이내'}
 function addTo(d,n){var x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return today(x)}
 function totals(){var s=0;S.items.forEach(function(it){s+=(+it.qty||0)*(+it.price||0)});var sub,v,tot;
-  if(S.vm==='in'){tot=s;sub=S.cur==='KRW'?Math.round(s/1.1):Math.round(s/1.1*100)/100;v=tot-sub}
-  else if(S.vm==='ex'){sub=s;v=S.cur==='KRW'?Math.round(s*.1):Math.round(s*10)/100;tot=sub+v}
+  if(S.vm==='in'){tot=s;sub=rnd(s/1.1);v=rnd(tot-sub)}
+  else if(S.vm==='ex'){sub=s;v=rnd(s*.1);tot=sub+v}
   else{sub=s;v=0;tot=s}
   return{sub:sub,vat:v,tot:tot}}
 function vmNote(){var ko=S.lang==='ko';return S.vm==='in'?(ko?'VAT 포함':'incl. VAT'):S.vm==='ex'?(ko?'VAT 별도':'excl. VAT'):''}
@@ -89,7 +92,7 @@ window.drawInvoice=function(){
   +'<p class="hint ivbar">입력하면 오른쪽 미리보기가 바로 바뀝니다. “PDF로 저장 / 인쇄”를 누른 뒤 대상(프린터)을 “PDF로 저장”으로 선택하세요. 공급자·계좌 정보는 이 브라우저에 저장됩니다.</p>'
   +'<div class="ivw"><div class="ivform"><div class="sec"><h3>기본</h3>'
   +'<label>대표 언어 (국·영문 병기)</label><select data-k="lang"><option value="ko">국문 위 · 영문 아래</option><option value="en">영문 위 · 국문 아래</option></select>'
-  +'<div class="grid2"><div><label>통화</label><select data-k="cur"><option value="KRW">KRW (₩)</option><option value="USD">USD ($)</option></select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
+  +'<div class="grid2"><div><label>통화</label><select data-k="cur">'+Object.keys(CUR).map(function(k){return '<option value="'+k+'">'+CUR[k][2]+'</option>'}).join('')+'</select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
   +inp('no','인보이스 번호',S.no)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','', 'text','예: 50% 선금, 50% 납품 후')+'</div>'+'</div>'
   +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
   +'<div class="sec"><h3>서비스 내역</h3><div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:12px">+ 항목 추가</button></div>'
