@@ -25,6 +25,8 @@ function money(n){n=+n||0;return S.cur==='KRW'?'₩'+Math.round(n).toLocaleStrin
 function nextNo(){var y=new Date().getFullYear(),k='buff_invoice_seq_'+y,n=1;try{n=(+localStorage.getItem(k)||0)+1}catch(e){}return 'BUFF-'+y+'-'+('00'+n).slice(-3)}
 function bump(){var y=new Date().getFullYear(),k='buff_invoice_seq_'+y;try{var m=(S.no||'').match(/^BUFF-(\d{4})-(\d+)$/);if(m&&+m[1]===y)localStorage.setItem(k,String(Math.max(+localStorage.getItem(k)||0,+m[2])))}catch(e){}}
 
+function termText(v){return v==='0'?'Due on receipt · 수령 즉시':'Net '+v+' · 발행 후 '+v+'일 이내'}
+function addTo(d,n){var x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return today(x)}
 function totals(){var s=0;S.items.forEach(function(it){s+=(+it.qty||0)*(+it.price||0)});var sub,v,tot;
   if(S.vm==='in'){tot=s;sub=S.cur==='KRW'?Math.round(s/1.1):Math.round(s/1.1*100)/100;v=tot-sub}
   else if(S.vm==='ex'){sub=s;v=S.cur==='KRW'?Math.round(s*.1):Math.round(s*10)/100;tot=sub+v}
@@ -80,7 +82,7 @@ function itemsForm(){return S.items.map(function(it,i){return '<div class="ivit"
 function loadScript(u){return new Promise(function(res,rej){var x=document.createElement('script');x.src=u;x.onload=res;x.onerror=function(){rej(new Error(u+' 로드 실패'))};document.head.appendChild(x)})}
 function loadDocx(){var v='?v='+Date.now();return loadScript('vendor/docx.iife.js').then(function(){return loadScript('invoice_docx.js'+v)})}
 window.drawInvoice=function(){
-  S=ld();S.no=nextNo();S.issue=today();S.due=addDays(14);S.terms='Net 14';
+  S=ld();S.no=nextNo();S.issue=today();S.due=addDays(14);S.ts='14';S.terms=termText('14');
   S.cCo='';S.cAd='';S.cEm='';S.cTx='';S.items=[{desc:'',sub:'',qty:1,unit:'',price:''}];
   var m=document.getElementById('main');
   m.innerHTML='<style>'+CSS+'</style><div class="bar ivbar"><h2>인보이스 발급</h2><button class="btn line" id="ivreset" type="button">새로 작성</button><button class="btn line" id="ivprint" type="button">PDF로 저장 / 인쇄</button><button class="btn" id="ivdocx" type="button">Word(docx) 저장</button></div>'
@@ -88,7 +90,7 @@ window.drawInvoice=function(){
   +'<div class="ivw"><div class="ivform"><div class="sec"><h3>기본</h3>'
   +'<label>대표 언어 (국·영문 병기)</label><select data-k="lang"><option value="ko">국문 위 · 영문 아래</option><option value="en">영문 위 · 국문 아래</option></select>'
   +'<div class="grid2"><div><label>통화</label><select data-k="cur"><option value="KRW">KRW (₩)</option><option value="USD">USD ($)</option></select></div><div><label>부가세 · 단가 기준</label><select data-k="vm"><option value="ex">부가세 별도 (+10%)</option><option value="in">부가세 포함 (역산)</option><option value="none">부가세 없음</option></select></div></div>'
-  +inp('no','인보이스 번호',S.no)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+inp('terms','결제 조건',S.terms,'text','예: Net 14 / 수령 즉시')+'</div>'
+  +inp('no','인보이스 번호',S.no)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due','결제 기한',S.due,'date')+'</div></div>'+'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','', 'text','예: 50% 선금, 50% 납품 후')+'</div>'+'</div>'
   +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
   +'<div class="sec"><h3>서비스 내역</h3><div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:12px">+ 항목 추가</button></div>'
   +'<div class="sec"><h3>입금 계좌 · 비고</h3>'+inp('bank','은행명',S.bank)+inp('holder','예금주',S.holder)+inp('acct','계좌번호 / SWIFT',S.acct)+'<label>비고</label><textarea data-k="notes" style="min-height:80px">'+E(S.notes)+'</textarea></div>'
@@ -96,10 +98,17 @@ window.drawInvoice=function(){
   +'<div class="ivpv"><div class="ivbox" id="ivbox"><div><div class="ivsc" id="ivsc"></div></div></div></div></div>';
   [].forEach.call(m.querySelectorAll('select[data-k]'),function(s){s.value=S[s.getAttribute('data-k')]});
   m.querySelector('.ivform').addEventListener('input',function(e){var t=e.target,k=t.getAttribute('data-k');
-    if(k){S[k]=t.value;sv()}
+    if(k){S[k]=t.value;
+      var f=m.querySelector('[data-k=due]'),sel=m.querySelector('[data-k=ts]'),tm=document.getElementById('ivterms');
+      if(k==='ts'){if(t.value==='custom'){m.querySelector('[data-k=terms]').value=S.terms}else{S.terms=termText(t.value);S.due=t.value==='0'?S.issue:addTo(S.issue,+t.value);f.value=S.due}}
+      else if(k==='issue'&&S.ts!=='custom'){S.due=S.ts==='0'?S.issue:addTo(S.issue,+S.ts);f.value=S.due}
+      else if(k==='due'&&S.ts!=='custom'&&(S.ts==='0'?S.due!==S.issue:S.due!==addTo(S.issue,+S.ts))){S.ts='custom';S.terms=S.terms;sel.value='custom'}
+      tm.classList.toggle('hide',S.ts!=='custom');
+      if(k==='ts'||k==='due'||k==='issue'){if(S.ts==='custom'&&k!=='terms'&&!S.terms)S.terms=''}
+      sv()}
     else if(t.getAttribute('data-f')){S.items[+t.getAttribute('data-i')][t.getAttribute('data-f')]=t.value}
     paint()});
-  m.querySelector('.ivform').addEventListener('change',function(e){if(/^(lang|cur|vm)$/.test(e.target.getAttribute('data-k')||''))paint()});
+  m.querySelector('.ivform').addEventListener('change',function(e){if(/^(lang|cur|vm|ts)$/.test(e.target.getAttribute('data-k')||''))paint()});
   function redraw(){document.getElementById('ivitems').innerHTML=itemsForm();bind();paint()}
   function bind(){[].forEach.call(document.querySelectorAll('[data-del]'),function(b){b.onclick=function(){S.items.splice(+b.getAttribute('data-del'),1);if(!S.items.length)S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()}})}
   document.getElementById('ivdocx').onclick=function(){var b=this;b.disabled=true;var o=b.textContent;b.textContent='만드는 중…';bump();(window.buffInvoiceDocx?Promise.resolve():loadDocx()).then(function(){return window.buffInvoiceDocx(window.buffInv.get())}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BUFF_Invoice_'+S.no+(S.cCo?'_'+S.cCo.replace(/[\\/:*?"<>|]/g,''):'')+'.docx';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}).catch(function(e){alert('docx 생성 실패: '+e.message)}).then(function(){b.disabled=false;b.textContent=o})};
