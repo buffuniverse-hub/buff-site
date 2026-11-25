@@ -85,6 +85,7 @@ var T={
   blank:function(){return{is_open:true,sort_order:0}}}
 };
 var SETTINGS=[['career_headline','Career 큰 제목','text','“BUFF”로 시작하면 로고 이미지로 표시됩니다.'],['career_subtext','Career 안내 문구','textarea'],['career_team_note','함께 성장 안내문','textarea'],['partner_text','파트너 등록 안내문','textarea'],['contact_email','채용·문의 이메일','text']];
+window.buffRest=rest;window.buffToast=toast;
 var TABS=['home','news','works','clients','team_members','career_positions','settings','invoice'];
 var cur='home', cache={};
 
