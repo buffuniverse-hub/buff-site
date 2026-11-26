@@ -182,7 +182,7 @@ function setMeta(t,d,img){
 }
 function pdfUrl(u){u=String(u||'').trim();if(!u)return '';var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)||u.match(/[?&]id=([^&#]+)/);if(/drive\.google\.com|docs\.google\.com/.test(u)&&m)return 'https://drive.google.com/uc?export=download&id='+m[1];return u}
 function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f(){h.style.fontSize='';var fs=parseFloat(getComputedStyle(h).fontSize);while(h.scrollWidth>h.clientWidth&&fs>14){fs-=1;h.style.fontSize=fs+'px'}}f();window.addEventListener('resize',f);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)}
-function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795678477';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
+function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795678831';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
