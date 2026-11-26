@@ -377,7 +377,7 @@ function init(){
   if(app){var k=app.getAttribute('data-page');if(k==='work')workDetail(app);else if(k==='news')newsDetail(app)}
   var r=$('#dc-root');
   if(!r){var pp=bindLists();Promise.all(pp||[]).then(fitAll,fitAll);setTimeout(fitAll,400);return}
-  /* 홈·Career 등은 화면이 나중에 그려지고, 탭 클릭 등으로 다시 그려지면 바인딩이 지워지므로 다시 적용합니다 */
+  /* 홈·Careers 등은 화면이 나중에 그려지고, 탭 클릭 등으로 다시 그려지면 바인딩이 지워지므로 다시 적용합니다 */
   var obs=new MutationObserver(function(){clearTimeout(obs.t);obs.t=setTimeout(run,60)});
   function vids(){[].forEach.call(r.querySelectorAll('video'),function(v){v.muted=true;v.defaultMuted=true;v.setAttribute('playsinline','');if(v.paused){var q=v.play();if(q&&q.catch)q.catch(function(){})}})}
   ['touchstart','click','scroll'].forEach(function(e){window.addEventListener(e,vids,{once:true,passive:true})});

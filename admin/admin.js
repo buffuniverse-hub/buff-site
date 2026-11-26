@@ -79,12 +79,12 @@ var T={
   list:function(r){return{img:r.avatar_url,title:r.name,sub:r.role,round:true}},
   fields:[['name','이름','text'],['name_en','[EN] Name','text'],['role','직함','text'],['role_en','영문 직무','text'],['avatar_url','프로필 원형 사진','image'],['photo_url','대표 큰 사진 (4:5 권장)','image'],['lead','대표 문장 (강조)','textarea',{rows:3}],['body','소개','textarea',{rows:3}],['social','SNS 링크 (아이콘으로 표시)','social'],['education','학력','textarea',{rows:2}],['career','경력','textarea',{rows:4}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{published:true,sort_order:0}}},
- career_positions:{label:'Career 포지션',title:'모집 포지션',order:'sort_order.asc',hint:'Career 페이지의 포지션 카드입니다. “모집 중”을 끄면 사이트에서 숨겨집니다.',
+ career_positions:{label:'Careers 포지션',title:'모집 포지션',order:'sort_order.asc',hint:'Careers 페이지의 포지션 카드입니다. “모집 중”을 끄면 사이트에서 숨겨집니다.',
   list:function(r){return{title:r.title,sub:r.description}},
   fields:[['title','포지션명','text'],['description','설명','textarea',{rows:2}],['description_en','[EN] Description','textarea',{rows:2}],['is_open','모집 중','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{is_open:true,sort_order:0}}}
 };
-var SETTINGS=[['career_headline','Career 큰 제목','text','“BUFF”로 시작하면 로고 이미지로 표시됩니다.'],['career_subtext','Career 안내 문구','textarea'],['career_team_note','함께 성장 안내문','textarea'],['partner_text','파트너 등록 안내문','textarea'],['contact_email','채용·문의 이메일','text']];
+var SETTINGS=[['career_headline','Careers 큰 제목','text','“BUFF”로 시작하면 로고 이미지로 표시됩니다.'],['career_subtext','Careers 안내 문구','textarea'],['career_team_note','함께 성장 안내문','textarea'],['partner_text','파트너 등록 안내문','textarea'],['contact_email','채용·문의 이메일','text']];
 window.buffRest=rest;window.buffToast=toast;
 var TABS=['home','news','works','clients','team_members','career_positions','settings','invoice'];
 var cur='home', cache={};
@@ -92,7 +92,7 @@ var cur='home', cache={};
 /* ---------- 화면 ---------- */
 function show(on){$('#login').classList.toggle('hide',on);$('#app').classList.toggle('hide',!on);$('#viewsite').classList.toggle('hide',!on);$('#logout').classList.toggle('hide',!on);if(on)go(cur)}
 function drawTabs(){
-  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Career 문구':k==='home'?'메인':k==='invoice'?'인보이스•견적서':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
+  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Careers 문구':k==='home'?'메인':k==='invoice'?'인보이스•견적서':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
   [].forEach.call($('#tabs').children,function(b){b.onclick=function(){go(b.getAttribute('data-k'))}});
 }
 function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():k==='invoice'?window.openInvoiceTab():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
@@ -350,11 +350,11 @@ function drawHome(){
   });
 }
 
-/* ---------- Career 문구 ---------- */
+/* ---------- Careers 문구 ---------- */
 function drawSettings(){
   return rest('GET','site_settings','select=*').then(function(rows){
     var cur={};rows.forEach(function(r){cur[r.key]=r.value});
-    $('#main').innerHTML='<div class="bar"><h2>Career 문구</h2><button class="btn" id="saveS">저장</button></div><p class="hint">Career 페이지에 보이는 문구입니다. 줄바꿈은 그대로 반영됩니다.</p><div class="card" style="max-width:none;padding:28px" id="sf"></div><div class="err" id="serr"></div>';
+    $('#main').innerHTML='<div class="bar"><h2>Careers 문구</h2><button class="btn" id="saveS">저장</button></div><p class="hint">Careers 페이지에 보이는 문구입니다. 줄바꿈은 그대로 반영됩니다.</p><div class="card" style="max-width:none;padding:28px" id="sf"></div><div class="err" id="serr"></div>';
     var box=$('#sf');
     SETTINGS.forEach(function(s){box.appendChild(field([s[0],s[1],s[2],{rows:3,help:s[3]}],cur,{}))});
     $('#saveS').onclick=function(){var b=this;b.disabled=true;
