@@ -46,11 +46,11 @@ var CUR={KRW:['₩',0,'원화 KRW (₩)'],USD:['US$',2,'미국 달러 USD (US$)'
 function dec(){return (CUR[S.cur]||CUR.KRW)[1]}
 function rnd(x){var m=Math.pow(10,dec());return Math.round(x*m)/m}
 function money(n){n=+n||0;var c=CUR[S.cur]||CUR.KRW;return c[0]+n.toLocaleString('en-US',{minimumFractionDigits:c[1],maximumFractionDigits:c[1]})}
-function fname(){var c=String(S.cCo||'').replace(/\s*[\\/|]\s*/g,'_').replace(/[:*?"<>]/g,'').replace(/\s+/g,' ').trim();return (S.no||'BUFF')+'-'+(qt()?'quotation':'invoice')+(c?'-'+c:'')}
+function fname(){var c=String(S.cCo||'').replace(/\s*[\\/|]\s*/g,'_').replace(/[:*?"<>]/g,'').replace(/\s+/g,' ').trim();return (S.no||('BUFF-'+(qt()?'QUOTATION':'INVOICE')))+(c?'-'+c:'')}
 function nt(){return qt()?S.qnotes:S.notes}
 function qt(){return S&&S.doc==='qt'}
-function nextNo(){var y=new Date().getFullYear(),k=(qt()?'buff_quote_seq_':'buff_invoice_seq_')+y,n=1;try{n=(+localStorage.getItem(k)||0)+1}catch(e){}return 'BUFF-'+(qt()?'Q-':'')+y+'-'+('00'+n).slice(-3)}
-function bump(){var y=new Date().getFullYear(),k=(qt()?'buff_quote_seq_':'buff_invoice_seq_')+y;try{var m=(S.no||'').match(/^BUFF-(?:Q-)?(\d{4})-(\d+)$/);if(m&&+m[1]===y)localStorage.setItem(k,String(Math.max(+localStorage.getItem(k)||0,+m[2])))}catch(e){}}
+function nextNo(){var y=new Date().getFullYear(),k=(qt()?'buff_quote_seq_':'buff_invoice_seq_')+y,n=1;try{n=(+localStorage.getItem(k)||0)+1}catch(e){}return 'BUFF-'+(qt()?'QUOTATION-':'INVOICE-')+y+'-'+('00'+n).slice(-3)}
+function bump(){var y=new Date().getFullYear(),k=(qt()?'buff_quote_seq_':'buff_invoice_seq_')+y;try{var m=(S.no||'').match(/^BUFF-(?:Q-|INVOICE-|QUOTATION-)?(\d{4})-(\d+)$/i);if(m&&+m[1]===y)localStorage.setItem(k,String(Math.max(+localStorage.getItem(k)||0,+m[2])))}catch(e){}}
 
 function termText(v){return v==='0'?'Due on receipt · 수령 즉시':'Net '+v+' · 발행 후 '+v+'일 이내'}
 function addTo(d,n){var x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return today(x)}
