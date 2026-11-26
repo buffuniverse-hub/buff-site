@@ -50,7 +50,7 @@ window.buffInvoiceDocx=function(g){
     // footer band
     var FB=11906;
     var fl=[new D.Paragraph({children:[new D.ImageRun({type:'png',data:a[2],transformation:{width:127,height:40},altText:{title:'BUFF',description:'BUFF logo',name:'logo'}})]})];
-    var fr=[p(r(S.fCo,{size:19,bold:true,color:'FFFFFF'}),{align:D.AlignmentType.RIGHT}),p(r(S.fAd,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(S.fEm,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(T.fl[3][0]+' / '+T.fl[3][1]+': '+S.fTx,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT})];
+    var fr=[p(r(S.fCo,{size:19,bold:true,color:'FFFFFF'}),{align:D.AlignmentType.RIGHT}),p(r(S.fAd,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),].concat(S.fAdK?[p(r(S.fAdK,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT})]:[]).concat([p(r(S.fEm,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT}),p(r(T.fl[3][0]+' / '+T.fl[3][1]+': '+S.fTx,{size:16,color:'E5E5EA'}),{align:D.AlignmentType.RIGHT})]);
     var band=tbl([4200,FB-4200],[new D.TableRow({height:{value:2250,rule:D.HeightRule.EXACT},children:[cell(fl,4200,{fill:BLACK,ml:M+0,mt:0,mb:0}),cell(fr,FB-4200,{fill:BLACK,mr:M,mt:0,mb:0})]})],{indent:{size:-M,type:D.WidthType.DXA}});
     var foot=new D.Footer({children:[band]});
     var doc=new D.Document({
