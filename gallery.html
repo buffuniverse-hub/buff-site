@@ -39,7 +39,7 @@ html,body{height:100%;overflow:hidden;background:#0a0a0b;font-family:'Paperozi',
 #hint{position:fixed;left:22px;bottom:26px;font-size:11px;color:#8a8a8a;z-index:4;max-width:34vw}
 .mv{position:fixed;right:22px;bottom:18px;display:none;flex-direction:column;gap:8px;z-index:4}
 .mv button{width:54px;height:54px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#111;font-size:18px;touch-action:none}
-@media (pointer:coarse){.mv{display:flex}#hint{bottom:auto;top:104px;left:22px;max-width:70vw}#now{bottom:28px;left:22px;transform:none;max-width:calc(100vw - 110px)}}
+@media (pointer:coarse){.mv{display:flex}#hint{bottom:auto;top:58px;left:22px;max-width:70vw}#now{bottom:28px;left:22px;transform:none;max-width:calc(100vw - 110px)}}
 #intro{position:fixed;inset:0;background:#0a0a0b;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:10;transition:opacity .6s}
 #intro.off{opacity:0;pointer-events:none}
 #intro h1{font-size:clamp(34px,6vw,64px);letter-spacing:.12em;font-weight:700}
@@ -64,15 +64,14 @@ html,body{height:100%;overflow:hidden;background:#0a0a0b;font-family:'Paperozi',
 </head>
 <body>
 <div id="stage"></div>
-<div class="bar"><a class="logo" href="/">BUFF<small>GALLERY · DEMO</small></a><div class="thm" id="thm"><a data-t="mix" href="?theme=mix">MIX</a><a data-t="dark" href="?theme=dark">DARK</a><a data-t="arena" href="?theme=arena">ARENA</a></div><button id="idxbtn">프로젝트 목록</button></div>
+<div class="bar"><a class="logo" href="/">BUFF<small>GALLERY · DEMO</small></a><button id="idxbtn">프로젝트 목록</button></div>
 <div id="idx"><ul></ul></div>
 <div id="now">BUFF GALLERY</div>
 <div id="hint"></div>
 <div class="mv"><button id="fw" aria-label="앞으로">▲</button><button id="bw" aria-label="뒤로">▼</button></div>
-<div id="intro"><span class="demo">DEMO</span><h1>BUFF GALLERY</h1><p>BUFF가 기록한 스포츠의 순간을<br>미술관처럼 걸어 다니며 감상해 보세요.</p><div id="count">&nbsp;</div><button id="enter" disabled>불러오는 중…</button></div>
+<div id="intro"><span class="demo">DEMO</span><h1>BUFF GALLERY</h1><p>야구장 통로와 라커룸을 지나<br>종목별 경기장에 걸린 BUFF의 사진을 만나보세요.</p><div id="count">&nbsp;</div><button id="enter" disabled>불러오는 중…</button></div>
 <div id="lb"><button id="lbx" aria-label="닫기">×</button><img id="lbimg" alt=""><div class="cap"><div id="lbt"></div><div id="lbm"></div><a id="lbgo" href="#">프로젝트 보기 →</a></div></div>
-<script>(function(){var t=new URLSearchParams(location.search).get("theme");if(["dark","arena","mix"].indexOf(t)<0)t="mix";document.querySelectorAll("#thm a").forEach(function(a){if(a.dataset.t===t)a.classList.add("on")})})()</script>
 <script src="/config.js"></script>
-<script src="/assets/gallery.js?v=1795719144"></script>
+<script src="/assets/gallery.js?v=1795719833"></script>
 </body>
 </html>
