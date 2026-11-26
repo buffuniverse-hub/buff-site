@@ -61,7 +61,7 @@ function upload(file,folder){
 }
 
 /* ---------- 항목 정의 ---------- */
-var CAT=[['branding','브랜딩•디자인'],['photo','사진'],['video','영상']];
+var CAT=[['marketing','마케팅 기획'],['branding','브랜딩•디자인'],['photo','사진'],['video','영상']];
 var T={
  news:{label:'News',title:'뉴스',order:'sort_order.asc,published_at.desc',hint:'카드를 드래그해서 순서를 바꿉니다. 제목은 두 줄로 입력하세요. (1줄: 대회명 / 2줄: 진행 내용)',
   list:function(r){return{img:r.thumbnail_url,title:r.title_line1+(r.title_line2?' · '+r.title_line2:''),sub:r.category+' · '+(r.published_at||'')}},

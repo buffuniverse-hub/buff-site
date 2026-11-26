@@ -3,8 +3,8 @@ var __M={};function getData(t,q){var k=t+'?'+q;return __M[k]||(__M[k]=window.sbG
 var $=function(s,r){return(r||document).querySelector(s)};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var br=function(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:#0066CC;text-decoration:underline;word-break:break-all">$1</a>').replace(/\n/g,'<br> ')};
-function tagOf(w){var c=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category],n={branding:'Branding',photo:'Photo',video:'Video'};return ['branding','photo','video'].filter(function(k){return c.indexOf(k)>-1}).map(function(k){return n[k]}).join(' · ')||(CAT[w.category]||[''])[0]}
-var CAT={photo:['Photo','/en/Works?cat=photo'],video:['Video','/en/Works?cat=video'],branding:['Branding','/en/Works?cat=branding']};
+function tagOf(w){var c=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category],n={marketing:'Marketing',branding:'Branding',photo:'Photo',video:'Video'};return ['marketing','branding','photo','video'].filter(function(k){return c.indexOf(k)>-1}).map(function(k){return n[k]}).join(' · ')||(CAT[w.category]||[''])[0]}
+var CAT={marketing:['Marketing','/en/Works?cat=marketing'],photo:['Photo','/en/Works?cat=photo'],video:['Video','/en/Works?cat=video'],branding:['Branding','/en/Works?cat=branding']};
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
 
 function tz(w){var v=+w.thumb_zoom;return v>=100&&v<=400?v:100}
@@ -98,7 +98,7 @@ var WK_CSS='.wk-sec{background:#FFFFFF;padding:0 0 96px}.wk-wrap{max-width:1200p
 var PLAY='<span style="position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path fill="#1D1D1F" d="M8 5.2v13.6a1 1 0 0 0 1.5.86l11-6.8a1 1 0 0 0 0-1.72l-11-6.8A1 1 0 0 0 8 5.2z"></path></svg></span>';
 
 
-var CATKO={branding:'Branding • Design',photo:'Photo',video:'Video'};
+var CATKO={marketing:'Marketing',branding:'Branding • Design',photo:'Photo',video:'Video'};
 function metaLine(w){
   var cs=(w.categories&&w.categories.length?w.categories:[w.category]).filter(function(c){return CATKO[c]});
   var sc=String(w.scope||'').split(/\n/).map(function(x){return x.replace(/^[\s\-•·*]+/,'').trim()}).filter(Boolean);
@@ -182,7 +182,7 @@ function setMeta(t,d,img){
 }
 function pdfUrl(u){u=String(u||'').trim();if(!u)return '';var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)||u.match(/[?&]id=([^&#]+)/);if(/drive\.google\.com|docs\.google\.com/.test(u)&&m)return 'https://drive.google.com/uc?export=download&id='+m[1];return u}
 function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f(){h.style.fontSize='';var fs=parseFloat(getComputedStyle(h).fontSize);while(h.scrollWidth>h.clientWidth&&fs>14){fs-=1;h.style.fontSize=fs+'px'}}f();window.addEventListener('resize',f);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)}
-function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795678831';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
+function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795678876';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
@@ -295,7 +295,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
 (function(){
   function setup(){
     var g=document.getElementById('works-grid'),bar=document.querySelector('.wf');if(!g||!bar||bar._w)return;bar._w=1;
-    var ok={all:1,branding:1,photo:1,video:1};
+    var ok={all:1,marketing:1,branding:1,photo:1,video:1};
     function cur(){var m=location.search.match(/[?&]cat=([a-z]+)/);return m&&ok[m[1]]?m[1]:'all'}
     var f=cur();
     function apply(){
