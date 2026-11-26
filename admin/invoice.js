@@ -7,12 +7,12 @@ var P={title:['SERVICE INVOICE',''],from:['공급자','FROM'],bill:['공급받�
  dl:[['인보이스 번호','Invoice No.'],['발행일','Issue Date'],['결제 기한','Due Date'],['결제 조건','Payment Terms'],['프로젝트 담당자','Project Lead']],
  th:[['No',''],['서비스/용역 내역','Description of Service'],['기간/수량','Period / Qty'],['단가','Unit Price'],['금액','Amount']],
  tot:[['공급가액','Subtotal'],['세액','Tax / VAT'],['총 청구금액','Total Due']],
- pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호','Account No.'],['SWIFT 코드','SWIFT Code']],note:['비고','NOTES']};
+ pay:['입금 계좌','PAYMENT'],pl:[['은행명','Bank Name'],['예금주','Account Holder'],['계좌번호','Account No.'],['SWIFT 코드','SWIFT Code'],['은행 주소','Bank Address'],['수취인 주소','Beneficiary Address'],['수취인 연락처','Beneficiary Tel']],note:['비고','NOTES']};
 function mk(l){var ko=l==='ko',f=function(x){return Array.isArray(x[0])?x.map(f):(ko||!x[1]?[x[0],x[1]]:[x[1],x[0]])};
   var o={};Object.keys(P).forEach(function(k){o[k]=f(P[k])});return o}
 var TX={ko:mk('ko'),en:mk('en')};TX.ko.title=TX.en.title=['SERVICE INVOICE','인보이스'];
-var DEF={lang:'ko',cur:'KRW',vm:'ex',fCo:'',fAd:'',fNm:'',fEm:'',fTx:'',bank:'',holder:'',acct:'',swift:'',notes:'',qnotes:''};
-var DB=null,KEYS=['lang','cur','vm','fCo','fAd','fNm','fEm','fTx','bank','holder','acct','swift','notes','qnotes'];
+var DEF={lang:'ko',cur:'KRW',vm:'ex',fCo:'',fAd:'',fNm:'',fEm:'',fTx:'',bank:'',holder:'',acct:'',swift:'',bAd:'',hAd:'',hTel:'',notes:'',qnotes:''};
+var DB=null,KEYS=['lang','cur','vm','fCo','fAd','fNm','fEm','fTx','bank','holder','acct','swift','bAd','hAd','hTel','notes','qnotes'];
 var S,tmr=null,saving=false;
 var rest=function(){return window.buffRest.apply(null,arguments)};
 function meaningful(){return S.cCo||S.cNm||S.items.some(function(i){return i.desc||i.price})}
@@ -95,13 +95,15 @@ function page(){
   +'<div class="rt">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+ph(h)+'</div><div class="g">'+E(dv[i])+'</div></div>'}).join('')+'</div></div>'
   +'<table class="ivt"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'
   +'<table class="ivtot"><tbody>'+tot(0,money(tt.sub))+tot(1,money(tt.vat))+tot(2,money(tt.tot),1)+'</tbody></table>'
-  +'<div class="ivn">'+(qt()?'':'<p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct,S.swift].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>')
+  +'<div class="ivn">'+(qt()?'':'<p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct,S.swift,S.bAd,S.hAd,S.hTel].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>')
   +(nt()?'<p>'+E(nt())+'</p>':'')+'<p class="ty">'+(qt()?'견적서를 검토해 주셔서 감사합니다. Thank you for your consideration.':'감사합니다. Thank you for your business!')+'</p></div></div>'
   +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
 }
 function scale(){var b=document.getElementById('ivbox'),s=document.getElementById('ivsc');if(!b||!s)return;var k=Math.min(1,(b.clientWidth-32)/794);s.style.transform='scale('+k+')';s.style.width='794px';s.parentNode.style.height=(s.scrollHeight*k+32)+'px'}
 function paint(){var s=document.getElementById('ivsc');if(!s)return;s.innerHTML=page();scale()}
 
+var ACC=null,AF=['bank','holder','acct','swift','bAd','hAd','hTel'];
+function accOpts(){var o='<option value="">선택…</option>';if(DB&&DB.bank)o+='<option value="d">기본 계좌 · '+E(DB.holder||DB.bank)+'</option>';(ACC||[]).forEach(function(a,i){o+='<option value="'+i+'">'+E(a.name)+'</option>'});return o}
 function inp(id,lab,val,type,ph){return '<label>'+lab+'</label><input type="'+(type||'text')+'" data-k="'+id+'" value="'+E(val)+'"'+(ph?' placeholder="'+E(ph)+'"':'')+'>'}
 var UNITS=['건 / case','경기 / match','대회 / event','장 / photos','편 / video','시간 / hrs','일 / days','개월 / mo','명 / person','개 / pcs'];
 function unitCtl(it,i){if(it.custom)return '<input type="text" data-i="'+i+'" data-f="unit" value="'+E(it.unit)+'" placeholder="직접 입력">';return '<select data-i="'+i+'" data-f="unit"><option value="">선택 안 함</option>'+UNITS.map(function(u){return '<option'+(it.unit===u?' selected':'')+'>'+u+'</option>'}).join('')+'<option value="__custom">직접 입력…</option></select>'}
@@ -126,7 +128,7 @@ function draw(keep){
   +inp('no',qt()?'견적서 번호':'인보이스 번호',S.no)+inp('fNm','프로젝트 담당자명 (Project Lead)',S.fNm)+'<div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due',qt()?'견적 유효기간':'결제 기한',S.due,'date')+'</div></div>'+'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','', 'text','예: 50% 선금, 50% 납품 후')+'</div>'+'</div>'
   +'<div class="sec"><h3>공급받는 자 (고객)</h3>'+inp('cCo','고객명 / 업체명',S.cCo)+inp('cNm','담당자명 (선택)',S.cNm)+inp('cAd','주소',S.cAd)+inp('cEm','이메일 / 연락처',S.cEm)+inp('cTx','사업자등록번호',S.cTx)+'</div>'
   +'<div class="sec"><h3>서비스 내역</h3><div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:12px">+ 항목 추가</button></div>'
-  +'<div class="sec"><h3>입금 계좌 · 비고</h3>'+inp('bank','은행명',S.bank)+inp('holder','예금주',S.holder)+inp('acct','계좌번호',S.acct)+inp('swift','SWIFT 코드 (해외 송금 시)',S.swift)+'<label>비고</label><textarea data-k="'+(qt()?'qnotes':'notes')+'" style="min-height:80px">'+E(nt())+'</textarea></div>'
+  +'<div class="sec"><h3>입금 계좌 · 비고</h3><label>저장된 계좌 불러오기</label><select id="ivacc">'+accOpts()+'</select>'+inp('bank','은행명',S.bank)+inp('holder','예금주',S.holder)+inp('acct','계좌번호',S.acct)+inp('swift','SWIFT 코드 (해외 송금 시)',S.swift)+inp('bAd','은행 영문 주소 (해외 송금 시)',S.bAd)+inp('hAd','수취인 영문 주소 (해외 송금 시)',S.hAd)+inp('hTel','수취인 연락처 (해외 송금 시)',S.hTel,'text','82-10-1234-5678')+'<div class="grid2" style="margin-top:10px"><input id="ivaccnm" placeholder="계좌 이름 (예: BUFF 법인 / 김동윤 개인)" style="height:44px"><button class="btn line sm" id="ivaccsave" type="button">계좌 목록에 저장</button></div>'+'<label>비고</label><textarea data-k="'+(qt()?'qnotes':'notes')+'" style="min-height:80px">'+E(nt())+'</textarea></div>'
   +'<div class="sec"><h3>공급자 (BUFF)</h3>'+inp('fCo','상호',S.fCo)+inp('fAd','주소',S.fAd)+inp('fEm','이메일 / 연락처',S.fEm)+inp('fTx','사업자등록번호',S.fTx)+'<button class="btn sm" id="ivsave" type="button" style="margin-top:16px;width:100%">공급자·계좌·비고를 기본값으로 저장</button></div></div>'
   +'<div class="ivpv"><div class="ivbox" id="ivbox"><div><div class="ivsc" id="ivsc"></div></div></div></div></div>';
   [].forEach.call(m.querySelectorAll('select[data-k]'),function(s){s.value=S[s.getAttribute('data-k')]});
@@ -148,6 +150,8 @@ function draw(keep){
   function bind(){[].forEach.call(document.querySelectorAll('[data-del]'),function(b){b.onclick=function(){S.items.splice(+b.getAttribute('data-del'),1);if(!S.items.length)S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()}})}
   document.getElementById('ivdocx').onclick=function(){var b=this;b.disabled=true;var o=b.textContent;b.textContent='만드는 중…';bump();S.status='issued';saveDraft();(window.buffInvoiceDocx?Promise.resolve():loadDocx()).then(function(){return window.buffInvoiceDocx(window.buffInv.get())}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BUFF_'+(qt()?'Quote_':'Invoice_')+S.no+(S.cCo?'_'+S.cCo.replace(/[\\/:*?"<>|]/g,''):'')+'.docx';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}).catch(function(e){alert('docx 생성 실패: '+e.message)}).then(function(){b.disabled=false;b.textContent=o})};
   document.getElementById('ivsave').onclick=function(){var b=this,o={};KEYS.forEach(function(k){o[k]=S[k]});b.disabled=true;window.buffRest('POST','invoice_settings','on_conflict=key',{key:'defaults',value:o,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'}).then(function(){DB=o;window.buffToast('기본값을 저장했습니다.')}).catch(function(e){window.buffToast('저장 실패: '+e.message,true)}).then(function(){b.disabled=false})};
+  document.getElementById('ivacc').onchange=function(){var v=this.value;if(v==='')return;var src=v==='d'?DB:ACC[+v];AF.forEach(function(k){S[k]=src[k]||'';var el=document.querySelector('.ivform [data-k='+k+']');if(el)el.value=S[k]});if(v!=='d')document.getElementById('ivaccnm').value=src.name||'';paint();schedule()};
+  document.getElementById('ivaccsave').onclick=function(){var nm=document.getElementById('ivaccnm').value.trim();if(!nm){window.buffToast('계좌 이름을 입력하세요.',true);return}var a={name:nm};AF.forEach(function(k){a[k]=S[k]||''});var L=(ACC||[]).filter(function(x){return x.name!==nm});L.push(a);var b=this;b.disabled=true;window.buffRest('POST','invoice_settings','on_conflict=key',{key:'accounts',value:L,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'}).then(function(){ACC=L;document.getElementById('ivacc').innerHTML=accOpts();window.buffToast('계좌 목록에 저장했습니다: '+nm)}).catch(function(e){window.buffToast('저장 실패: '+e.message,true)}).then(function(){b.disabled=false})};
   document.getElementById('ivadd').onclick=function(){S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()};
   document.getElementById('ivlist').onclick=function(){saveDraft().then(showList)};
   document.getElementById('ivreset').onclick=function(){if(confirm('입력한 내용을 지우고 새로 작성할까요?'))window.drawInvoice()};
@@ -156,5 +160,5 @@ function draw(keep){
   return Promise.resolve();
 }
 window.openInvoiceTab=function(){showList();return Promise.resolve()};
-window.drawInvoice=function(keep){if(keep||DB)return draw(keep);return window.buffRest('GET','invoice_settings','select=value&key=eq.defaults').then(function(rows){DB=(rows&&rows[0]&&rows[0].value)||{};return draw(keep)})};
+window.drawInvoice=function(keep){if(keep||DB)return draw(keep);return window.buffRest('GET','invoice_settings','select=key,value&key=in.(defaults,accounts)').then(function(rows){rows=rows||[];var d=rows.filter(function(r){return r.key==='defaults'})[0],a=rows.filter(function(r){return r.key==='accounts'})[0];DB=(d&&d.value)||{};ACC=(a&&Array.isArray(a.value))?a.value:[];return draw(keep)})};
 })();
