@@ -69,7 +69,7 @@ var T={
   blank:function(){return{category:'Photo',published:true,sort_order:0,published_at:new Date().toISOString().slice(0,10)}}},
  works:{label:'Works',title:'작업물',order:'sort_order.asc,created_at.asc',hint:'카드를 드래그해서 Works 페이지 순서를 바꿉니다. 영상 링크를 넣으면 사이트에 재생 버튼이 생깁니다.',
   list:function(r){return{img:r.thumbnail_url,title:r.title,sub:((r.categories&&r.categories.length?r.categories:[r.category]).join(' · '))}},
-  fields:[['categories','분류 (브랜딩과 사진을 함께 한 프로젝트는 둘 다 선택)','cats'],['title','프로젝트명','text'],['title_en','[EN] Project name','text',{ph:'English version (비우면 한글 표시)'}],['slug','페이지 주소 (영문 소문자·숫자·하이픈 · 비우면 영문 제목으로 자동)','text',{ph:'예: wlc-u20-jeju-2025 → buffuniverse.co.kr/work?wlc-u20-jeju-2025'}],['client','클라이언트','text',{ph:'예: 포카리스웨트'}],['client_en','[EN] Client','text'],['work_year','기간','text',{ph:'예: 2026 / 2026.09 ~ 2026.10'}],['description','프로젝트 설명','textarea',{rows:6}],['description_en','[EN] Description','textarea',{rows:6}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['thumb_zoom','썸네일 확대·위치 (슬라이더)','thumbframe'],['images','상세 이미지','imagelist'],['videos','영상·인스타그램 링크 (YouTube / Instagram 게시물·릴스)','videos'],['members','참여 멤버','members'],['template','상세 페이지 템플릿','select',{opts:[['1','템플릿 1 (기본)'],['2','템플릿 2 (상세형 · 마케팅/브랜딩 프로젝트 소개)']]}],['sections','[템플릿 2] 섹션 구성 (JSON · 영문은 _en 항목)','json',{rows:16}],['metrics','[템플릿 2] 성과 수치 (JSON · 영문은 _en 항목)','json',{rows:12}],['pdf_url','포트폴리오 PDF 링크 (구글 드라이브 공유 링크)','text',{ph:'https://drive.google.com/file/d/…/view  ("링크가 있는 모든 사용자"로 공유)'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
+  fields:[['categories','분류 (브랜딩과 사진을 함께 한 프로젝트는 둘 다 선택)','cats'],['sports','종목 (Works 필터)','sports'],['title','프로젝트명','text'],['title_en','[EN] Project name','text',{ph:'English version (비우면 한글 표시)'}],['slug','페이지 주소 (영문 소문자·숫자·하이픈 · 비우면 영문 제목으로 자동)','text',{ph:'예: wlc-u20-jeju-2025 → buffuniverse.co.kr/work?wlc-u20-jeju-2025'}],['client','클라이언트','text',{ph:'예: 포카리스웨트'}],['client_en','[EN] Client','text'],['work_year','기간','text',{ph:'예: 2026 / 2026.09 ~ 2026.10'}],['description','프로젝트 설명','textarea',{rows:6}],['description_en','[EN] Description','textarea',{rows:6}],['thumbnail_url','목록 썸네일 (16:9 권장)','image'],['thumb_zoom','썸네일 확대·위치 (슬라이더)','thumbframe'],['images','상세 이미지','imagelist'],['videos','영상·인스타그램 링크 (YouTube / Instagram 게시물·릴스)','videos'],['members','참여 멤버','members'],['template','상세 페이지 템플릿','select',{opts:[['1','템플릿 1 (기본)'],['2','템플릿 2 (상세형 · 마케팅/브랜딩 프로젝트 소개)']]}],['sections','[템플릿 2] 섹션 구성 (JSON · 영문은 _en 항목)','json',{rows:16}],['metrics','[템플릿 2] 성과 수치 (JSON · 영문은 _en 항목)','json',{rows:12}],['pdf_url','포트폴리오 PDF 링크 (구글 드라이브 공유 링크)','text',{ph:'https://drive.google.com/file/d/…/view  ("링크가 있는 모든 사용자"로 공유)'}],['published','사이트에 공개','bool'],['sort_order','정렬 순서','int']],
   blank:function(){return{category:'photo',categories:['photo'],published:true,featured:false,sort_order:0,tags:[],images:[],videos:[],members:[],template:'1',sections:[],metrics:[]}}},
  clients:{label:'Clients',title:'고객사',order:'sort_order.asc',hint:'홈 화면 Our Clients 로고 목록입니다. 배경이 투명한 PNG를 권장합니다.',
   list:function(r){return{img:r.logo_url,title:r.name,sub:r.url||'링크 없음',contain:true}},
@@ -206,6 +206,13 @@ function field(f,F,ctx){
     if(F[key]&&!opts.some(function(o){return o[0]===F[key]}))opts.push([F[key],F[key]]);
     inp.innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'"'+((F[key]||'')===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('');
     inp.onchange=function(){F[key]=this.value||null};w.appendChild(inp)}
+  else if(type==='sports'){
+    var SPL=[['lacrosse','라크로스'],['basketball','농구'],['tabletennis','탁구'],['futsal','풋살'],['baseball','야구'],['football','축구'],['flagfootball','플래그풋볼'],['rugby','럭비'],['other','기타']];
+    var sw=document.createElement('div');sw.style.cssText='display:flex;flex-wrap:wrap;gap:16px';
+    SPL.forEach(function(c){var l=document.createElement('label');l.className='chk';l.style.margin='0';l.innerHTML='<input type="checkbox" '+((F[key]||[]).indexOf(c[0])>=0?'checked':'')+'><span>'+esc(c[1])+'</span>';
+      l.firstChild.onchange=function(){var a=(F[key]||[]).filter(function(x){return x!==c[0]});if(this.checked)a.push(c[0]);F[key]=SPL.map(function(x){return x[0]}).filter(function(x){return a.indexOf(x)>=0})};sw.appendChild(l)});
+    w.appendChild(sw);
+  }
   else if(type==='cats'){
     var cs=Array.isArray(F[key])&&F[key].length?F[key]:(F[key]=[F.category||'photo']);
     var cw=document.createElement('div');cw.style.cssText='display:flex;flex-wrap:wrap;gap:16px';
