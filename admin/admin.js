@@ -150,6 +150,7 @@ function openForm(k,data){
     var works=ex[0]||[],team=ex[1]||[];
     var h='<div class="ov"><div class="panel"><h3>'+esc(d.title)+(isNew?' 추가':' 수정')+'</h3><div id="fe"></div><div class="err" id="ferr"></div><div class="foot"><button class="btn line" id="cancel">취소</button><button class="btn" id="save">저장</button></div></div></div>';
     $('#modal').innerHTML=h;
+    var F0=JSON.parse(JSON.stringify(F));
     var box=$('#fe');
     d.fields.forEach(function(f){box.appendChild(field(f,F,{works:works,team:team}))});
     $('#cancel').onclick=close;
@@ -162,6 +163,7 @@ function openForm(k,data){
       if(k==='works'){var cs0=(body.categories&&body.categories.length)?body.categories:[F.category||'photo'];body.categories=cs0;body.category=cs0[0]}
       if(k==='works'){if(!body.template)body.template='1';if(!Array.isArray(body.sections))body.sections=[];if(!Array.isArray(body.metrics))body.metrics=[]}
       if(body.videos)body.videos=body.videos.filter(function(v){return v.url&&v.url.trim()});
+      if(!isNew){var ch={};Object.keys(body).forEach(function(n){var o=F0[n]===undefined?null:F0[n];if(JSON.stringify(body[n])!==JSON.stringify(o))ch[n]=body[n]});body=ch;if(!Object.keys(body).length){close();toast('바뀐 내용이 없어 저장하지 않았습니다.');return}}
       var req=isNew?rest('POST',k,'',body,{Prefer:'return=minimal'}):rest('PATCH',k,'id=eq.'+F.id,body,{Prefer:'return=minimal'});
       req.then(function(){close();toast('저장했습니다. 사이트에 바로 반영됩니다.');drawList(k)}).catch(function(e){$('#ferr').textContent=e.message;btn.disabled=false;btn.textContent='저장'});
     };
