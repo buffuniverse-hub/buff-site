@@ -152,7 +152,7 @@ window.renderWork2=function(app,w,back,credit){
   if(imgs.length)main+=photosBlock({count:imgs.length,cols:3},imgs.splice(0));
   var navH=nav.length?'<div class="nav"><div class="wrap">'+nav.map(function(n){return '<a href="#'+n[0]+'">'+esc(n[1])+'</a>'}).join('')+'</div></div>':'';
   var foot=T(head,'foot');
-  app.innerHTML='<div class="t2"><div class="wrap"><a class="back" href="'+esc(back||'Works')+'">‹ Works</a></div>'+headBlock(head,w,mediaBlock(w),'',slides)+(gal?'<div class="wrap t2-gal"><div class="wk-media"><div class="wk-just" data-gap="8" data-t="200">'+gal+'</div></div></div>':'')+navH+'<div class="wrap">'+main+igBlock(w)+(credit?'<section class="t2-credit">'+credit+'</section>':'')+(foot?'<footer>'+esc(foot)+'</footer>':'')+'</div></div>';
+  app.innerHTML='<div class="t2"><div class="wrap"><a class="back" href="'+esc(back||'Works')+'">‹ Works</a></div>'+headBlock(head,w,mediaBlock(w),'',slides)+(gal?'<div class="wrap t2-gal"><div class="wk-media"><div class="wk-just" data-gap="8" data-t="200" data-per="5">'+gal+'</div></div></div>':'')+navH+'<div class="wrap">'+main+igBlock(w)+(credit?'<section class="t2-credit">'+credit+'</section>':'')+(foot?'<footer>'+esc(foot)+'</footer>':'')+'</div></div>';
   var root=app.querySelector('.t2');enhance(root);
   [].forEach.call(root.querySelectorAll('.t2-ph'),function(im){im.style.cursor='zoom-in';im.addEventListener('click',function(){window.open(im.src,'_blank','noopener')})});
 };
