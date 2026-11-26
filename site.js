@@ -188,7 +188,7 @@ function setMeta(t,d,img){
 }
 function pdfUrl(u){u=String(u||'').trim();if(!u)return '';var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)||u.match(/[?&]id=([^&#]+)/);if(/drive\.google\.com|docs\.google\.com/.test(u)&&m)return 'https://drive.google.com/uc?export=download&id='+m[1];return u}
 function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f(){h.style.fontSize='';var fs=parseFloat(getComputedStyle(h).fontSize);while(h.scrollWidth>h.clientWidth&&fs>14){fs-=1;h.style.fontSize=fs+'px'}}f();window.addEventListener('resize',f);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)}
-function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795715854';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
+function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795716028';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var qk=qKey(),id=qk&&qk.v;
@@ -311,12 +311,16 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
     }
 
     var SP={lacrosse:'라크로스',basketball:'농구',tabletennis:'탁구',futsal:'풋살',baseball:'야구',football:'축구',flagfootball:'플래그풋볼',rugby:'럭비',other:'기타'},LB=['전체 종목','전체 연도','전체 인물'],NM={},q=new URLSearchParams(location.search),sel={sport:q.get('sport')||'',year:q.get('year')||'',who:q.get('who')||''};
-    var row=document.createElement('div');row.className='wf2';bar.parentNode.insertBefore(row,bar.nextSibling);
+    var row=document.createElement('div');row.className='wf2';bar.appendChild(row);
     function build(){var S={},Y={},M={};[].forEach.call(g.children,function(c){(c.getAttribute('data-sport')||'').split(' ').forEach(function(x){if(x)S[x]=1});var y=c.getAttribute('data-year');if(y)Y[y]=1;(c.getAttribute('data-mem')||'').split('|').forEach(function(x){if(x)M[x]=1})});
-      function opt(k,lab,vals,fmt){return '<label><select data-k="'+k+'" aria-label="'+lab+'"><option value="">'+lab+'</option>'+vals.map(function(v){return '<option value="'+esc(v)+'"'+(sel[k]===v?' selected':'')+'>'+esc(fmt(v))+'</option>'}).join('')+'</select></label>'}
+      function opt(k,lab,vals,fmt){var cur=sel[k]&&vals.indexOf(sel[k])>=0?fmt(sel[k]):lab;return '<div class="dd'+(sel[k]?' on':'')+'" data-k="'+k+'"><button type="button" class="ddb" aria-haspopup="listbox" aria-expanded="false">'+esc(cur)+'</button><div class="ddm" role="listbox"><button type="button" role="option" data-v=""'+(sel[k]?'':' aria-selected="true"')+'>'+esc(lab)+'</button>'+vals.map(function(v){return '<button type="button" role="option" data-v="'+esc(v)+'"'+(sel[k]===v?' aria-selected="true"':'')+'>'+esc(fmt(v))+'</button>'}).join('')+'</div></div>'}
       row.innerHTML=opt('sport',LB[0],Object.keys(SP).filter(function(k){return S[k]}),function(v){return SP[v]||v})+opt('year',LB[1],Object.keys(Y).sort().reverse(),function(v){return v})+opt('who',LB[2],Object.keys(M).sort(),function(v){return NM[v]||v});
-      [].forEach.call(row.querySelectorAll('select'),function(x){x.classList.toggle('on',!!x.value)})}
-    row.addEventListener('change',function(ev){var x=ev.target;if(!x.getAttribute('data-k'))return;sel[x.getAttribute('data-k')]=x.value;x.classList.toggle('on',!!x.value);sync();apply()});
+    }
+    function closeAll(ex){[].forEach.call(row.querySelectorAll('.dd.open'),function(d){if(d!==ex){d.classList.remove('open');d.querySelector('.ddb').setAttribute('aria-expanded','false')}})}
+    row.addEventListener('click',function(ev){ev.stopPropagation();var b=ev.target.closest('.ddb'),o=ev.target.closest('[data-v]'),d=ev.target.closest('.dd');if(!d)return;
+      if(b){var op=!d.classList.contains('open');closeAll(d);d.classList.toggle('open',op);b.setAttribute('aria-expanded',op?'true':'false');return}
+      if(o){sel[d.getAttribute('data-k')]=o.getAttribute('data-v');closeAll();sync();build();apply()}});
+    document.addEventListener('click',function(){closeAll()});document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll()});
     function sync(){try{var u=new URLSearchParams();if(f!=='all')u.set('cat',f);['sport','year','who'].forEach(function(k){if(sel[k])u.set(k,sel[k])});var t=u.toString();history.replaceState(null,'',location.pathname+(t?'?'+t:''))}catch(e){}}
     function pass(c){return (!sel.sport||(' '+(c.getAttribute('data-sport')||'')+' ').indexOf(' '+sel.sport+' ')>=0)&&(!sel.year||c.getAttribute('data-year')===sel.year)&&(!sel.who||('|'+(c.getAttribute('data-mem')||'')+'|').indexOf('|'+sel.who+'|')>=0)}
     try{getData('team_members','select=name,name_en&published=eq.true').then(function(t){(t||[]).forEach(function(m){if(m.name_en)0});build()}).catch(function(){})}catch(e){}
