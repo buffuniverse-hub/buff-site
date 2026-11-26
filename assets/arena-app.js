@@ -87,7 +87,7 @@
   function loadArena() {
     if (window.BuffArena) return Promise.resolve();
     if (!arenaScript) arenaScript = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = '/assets/arena3d.js?v=1795721192'; s.async = true;
+      var s = document.createElement('script'); s.src = '/assets/arena3d.js?v=1795721341'; s.async = true;
       s.onload = function () { window.BuffArena ? res() : rej(new Error('arena')); };
       s.onerror = function () { arenaScript = null; rej(new Error('arena')); };
       document.head.appendChild(s);
