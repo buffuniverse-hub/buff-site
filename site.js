@@ -119,8 +119,9 @@ function justify(app){
     var W=box.clientWidth;if(!W)return;
     var mob=W<640,dg=+box.getAttribute('data-gap'),dt=+box.getAttribute('data-t'),gap=dg?(mob?Math.min(dg,8):dg):(mob?10:16),target=dt?(mob?Math.min(dt,150):Math.min(dt,W/4.2)):(mob?210:Math.min(360,W/3.1));
     var rs=imgs.map(function(im){return im.naturalWidth&&im.naturalHeight?im.naturalWidth/im.naturalHeight:1.5});
-    var rows=[],cur=[],sum=0;
-    for(var i=0;i<imgs.length;i++){
+    var rows=[],cur=[],sum=0,per=+box.getAttribute('data-per');
+    if(per&&!mob){for(var q=0;q<imgs.length;q+=per){var rr=[];for(var z=q;z<Math.min(q+per,imgs.length);z++)rr.push(z);rows.push(rr)}}
+    else for(var i=0;i<imgs.length;i++){
       cur.push(i);sum+=rs[i];
       if(sum*target+gap*(cur.length-1)>=W){rows.push(cur);cur=[];sum=0}
     }
@@ -129,7 +130,7 @@ function justify(app){
     rows.forEach(function(row,ri){
       var s=0;row.forEach(function(k){s+=rs[k]});
       var h=(W-gap*(row.length-1))/s;
-      if(ri===rows.length-1&&h>target*1.3)h=target;
+      if(!per&&ri===rows.length-1&&h>target*1.3)h=target;
       var d=document.createElement('div');d.className='wk-row';d.style.cssText='gap:'+gap+'px;margin-bottom:'+(ri<rows.length-1?gap:0)+'px';
       row.forEach(function(k){var im=imgs[k];im.style.width=(rs[k]*h)+'px';im.style.height=h+'px';im.style.maxWidth='none';d.appendChild(im)});
       box.appendChild(d);
@@ -182,7 +183,7 @@ function setMeta(t,d,img){
 }
 function pdfUrl(u){u=String(u||'').trim();if(!u)return '';var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)||u.match(/[?&]id=([^&#]+)/);if(/drive\.google\.com|docs\.google\.com/.test(u)&&m)return 'https://drive.google.com/uc?export=download&id='+m[1];return u}
 function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f(){h.style.fontSize='';var fs=parseFloat(getComputedStyle(h).fontSize);while(h.scrollWidth>h.clientWidth&&fs>14){fs-=1;h.style.fontSize=fs+'px'}}f();window.addEventListener('resize',f);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)}
-function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795697805';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
+function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795698263';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var id=new URLSearchParams(location.search).get('id');
