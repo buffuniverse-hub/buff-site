@@ -9,8 +9,8 @@
   var SPORT_EN = { basketball: 'BASKETBALL', tabletennis: 'TABLE TENNIS', lacrosse: 'LACROSSE', baseball: 'BASEBALL', football: 'FOOTBALL', futsal: 'FUTSAL', flagfootball: 'FLAG FOOTBALL', rugby: 'RUGBY', other: 'SPORTS' };
   /* 프로젝트별 전시실(현장 구조 기준). 없으면 종목 기본값 → 기본 전시실 */
   var ROOMS = {
-    'aubl-yonsei-vs-tsinghua': 'arena-basketball',
-    'aubl-yonsei-vs-sjtu': 'arena-basketball',
+    'aubl-yonsei-vs-tsinghua': { scene: 'arena-sangnoksu', scoreboard: 'tsinghua' }, // 안산 상록수체육관
+    'aubl-yonsei-vs-sjtu': { scene: 'arena-sangnoksu', scoreboard: 'screen' },
     'ilc-pro-table-tennis-league-2026-series4': 'tt-hall',
     'lacrosse-seoul-open-2026': 'field-lacrosse'
   };
@@ -34,7 +34,8 @@
           seen[u] = 1; photos.push({ i: photos.length, src: u });
         });
         var sport = (r.sports && r.sports[0]) || 'other';
-        return { slug: r.slug, title: r.title, client: r.client, year: r.work_year, sport: sport, photos: photos, scene: ROOMS[r.slug] || BY_SPORT[sport] || 'gallery' };
+        var room = ROOMS[r.slug]; if (typeof room === 'string') room = { scene: room };
+        return { slug: r.slug, title: r.title, client: r.client, year: r.work_year, sport: sport, photos: photos, scene: (room && room.scene) || BY_SPORT[sport] || 'gallery', opts: room || {} };
       }).filter(function (p) { return p.photos.length; });
       return data;
     });
@@ -87,7 +88,7 @@
   function loadArena() {
     if (window.BuffArena) return Promise.resolve();
     if (!arenaScript) arenaScript = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = '/assets/arena3d.js?v=1795721341'; s.async = true;
+      var s = document.createElement('script'); s.src = '/assets/arena3d.js?v=1795723143'; s.async = true;
       s.onload = function () { window.BuffArena ? res() : rej(new Error('arena')); };
       s.onerror = function () { arenaScript = null; rej(new Error('arena')); };
       document.head.appendChild(s);
@@ -117,7 +118,7 @@
       if (proj !== token) return;
       try {
         ctl = window.BuffArena.mount($('#stage'), {
-          sceneId: p.scene, project: { title: p.title, client: p.client, year: p.year },
+          sceneId: p.scene, project: { slug: p.slug, title: p.title, client: p.client, year: p.year, scoreboard: p.opts.scoreboard },
           photos: p.photos.map(function (x) { return { i: x.i, src: x.src }; }),
           reducedMotion: REDUCED,
           onPhoto: function (i) { var c = $('#stage canvas'); if (c) { c.tabIndex = -1; c.setAttribute('aria-label', '3D 전시실'); c.focus({ preventScroll: true }); } openPhoto(i, true); },
