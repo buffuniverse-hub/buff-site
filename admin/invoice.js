@@ -34,7 +34,7 @@ function showList(){clearTimeout(tmr);var m=document.getElementById('main');
     [].forEach.call(box.querySelectorAll('select[data-st]'),function(sel){sel.onclick=function(e){e.stopPropagation()};sel.onchange=function(){var v=sel.value;sel.className='st'+(v==='issued'?' ok':'');rest('PATCH','invoices','id=eq.'+sel.getAttribute('data-st'),{status:v},{Prefer:'return=minimal'}).then(function(){window.buffToast('상태 변경: '+(v==='issued'?'발행':'작성 중'))}).catch(function(x){window.buffToast('상태 변경 실패: '+x.message,true)})}});
     [].forEach.call(box.querySelectorAll('tr.r'),function(tr){tr.onclick=function(e){var del=e.target.getAttribute&&e.target.getAttribute('data-del');
       if(del){e.stopPropagation();if(confirm('이 문서를 삭제할까요? 되돌릴 수 없습니다.'))rest('DELETE','invoices','id=eq.'+del).then(showList).catch(function(x){window.buffToast('삭제 실패: '+x.message,true)});return}
-      rest('GET','invoices','select=id,status,data&id=eq.'+tr.getAttribute('data-id')).then(function(r){if(!r||!r[0])return;S=Object.assign({},DEF,DB||{},r[0].data);S.id=r[0].id;S.status=r[0].status;draw(true)})}})
+      rest('GET','invoices','select=id,status,data&id=eq.'+tr.getAttribute('data-id')).then(function(r){if(!r||!r[0])return;S=Object.assign({},DEF,DB||{},r[0].data);S.id=r[0].id;S.status=r[0].status;window.drawInvoice(true)})}})
   }).catch(function(e){document.getElementById('ivl').textContent='불러오기 실패: '+e.message})}
 function ld(){return Object.assign({},DEF,DB||{})}
 function sv(){}
@@ -160,5 +160,5 @@ function draw(keep){
   return Promise.resolve();
 }
 window.openInvoiceTab=function(){showList();return Promise.resolve()};
-window.drawInvoice=function(keep){if(keep||DB)return draw(keep);return window.buffRest('GET','invoice_settings','select=key,value&key=in.(defaults,accounts)').then(function(rows){rows=rows||[];var d=rows.filter(function(r){return r.key==='defaults'})[0],a=rows.filter(function(r){return r.key==='accounts'})[0];DB=(d&&d.value)||{};ACC=(a&&Array.isArray(a.value))?a.value:[];return draw(keep)})};
+window.drawInvoice=function(keep){if(DB&&ACC)return draw(keep);return window.buffRest('GET','invoice_settings','select=key,value&key=in.(defaults,accounts)').then(function(rows){rows=rows||[];var d=rows.filter(function(r){return r.key==='defaults'})[0],a=rows.filter(function(r){return r.key==='accounts'})[0];DB=(d&&d.value)||{};ACC=(a&&Array.isArray(a.value))?a.value:[];return draw(keep)})};
 })();
