@@ -398,9 +398,17 @@ function reel(){
       logos();
     }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
     /* 배경이 투명한 로고 썸네일: 잘리지 않게 여백을 두고 밝은 배경에 표시 */
-    function logos(){var seen={};[].forEach.call(row.querySelectorAll('.reel-slide img'),function(im){var s=im.getAttribute('src')||'';if(!/\.png(\?|$)/i.test(s))return;
-      function mark(){[].forEach.call(row.querySelectorAll('.reel-slide img'),function(x){if(x.getAttribute('src')===s)x.parentNode.classList.add('reel-logo')})}
-      if(seen[s])return;seen[s]=1;var p=new Image();p.crossOrigin='anonymous';p.onload=function(){try{var c=document.createElement('canvas'),W=c.width=Math.min(p.naturalWidth,200),H=c.height=Math.max(1,Math.round(W*p.naturalHeight/p.naturalWidth)),x=c.getContext('2d');x.drawImage(p,0,0,W,H);var pts=[[0,0],[W-1,0],[0,H-1],[W-1,H-1],[W>>1,0],[0,H>>1]];for(var i=0;i<pts.length;i++){if(x.getImageData(pts[i][0],pts[i][1],1,1).data[3]<250){mark();return}}}catch(e){}};p.src=s})}
+    function logos(){var seen={};[].forEach.call(row.querySelectorAll('.reel-slide img'),function(im){var s=im.getAttribute('src')||'';if(!/\.png(\?|$)/i.test(s)||seen[s])return;seen[s]=1;
+      var p=new Image();p.crossOrigin='anonymous';p.onload=function(){try{
+        var W=p.naturalWidth,H=p.naturalHeight,k=Math.min(1,1400/Math.max(W,H));W=Math.round(W*k);H=Math.round(H*k);
+        var c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');x.drawImage(p,0,0,W,H);
+        var d=x.getImageData(0,0,W,H).data,x0=W,y0=H,x1=-1,y1=-1,tr=0;
+        for(var y=0;y<H;y++)for(var i=0;i<W;i++){var a=d[(y*W+i)*4+3];if(a<250)tr=1;if(a>16){if(i<x0)x0=i;if(i>x1)x1=i;if(y<y0)y0=y;if(y>y1)y1=y}}
+        if(!tr||x1<0)return;
+        /* 투명 여백을 잘라낸 로고로 교체 */
+        var cw=x1-x0+1,ch=y1-y0+1,o=document.createElement('canvas');o.width=cw;o.height=ch;o.getContext('2d').drawImage(c,x0,y0,cw,ch,0,0,cw,ch);var u=o.toDataURL('image/png');
+        [].forEach.call(row.querySelectorAll('.reel-slide img'),function(z){if(z.getAttribute('src')===s){z.src=u;z.parentNode.classList.add('reel-logo')}});
+      }catch(e){}};p.src=s})}
     logos();
     var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(speed,150)});
     speed();
