@@ -395,7 +395,13 @@ function reel(){
     if(window.sbGet)window.sbGet('works','select=id,title,title_en,category,thumbnail_url&published=eq.true&order=sort_order.asc').then(function(rows){
       rows=(rows||[]).filter(function(w){return w.thumbnail_url});
       if(rows.length){row.innerHTML=rows.map(function(w){return slide(w,0)}).join('')+rows.map(function(w){return slide(w,1)}).join('');row.style.animation='none';void row.offsetWidth;row.style.animation='';}
+      logos();
     }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
+    /* 배경이 투명한 로고 썸네일: 잘리지 않게 여백을 두고 밝은 배경에 표시 */
+    function logos(){var seen={};[].forEach.call(row.querySelectorAll('.reel-slide img'),function(im){var s=im.getAttribute('src')||'';if(!/\.png(\?|$)/i.test(s))return;
+      function mark(){[].forEach.call(row.querySelectorAll('.reel-slide img'),function(x){if(x.getAttribute('src')===s)x.parentNode.classList.add('reel-logo')})}
+      if(seen[s])return;seen[s]=1;var p=new Image();p.crossOrigin='anonymous';p.onload=function(){try{var c=document.createElement('canvas'),W=c.width=Math.min(p.naturalWidth,200),H=c.height=Math.max(1,Math.round(W*p.naturalHeight/p.naturalWidth)),x=c.getContext('2d');x.drawImage(p,0,0,W,H);var pts=[[0,0],[W-1,0],[0,H-1],[W-1,H-1],[W>>1,0],[0,H>>1]];for(var i=0;i<pts.length;i++){if(x.getImageData(pts[i][0],pts[i][1],1,1).data[3]<250){mark();return}}}catch(e){}};p.src=s})}
+    logos();
     var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(speed,150)});
     speed();
     /* 모바일: iOS·안드로이드 모두 같은 속도가 되도록 CSS 대신 시간 기준(px/초)으로 직접 굴립니다. 다른 롤링(.mq)과 같은 32px/초 */
