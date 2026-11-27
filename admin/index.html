@@ -72,6 +72,7 @@ main{max-width:1200px;margin:0 auto;padding:40px 40px 120px}
 .imgbox{display:flex;gap:14px;align-items:center}
 .imgbox img{width:160px;height:90px;object-fit:cover;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
 .imgbox .noimg{width:160px;height:90px;border-radius:12px;background:var(--bg);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:13px}
+.rgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.rgrid .row{display:flex;flex-direction:column;align-items:stretch;gap:0;position:relative;margin:0;padding:12px;border-radius:18px}.rgrid .row img,.rgrid .row .ph{width:100%;height:auto;aspect-ratio:16/9;border-radius:12px}.rgrid .row .t{flex:1;margin:12px 4px 10px}.rgrid .row .t b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:15px;line-height:1.4}.rgrid .row .t span{display:block;margin-top:2px;font-size:13px}.rgrid .grip{position:absolute;top:20px;left:20px;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:99px;background:rgba(255,255,255,.92);color:#1D1D1F;font-size:15px;box-shadow:0 1px 4px rgba(0,0,0,.15)}.rgrid .grip em{font-style:normal;font-size:12px;font-weight:700}.rgrid .chip{position:absolute;top:20px;right:20px}.rgrid .acts{width:100%;display:flex;gap:8px}.rgrid .acts .btn{flex:1}@media(max-width:1000px){.rgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.rgrid{grid-template-columns:1fr}.rgrid .row{flex-wrap:nowrap}}
 .row[draggable]{cursor:grab}.row.dragging,.imglist .it.dragging{opacity:.4}.row.over{outline:2px solid #0071E3;outline-offset:-2px}.imglist .it{cursor:grab}.imglist .it.over img{outline:2px solid #0071E3}.imglist .it .mv{display:none}.grip{color:#9a9aa0;font-size:20px;line-height:1;flex:0 0 auto;user-select:none}.row img{pointer-events:none}.imglist .it img{pointer-events:none}.imglist{display:flex;flex-wrap:wrap;gap:12px}
 .imglist .it{position:relative;width:150px}
 .imglist .it img{width:150px;height:96px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block;background:var(--bg)}
@@ -113,7 +114,7 @@ main{max-width:1200px;margin:0 auto;padding:40px 40px 120px}
 </section>
 <div id="modal"></div>
 <script src="../config.js"></script>
-<script src="admin.js?v=1795794025"></script>
+<script src="admin.js?v=1795796529"></script>
 <script src="invoice.js?v=1795675902"></script>
 </body>
 </html>
