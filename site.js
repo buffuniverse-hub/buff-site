@@ -7,6 +7,11 @@ var br=function(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" t
 function tagOf(w){var c=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category],n={marketing:'Marketing',branding:'Branding',photo:'Photo',video:'Video'};return ['marketing','branding','photo','video'].filter(function(k){return c.indexOf(k)>-1}).map(function(k){return n[k]}).join(' · ')||(CAT[w.category]||[''])[0]}
 var CAT={marketing:['Marketing','Works?cat=marketing'],photo:['Photo','Works?cat=photo'],video:['Video','Works?cat=video'],branding:['Branding','Works?cat=branding']};
 function ytId(u){var m=String(u||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:''}
+/* 썸네일이 없으면 첫 번째 유튜브 영상의 썸네일을 자동으로 사용 */
+function thumbOf(w){if(w&&w.thumbnail_url)return w.thumbnail_url;var v=(w&&w.videos)||[];for(var k=0;k<v.length;k++){var id=ytId(v[k]&&(v[k].url||v[k]));if(id)return 'https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg'}return ''}
+function ytFix(im){if(/ytimg\.com\/vi\/.+\/maxresdefault/.test(im.src)&&im.naturalWidth&&im.naturalWidth<=120)im.src=im.src.replace('maxresdefault','hqdefault')}
+document.addEventListener('load',function(e){var im=e.target;if(im&&im.tagName==='IMG')ytFix(im)},true);
+document.addEventListener('error',function(e){var im=e.target;if(im&&im.tagName==='IMG'&&/maxresdefault/.test(im.src))im.src=im.src.replace('maxresdefault','hqdefault')},true);
 
 function tz(w){var v=+w.thumb_zoom;return v>=100&&v<=400?v:100}
 function tx(w){var v=+w.thumb_x;return v>=0&&v<=100&&w.thumb_x!=null?v:50}
@@ -21,7 +26,7 @@ var SPN={lacrosse:'라크로스',basketball:'농구',tabletennis:'탁구',futsal
 function worksHtml(r,cat){if(cat!=='all'||!document.querySelector('.wf'))return r.map(workCard).join('');var s=r.filter(function(w){return w.field!=='culture'}),c=r.filter(function(w){return w.field==='culture'});function sec(k,a){return a.length?'<div class="wsec" data-f="'+k+'"><h2>'+k.toUpperCase()+'</h2><span class="wn">'+a.length+'</span></div>'+a.map(workCard).join(''):''}return sec('sports',s)+sec('culture',c)}
 function workCard(w){
   return '<a href="'+esc(wHref(w))+'" data-cat="'+esc((w.categories&&w.categories.length?w.categories:[w.category]).join(' '))+'" data-field="'+esc(w.field||'sports')+'" data-ctype="'+esc(w.culture_type||'')+'" data-sport="'+esc((w.sports||[]).join(' '))+'" data-year="'+esc(wYear(w))+'" data-mem="'+esc((w.members||[]).join('|'))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
-  +'<div style="position: relative; overflow: hidden; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px; aspect-ratio: 16 / 9; width: 100%"><img draggable="false" src="'+esc(w.thumbnail_url)+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; height: 100%; object-fit: cover; object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"></div>'
+  +'<div style="position: relative; overflow: hidden; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px; aspect-ratio: 16 / 9; width: 100%"><img draggable="false" src="'+esc(thumbOf(w))+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; height: 100%; object-fit: cover; object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"></div>'
   +'<span title="'+esc(w.title)+'" style="pointer-events: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
   +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(tagOf(w))+'</span>'
   +'<span class="wm" style="display: none; pointer-events: none">'+esc(metaOf(w))+'</span></a>';
@@ -202,7 +207,7 @@ function workDetail(app){
     var w=res[0][0],team=res[1];toSlugUrl(w);
     if(!w){app.innerHTML='<div style="padding:140px 24px 160px;text-align:center;word-break:keep-all"><p style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1D1D1F">이 작업물은 준비 중입니다</p><p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#6E6E73">자체 화면으로 준비하고 있어요.<br>조금만 기다려 주세요.</p><a href="/" style="display:inline-block;padding:12px 24px;border-radius:999px;background:#1D1D1F;color:#fff;text-decoration:none;font-size:15px">홈으로 돌아가기</a></div>';return}
     document.title='BUFF UNIVERSE — '+w.title;
-    setMeta(w.title,w.description||'',w.thumbnail_url||(w.images||[])[0]||'');
+    setMeta(w.title,w.description||'',thumbOf(w)||(w.images||[])[0]||'');
     var c=CAT[w.category]||CAT.photo;
     var mem=(w.members||[]).map(function(n){var t=team.filter(function(x){return x.name===n||x.ko_name===n})[0]||{};
       return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(t.name||n)+'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 14px; font-weight: 700; color: #1D1D1F">'+esc(t.name||n)+'</span></div>'}).join('');
@@ -389,11 +394,11 @@ function reel(){
     }
     function slide(w,hid){
       var cat=tagOf(w).toUpperCase();
-      return '<a class="reel-slide" href="'+esc(wHref(w))+'"><img src="'+esc(w.thumbnail_url)+'" alt="'+(hid?'':esc(w.title))+'"'+(hid?' aria-hidden="true"':'')+' style="object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
+      return '<a class="reel-slide" href="'+esc(wHref(w))+'"><img src="'+esc(thumbOf(w))+'" alt="'+(hid?'':esc(w.title))+'"'+(hid?' aria-hidden="true"':'')+' style="object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
     }
     /* 관리자 페이지의 작업물·썸네일과 연동 */
     if(window.sbGet)window.sbGet('works','select=*&published=eq.true&order=sort_order.asc').then(function(rows){
-      rows=(rows||[]).filter(function(w){return w.thumbnail_url});
+      rows=(rows||[]).filter(function(w){return thumbOf(w)});
       if(rows.length){row.innerHTML=rows.map(function(w){return slide(w,0)}).join('')+rows.map(function(w){return slide(w,1)}).join('');row.style.animation='none';void row.offsetWidth;row.style.animation='';}
     }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
     var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(speed,150)});
