@@ -97,7 +97,7 @@ function page(){
   +'<div class="rt">'+t.dl.map(function(h,i){return '<div><div class="k">'+E(h[0])+ph(h)+'</div><div class="g">'+E(dv[i])+'</div></div>'}).join('')+'</div></div>'
   +'<table class="ivt"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'
   +'<table class="ivtot"><tbody>'+tot(0,money(tt.sub))+tot(1,money(tt.vat))+tot(2,money(tt.tot),1)+'</tbody></table>'
-  +'<div class="ivn">'+(qt()?'':'<p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct,S.swift,S.bAd,S.hAd,S.hTel].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>')
+  +'<div class="ivn">'+('<p><span class="k">'+E(t.pay[0])+ph(t.pay)+'</span><br>'+[S.bank,S.holder,S.acct,S.swift,S.bAd,S.hAd,S.hTel].map(function(v,i){return v?E(t.pl[i][0])+': '+E(v):''}).filter(Boolean).join('<br>')+'</p>')
   +(nt()?'<p>'+E(nt())+'</p>':'')+'<p class="ty">'+(qt()?'견적서를 검토해 주셔서 감사합니다. Thank you for your consideration.':'감사합니다. Thank you for your business!')+'</p></div></div>'
   +'<div class="ivfoot"><img src="'+LOGO+'" alt="BUFF"><div class="a"><b>'+E(S.fCo)+'</b><br>'+E(S.fAd)+(S.fAdK?'<br>'+E(S.fAdK):'')+'<br>'+E(S.fEm)+'<br>'+E(t.fl[3][0])+' / '+E(t.fl[3][1])+': '+E(S.fTx)+'</div></div></div>';
 }
@@ -135,7 +135,7 @@ function draw(keep){
     +'<label>결제 조건</label><select data-k="ts"><option value="7">Net 7 · 7일 이내</option><option value="14">Net 14 · 14일 이내</option><option value="30">Net 30 · 30일 이내</option><option value="60">Net 60 · 60일 이내</option><option value="0">Due on receipt · 수령 즉시</option><option value="custom">직접 입력</option></select><div id="ivterms" class="hide">'+inp('terms','결제 조건 직접 입력','','text','예: 50% 선금, 50% 납품 후')+'</div>')
   +sec(3,'고객 (공급받는 자)',true,'<div class="grid2"><div>'+inp('cCo','고객명 / 업체명',S.cCo)+'</div><div>'+inp('cNm','담당자 (선택)',S.cNm)+'</div></div>'+inp('cAd','주소',S.cAd)+'<div class="grid2"><div>'+inp('cEm','이메일 / 연락처',S.cEm)+'</div><div>'+inp('cTx','사업자등록번호 (선택)',S.cTx)+'</div></div>')
   +sec(4,'서비스 내역',true,'<div id="ivitems">'+itemsForm()+'</div><button class="btn line sm" id="ivadd" type="button" style="margin-top:10px;width:100%">+ 항목 추가</button>')
-  +(qt()?'':sec(5,'입금 계좌',true,'<label>저장된 계좌</label><div class="ivrow" style="margin-top:0"><select id="ivacc" style="flex:1">'+accOpts()+'</select><button class="btn line sm" id="ivaccdel" type="button">삭제</button></div>'
+  +(sec(5,'입금 계좌',true,'<label>저장된 계좌</label><div class="ivrow" style="margin-top:0"><select id="ivacc" style="flex:1">'+accOpts()+'</select><button class="btn line sm" id="ivaccdel" type="button">삭제</button></div>'
     +'<details class="ivsub2"'+(S.bank?'':' open')+'><summary>계좌 정보 '+(S.bank?'<em>'+E(S.bank)+(S.holder?' · '+E(S.holder):'')+'</em>':'')+'</summary>'
     +'<div class="grid2"><div>'+inp('bank','은행명',S.bank)+'</div><div>'+inp('holder','예금주',S.holder)+'</div></div><div class="grid2"><div>'+inp('acct','계좌번호',S.acct)+'</div><div>'+inp('swift','SWIFT 코드',S.swift)+'</div></div>'
     +'<p class="ivgh">해외에서 입금받을 때</p>'+inp('bAd','은행 영문 주소',S.bAd)+inp('hAd','수취인 영문 주소',S.hAd)+inp('hTel','수취인 연락처',S.hTel,'text','82-10-1234-5678')

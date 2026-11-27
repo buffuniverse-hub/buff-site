@@ -43,7 +43,7 @@ window.buffInvoiceDocx=function(g){
     var totals=tbl(tw,[trow(0,money(tt.sub)),trow(1,money(tt.vat)),trow(2,money(tt.tot),true)],{alignment:D.AlignmentType.RIGHT});
     // notes
     var QT=S.doc==='qt',pay=[];var pls=[S.bank,S.holder,S.acct,S.swift,S.bAd,S.hAd,S.hTel];
-    if(!QT){pay.push(p([r(T.pay[0],{size:18,bold:true})].concat(sub(T.pay)),{after:30}));
+    {pay.push(p([r(T.pay[0],{size:18,bold:true})].concat(sub(T.pay)),{after:30}));
     pls.forEach(function(v,i){if(v)pay.push(p(r(T.pl[i][0]+': '+v,{size:18,color:'4A4A4F'})))});}
     if(g.notes)String(g.notes).split('\n').forEach(function(l,i){pay.push(p(r(l,{size:18,color:'4A4A4F'}),{before:i?0:140}))});
     pay.push(p(r(QT?'견적서를 검토해 주셔서 감사합니다. Thank you for your consideration.':'감사합니다. Thank you for your business!',{size:18,bold:true}),{before:140}));
