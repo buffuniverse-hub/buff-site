@@ -86,6 +86,30 @@ var T={
 };
 var SETTINGS=[['career_headline','Careers 큰 제목','text','“BUFF”로 시작하면 로고 이미지로 표시됩니다.'],['career_subtext','Careers 안내 문구','textarea'],['career_team_note','함께 성장 안내문','textarea'],['partner_text','파트너 등록 안내문','textarea'],['contact_email','채용·문의 이메일','text']];
 window.buffRest=rest;window.buffToast=toast;
+/* 작업물 입력 화면: 국문 위주로 묶고, 자동으로 채워지는 영문·고급 설정은 접어 둠 */
+(function(){
+  var by={};T.works.fields.forEach(function(f){by[f[0]]=f});
+  function F_(k,label,extra){var f=by[k]?by[k].slice():[k,label,'text'];if(label)f[1]=label;if(extra){f[3]=Object.assign({},f[3]||{},extra)}return f}
+  T.works.fields=[
+    ['_g','기본 정보'],
+    F_('title','프로젝트명'),F_('client','클라이언트'),F_('work_year','연도 (기간)'),F_('description','프로젝트 설명'),
+    ['_g','분류'],
+    F_('field','분야',{opts:[['sports','SPORTS'],['culture','LIFESTYLE (공연·행사·제품 등)']]}),
+    F_('sports','종목',{when:function(F){return F.field!=='culture'}}),
+    F_('culture_type','유형',{when:function(F){return F.field==='culture'}}),
+    F_('categories','작업 분류 (여러 개 선택 가능)'),
+    ['_g','사진 · 영상'],
+    F_('thumbnail_url','목록 썸네일 (16:9 권장 · 비워 두면 유튜브 영상 썸네일 자동 사용)'),F_('thumb_zoom','썸네일 확대 · 위치'),
+    F_('images','상세 이미지'),F_('videos','영상 링크 (YouTube · Instagram)'),F_('press','관련 보도 링크 (보도자료 · 기사 주소)'),
+    ['_g','참여 · 공개'],
+    F_('members','참여 멤버'),F_('published','사이트에 공개'),
+    ['_g','영문 · 페이지 주소 — 저장하면 자동으로 채워집니다 (고칠 때만 열어 주세요)','fold'],
+    F_('title_en','[EN] 프로젝트명'),F_('client_en','[EN] 클라이언트'),['work_year_en','[EN] 연도','text'],F_('description_en','[EN] 프로젝트 설명'),
+    F_('slug','페이지 주소 (비워 두면 자동 생성 · 한 번 정해지면 바꾸지 않는 걸 권장)'),
+    ['_g','고급 설정','fold'],
+    F_('template','상세 페이지 템플릿'),F_('sections','[템플릿 2] 섹션 구성 (JSON)'),F_('metrics','[템플릿 2] 성과 수치 (JSON)'),F_('pdf_url','포트폴리오 PDF 링크'),F_('sort_order','정렬 순서 (목록에서 드래그로도 바꿀 수 있음)')
+  ];
+})();
 var TABS=['home','news','works','clients','team_members','career_positions','settings','invoice'];
 var cur='home', cache={};
 
@@ -152,12 +176,19 @@ function openForm(k,data){
     $('#modal').innerHTML=h;
     var F0=JSON.parse(JSON.stringify(F));
     var box=$('#fe');
-    d.fields.forEach(function(f){box.appendChild(field(f,F,{works:works,team:team}))});
+    if(!document.getElementById('fg-css')){var gs=document.createElement('style');gs.id='fg-css';gs.textContent='.fg-h{margin:26px 0 12px;padding-top:18px;border-top:1px solid #E5E5EA;font-size:15px;font-weight:700;color:#1D1D1F}#fe>.fg-h:first-child{margin-top:4px;padding-top:0;border-top:0}details.fg{margin:22px 0 0;border:1px solid #E5E5EA;border-radius:12px;padding:0 16px;background:#FAFAFA}details.fg>summary{cursor:pointer;padding:14px 0;font-size:14px;font-weight:600;color:#6E6E73;list-style:none}details.fg>summary::-webkit-details-marker{display:none}details.fg>summary:before{content:"▸ ";color:#86868B}details.fg[open]>summary:before{content:"▾ "}details.fg[open]{padding-bottom:12px}';document.head.appendChild(gs)}
+    var cur=box,conds=[];
+    d.fields.forEach(function(f){
+      if(f[0]==='_g'){if(f[2]==='fold'){var dt=document.createElement('details');dt.className='fg';dt.innerHTML='<summary>'+esc(f[1])+'</summary>';box.appendChild(dt);cur=dt}else{var hh=document.createElement('div');hh.className='fg-h';hh.textContent=f[1];box.appendChild(hh);cur=box}return}
+      var el=field(f,F,{works:works,team:team});cur.appendChild(el);if(f[3]&&f[3].when)conds.push([el,f[3].when]);
+    });
+    function refresh(){conds.forEach(function(c){c[0].style.display=c[1](F)?'':'none'})}
+    refresh();['change','input','click'].forEach(function(ev){box.addEventListener(ev,function(){setTimeout(refresh,0)})});
     $('#cancel').onclick=close;
     $('.ov').addEventListener('mousedown',function(e){if(e.target===this&&confirm('작성 중인 내용이 사라집니다. 닫을까요?'))close()});
     $('#save').onclick=function(){
       var btn=this;btn.disabled=true;btn.textContent='저장 중…';$('#ferr').textContent='';
-      var body={};d.fields.forEach(function(f){body[f[0]]=F[f[0]]===undefined?null:F[f[0]]});
+      var body={};d.fields.forEach(function(f){if(f[0].charAt(0)==='_')return;body[f[0]]=F[f[0]]===undefined?null:F[f[0]]});
       ['published_at','work_id','url','thumbnail_url'].forEach(function(n){if(body[n]==='')body[n]=null});
       if('thumb_zoom' in body){body.thumb_x=F.thumb_x==null?50:F.thumb_x;body.thumb_y=F.thumb_y==null?50:F.thumb_y}
       if(k==='works'){var cs0=(body.categories&&body.categories.length)?body.categories:[F.category||'photo'];body.categories=cs0;body.category=cs0[0]}
