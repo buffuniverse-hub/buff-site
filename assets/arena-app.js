@@ -88,7 +88,7 @@
   function loadArena() {
     if (window.BuffArena) return Promise.resolve();
     if (!arenaScript) arenaScript = new Promise(function (res, rej) {
-      var s = document.createElement('script'); s.src = '/assets/arena3d.js?v=sangnoksu-v8'; s.async = true;
+      var s = document.createElement('script'); s.src = '/assets/arena3d.js?v=buff-court-v9'; s.async = true;
       s.onload = function () { window.BuffArena ? res() : rej(new Error('arena')); };
       s.onerror = function () { arenaScript = null; rej(new Error('arena')); };
       document.head.appendChild(s);
@@ -103,10 +103,11 @@
     closeRoom();
     proj = p;
     $('#list').hidden = true; $('.top').hidden = true; $('#room').hidden = false;
-    document.title = p.title + ' — BUFF GALLERY';
-    $('#rt').textContent = p.title;
-    $('#rs').textContent = [SPORT_EN[p.sport], p.client, p.year].filter(Boolean).join(' · ');
-    $('#rlt').textContent = p.title;
+    var roomName = p.scene === 'arena-sangnoksu' ? 'BUFF 농구 코트' : p.title;
+    document.title = roomName + ' — BUFF GALLERY';
+    $('#rt').textContent = roomName;
+    $('#rs').textContent = [roomName !== p.title ? p.title : SPORT_EN[p.sport], p.client, p.year].filter(Boolean).join(' · ');
+    $('#rlt').textContent = roomName;
     $('#rload').style.backgroundImage = 'url("' + p.photos[0].src.replace(/"/g, '%22') + '")';
     $('#rload').hidden = false; $('#rfall').hidden = true; $('#rbar').hidden = true;
     $('#rlm').textContent = '전시실을 준비하고 있어요';
@@ -118,7 +119,7 @@
       if (proj !== token) return;
       try {
         ctl = window.BuffArena.mount($('#stage'), {
-          sceneId: p.scene, project: { slug: p.slug, title: p.title, client: p.client, year: p.year, scoreboard: p.opts.scoreboard },
+          sceneId: p.scene, project: { slug: p.slug, title: p.title, roomName: roomName, client: p.client, year: p.year, scoreboard: p.opts.scoreboard },
           photos: p.photos.map(function (x) { return { i: x.i, src: x.src }; }),
           reducedMotion: REDUCED,
           onPhoto: function (i) { var c = $('#stage canvas'); if (c) { c.tabIndex = -1; c.setAttribute('aria-label', '3D 전시실'); c.focus({ preventScroll: true }); } openPhoto(i, true); },
