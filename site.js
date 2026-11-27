@@ -307,10 +307,10 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
   function setup(){
     var g=document.getElementById('works-grid'),bar=document.querySelector('.wf');if(!g||!bar||bar._w)return;bar._w=1;
     wsCss();
-    var T={"filter": "필터", "done": "결과 보기", "svc": "분류", "sport": "종목", "type": "유형", "year": "연도", "who": "인물", "sel": "선택", "all": "전체", "en": false,"field":"분야","kind":"종목 · 유형","reset":"초기화","gsp":"SPORTS · 종목","gcu":"CULTURE · 유형"},SP=SPN,CT=CTN,NM={},FN={all:'ALL',sports:'SPORTS',culture:'CULTURE'};
+    var T={"filter": "필터", "done": "결과 보기", "svc": "분류", "sport": "종목", "type": "유형", "year": "연도", "who": "인물", "sel": "선택", "all": "전체", "en": false,"field":"분야","kind":"종목 · 유형","reset":"초기화","gsp":"SPORTS · 종목","gcu":"LIFESTYLE · 유형"},SP=SPN,CT={performance:'Performance',event:'Event',product:'Product',other:'Other'},NM={},FN={all:'ALL',sports:'SPORTS',culture:'LIFESTYLE'};
     var SVC=[].map.call(bar.querySelectorAll('button[data-f]'),function(b){return [b.getAttribute('data-f'),b.textContent.trim()]}).filter(function(s){return s[0]!=='all'});
     var q=new URLSearchParams(location.search);
-    var st={f:FN[q.get('field')]?q.get('field'):'all',svc:'',sp:q.get('sport')||'',cu:q.get('ctype')||'',y:q.get('year')||'',m:q.get('who')||''};
+    var fq0=q.get('field')==='lifestyle'?'culture':q.get('field');var st={f:FN[fq0]?fq0:'all',svc:'',sp:q.get('sport')||'',cu:q.get('ctype')||'',y:q.get('year')||'',m:q.get('who')||''};
     var c0=q.get('cat');SVC.forEach(function(s){if(s[0]===c0)st.svc=c0});
     if(st.f==='all'){if(st.sp)st.f='sports';else if(st.cu)st.f='culture'}
     function mk(t,c,h){var e=document.createElement(t);e.className=c;if(h)e.innerHTML=h;return e}
