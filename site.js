@@ -200,6 +200,25 @@ function setMeta(t,d,img){
 function pdfUrl(u){u=String(u||'').trim();if(!u)return '';var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)||u.match(/[?&]id=([^&#]+)/);if(/drive\.google\.com|docs\.google\.com/.test(u)&&m)return 'https://drive.google.com/uc?export=download&id='+m[1];return u}
 function fitTitle(app){var h=app.querySelector('.wk-h1');if(!h)return;function f(){h.style.fontSize='';var fs=parseFloat(getComputedStyle(h).fontSize);while(h.scrollWidth>h.clientWidth&&fs>14){fs-=1;h.style.fontSize=fs+'px'}}f();window.addEventListener('resize',f);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(f)}
 function loadW2(cb){if(window.renderWork2)return cb(true);var s=document.createElement('script');s.src='/work2.js?v=1795716188';s.onload=function(){cb(true)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
+/* 작품 페이지 공유 버튼: 휴대폰은 기본 공유 창(카톡·메시지 등), PC는 링크 복사 */
+function addShare(app,w){try{
+  if(!document.getElementById('wk-share-css')){var s=document.createElement('style');s.id='wk-share-css';s.textContent=".wk-share{justify-self:end;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid #D2D2D7;border-radius:99px;background:#fff;color:#1D1D1F;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s;white-space:nowrap}.wk-share:hover{border-color:#1D1D1F}.wk-share svg{width:15px;height:15px}.wk-share-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 0 0}@media(min-width:641px){.wk-share-row{margin-top:32px}}.wk-share-row .back{margin:0!important}.wk-toast{position:fixed;left:50%;bottom:32px;transform:translate(-50%,20px);background:#1D1D1F;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:99px;opacity:0;transition:opacity .2s,transform .2s;z-index:200;pointer-events:none}.wk-toast.on{opacity:1;transform:translate(-50%,0)}";document.head.appendChild(s)}
+  var b=document.createElement('button');b.type='button';b.className='wk-share';b.setAttribute('aria-label','공유');
+  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span>공유</span>';
+  var slot=app.querySelector('.wk-top>span:last-child'),back=app.querySelector('.t2 .back');
+  if(slot)slot.parentNode.replaceChild(b,slot);
+  else if(back){var row=document.createElement('div');row.className='wk-share-row';back.parentNode.insertBefore(row,back);row.appendChild(back);row.appendChild(b)}
+  else return;
+  function toast(m){var t=document.createElement('div');t.className='wk-toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(function(){t.classList.add('on')});setTimeout(function(){t.classList.remove('on');setTimeout(function(){t.remove()},250)},1800)}
+  b.addEventListener('click',function(){
+    var url=location.origin+location.pathname+(/\/work(\.html)?$/.test(location.pathname)?location.search:''),title=(window.BUFF_EN&&w.title_en)||w.title;
+    var touch=window.matchMedia('(pointer:coarse)').matches;
+    if(navigator.share&&touch){navigator.share({title:title,url:url}).catch(function(){});return}
+    var done=function(){toast('링크를 복사했어요')};
+    if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(url).then(done,function(){window.prompt('이 링크를 복사해 주세요',url)});
+    else window.prompt('이 링크를 복사해 주세요',url);
+  });
+}catch(e){}}
 function workDetail(app){
   var st=document.createElement('style');st.textContent=WK_CSS;document.head.appendChild(st);
   var qk=qKey(),id=qk&&qk.v;
@@ -212,7 +231,7 @@ function workDetail(app){
     var c=CAT[w.category]||CAT.photo;
     var mem=(w.members||[]).map(function(n){var t=team.filter(function(x){return x.name===n||x.ko_name===n})[0]||{};
       return '<div style="display: flex; align-items: center; gap: 10px">'+(t.avatar_url?'<img src="'+esc(t.avatar_url)+'" alt="'+esc(t.name||n)+'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: top center; background: #F5F5F7">':'')+'<span style="font-size: 14px; font-weight: 700; color: #1D1D1F">'+esc(t.name||n)+'</span></div>'}).join('');
-    if(String(w.template)==='2'){loadW2(function(ok){if(ok){window.renderWork2(app,w,c[1],mem?'<div class="wk-credit"><em>참여 인물</em><div class="wk-people">'+mem+'</div></div>':'');justify(app);wireMedia(app)}else app.innerHTML='<p style="padding:120px 40px;text-align:center">'+(window.BUFF_EN?'Could not load the page. Please try again later.':'불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')+'</p>'});return}
+    if(String(w.template)==='2'){loadW2(function(ok){if(ok){window.renderWork2(app,w,c[1],mem?'<div class="wk-credit"><em>참여 인물</em><div class="wk-people">'+mem+'</div></div>':'');addShare(app,w);justify(app);wireMedia(app)}else app.innerHTML='<p style="padding:120px 40px;text-align:center">'+(window.BUFF_EN?'Could not load the page. Please try again later.':'불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')+'</p>'});return}
     var media='';
     var vids='';
     (Array.isArray(w.videos)?w.videos:[]).forEach(function(v){var i=ytId(v.url);if(!v.url)return;var igm=String(v.url).match(/instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([\w-]+)/);if(igm){vids+='<figure class="wk-vid wk-ig" style="margin: 0"><div style="border-radius: 16px; overflow: hidden; border: 1px solid #D2D2D7; background: #fff"><iframe src="https://www.instagram.com/'+(igm[1]==='p'?'p':'reel')+'/'+igm[2]+'/embed/" title="Instagram" loading="lazy" scrolling="no" allowtransparency="true" allowfullscreen style="display: block; width: 100%; height: 600px; border: 0"></iframe></div></figure>';return}
@@ -230,7 +249,7 @@ function workDetail(app){
     +metaLine(w)
     +(w.description?'<div class="wk-desc">'+(/\n/.test(w.description)?w.description:w.description.replace(/([.!?。]|다\.)\s+/g,function(m,a){return a+'\n'})).trim().split(/\n\s*\n/).map(function(b){return '<p>'+b.split(/\n/).map(function(l){return esc(l.trim())}).join('<br>')+'</p>'}).join('')+'</div>':'')
     +'<div class="wk-wrap"><div class="wk-media">'+media+'</div></div>'+(mem?'<div class="wk-credit"><em>참여 인물</em><div class="wk-people">'+mem+'</div></div>':'')+'</section>';
-    wireMedia(app);justify(app);fitTitle(app);
+    wireMedia(app);justify(app);fitTitle(app);addShare(app,w);
   }).catch(function(){app.innerHTML='<p style="padding:120px 40px;text-align:center">불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>'});
 }
 function srcLabel(u){u=String(u||'');return /instagram\.com/.test(u)?'인스타그램에서 보기':/youtu\.?be/.test(u)?'유튜브에서 보기':/threads\.(net|com)/.test(u)?'스레드에서 보기':/facebook\.com|fb\.watch/.test(u)?'페이스북에서 보기':/(twitter|x)\.com/.test(u)?'X에서 보기':'원문 보기'}
