@@ -440,7 +440,7 @@ function reel(){
       return '<a class="reel-slide" href="'+esc(wHref(w))+'"><img src="'+esc(thumbOf(w))+'" alt="'+(hid?'':esc(w.title))+'"'+(hid?' aria-hidden="true"':'')+' style="object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"><div class="reel-cap"><small>'+cat+'</small><b>'+esc(w.title)+'</b></div></a>';
     }
     /* 관리자 페이지의 작업물·썸네일과 연동 */
-    if(window.sbGet)window.sbGet('works','select=*&published=eq.true&order=sort_order.asc').then(function(rows){
+    if(window.sbGet)window.sbGet('works','select=*&published=eq.true&field=neq.culture&order=sort_order.asc').then(function(rows){
       rows=(rows||[]).filter(function(w){return thumbOf(w)});
       if(rows.length){row.innerHTML=rows.map(function(w){return slide(w,0)}).join('')+rows.map(function(w){return slide(w,1)}).join('');row.style.animation='none';void row.offsetWidth;row.style.animation='';}
     }).catch(function(){}).then(function(){setTimeout(speed,50);var im=row.querySelectorAll('img'),n=im.length;[].forEach.call(im,function(i){i.addEventListener('load',speed)})});
