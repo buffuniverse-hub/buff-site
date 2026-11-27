@@ -4308,14 +4308,15 @@ function addBasketNet(centerX, rimHeight) {
 }
 for(let O of[-1,1]){let H=O*(m/2-1.2),J=O*(m/2-1.575),b=O*(m/2+.95);i.box(.03,1.05,1.8,ft,H,3.425,0,{cast:!1});for(let[q,z,j,ht]of[[2.925,.05,0,1.8],[3.925,.05,0,1.8]])i.box(.045,z,ht,Q,H,q,j);for(let q of[-.875,.875])i.box(.035,1.05,.05,Q,H,3.425,q);i.box(.036,.45,.04,Q,H,3.275,.29),i.box(.036,.45,.04,Q,H,3.275,-.29),i.box(.036,.035,.59,Q,H,3.48,0),i.box(.036,.035,.59,Q,H,3.07,0),i.box(.06,.14,1.82,ut,H,2.84,0,{bevel:.02});let v=new Lt(new ti(.2295,.01,8,40),dt);v.rotation.x=Math.PI/2,v.position.set(J,3.05,0),v.castShadow=!0,n.add(v),i.box(.15,.04,.12,dt,(J+H)/2,3.03,0);addBasketNet(J,3.05);
 {
-  // Padded mobile stanchion and open, painted-white box truss.
+  // Padded mobile stanchion with a folding cantilever and backboard braces.
   const backing = new Lt(new dn(.43, .69, 1.62, 4, 1), ut);
   backing.rotation.y = Math.PI / 4;
   backing.scale.set(1.3, 1, 1.28);
   backing.position.set(b + O * .13, .82, 0);
   backing.castShadow = backing.receiveShadow = true;
   n.add(backing);
-  i.box(1.69,.13,1.35,l(0x17191b,.69),b+O*.10,.095,0,{bevel:.035});
+  i.box(2.36,.28,1.39,l(0x17191b,.8),b+O*.47,.16,0,{bevel:.04});
+  i.box(1.24,.045,1.37,l(0x272a2d,.81),b+O*.91,.31,0,{bevel:.012});
   
   // Simple Icons Under Armour SVG — https://github.com/simple-icons/simple-icons/blob/develop/icons/underarmour.svg
   const uaLogo = a.load("data:image/svg+xml," + encodeURIComponent("<svg role=\"img\" width=\"480\" height=\"284\" viewBox=\"0 4.85 24 14.3\" xmlns=\"http://www.w3.org/2000/svg\"><title>Under Armour</title><path fill=\"#f5f3ee\" d=\"M15.954 12c-.089.066-.195.142-.324.233-.826.585-2.023.985-3.58.985h-.104c-1.556 0-2.755-.4-3.58-.985A36.43 36.43 0 018.042 12c.09-.067.196-.143.324-.234.825-.584 2.024-.985 3.58-.985h.104c1.557 0 2.756.401 3.58.985.129.09.235.167.325.234M24 7.181s-.709-.541-2.95-1.365c-1.968-.721-3.452-.883-3.452-.883l.006 4.243c0 .598-.162 1.143-.618 1.765-1.672-.61-3.254-.985-4.981-.985-1.728 0-3.308.375-4.98.985-.457-.619-.62-1.168-.62-1.765l.007-4.243s-1.494.16-3.463.883C.709 6.642 0 7.181 0 7.181c.093 1.926 1.78 3.638 4.435 4.82C1.777 13.18.09 14.887 0 16.818c0 0 .709.54 2.949 1.365 1.968.721 3.453.883 3.453.883l-.007-4.244c0-.597.164-1.143.619-1.764 1.672.61 3.252.983 4.98.983 1.727 0 3.309-.374 4.98-.983.457.62.62 1.167.62 1.764l-.006 4.244s1.484-.16 3.452-.883c2.241-.826 2.95-1.365 2.95-1.365-.093-1.927-1.78-3.64-4.435-4.819 2.657-1.182 4.343-2.888 4.435-4.82\"/></svg>"), () => i.dirty&&i.dirty());
@@ -4336,11 +4337,6 @@ for(let O of[-1,1]){let H=O*(m/2-1.2),J=O*(m/2-1.575),b=O*(m/2+.95);i.box(.03,1.
   const rear = b + O * .17;
   const front = H + O * .12;
   const span = rear - front;
-  const truss = (t, z, upper) => [
-    rear - span * t,
-    1.46 + (upper ? .29 : 0) + t * 1.64,
-    z
-  ];
   const paint = Q;
   const tube = (from, to, width) => {
     const start = new L(...from);
@@ -4353,19 +4349,28 @@ for(let O of[-1,1]){let H=O*(m/2-1.2),J=O*(m/2-1.575),b=O*(m/2+.95);i.box(.03,1.
     bar.receiveShadow = true;
     n.add(bar);
   };
-  const halfWidth = .24;
-  const joints = [0, .37, .72, 1];
-  for (const z of [-halfWidth, halfWidth]) {
-    for (const upper of [false, true]) tube(truss(0,z,upper),truss(1,z,upper),.068);
-    for (let k = 0; k < joints.length - 1; k++) {
-      tube(truss(joints[k],z,k % 2 === 0),truss(joints[k+1],z,k % 2 !== 0),.049);
-    }
-    tube(truss(0,z,false),truss(0,z,true),.059);
-    tube(truss(1,z,false),truss(1,z,true),.059);
-  }
-  for (const t of joints) {
-    tube(truss(t,-halfWidth,true),truss(t,halfWidth,true),.053);
-    tube(truss(t,-halfWidth,false),truss(t,halfWidth,false),.053);
+
+  // Profile of the folding cantilever, with steel braces behind the clear board.
+  const profile = new rs();
+  const armPoints = [
+    [rear+O*.20,1.45],[rear+O*.20,1.91],[rear-span*.33,2.61],
+    [front,3.37],[front,3.16],[rear-span*.40,2.35]
+  ];
+  profile.moveTo(...armPoints[0]);
+  for (const point of armPoints.slice(1)) profile.lineTo(...point);
+  profile.closePath();
+  const beam = new Lt(new Mo(profile,{
+    depth:.32,bevelEnabled:true,bevelSize:.014,bevelThickness:.014,bevelSegments:2,steps:1
+  }),paint);
+  beam.position.z=-.16;
+  beam.castShadow=beam.receiveShadow=true;
+  n.add(beam);
+  for (const side of [-1,1]) {
+    const z=side*.31;
+    tube([rear+O*.83,.35,z],[rear+O*.13,1.78,side*.22],.064);
+    tube([rear+O*.30,.36,z],[rear-span*.35,2.47,side*.21],.052);
+    tube([rear-span*.48,2.74,side*.19],[front,3.89,side*.57],.040);
+    tube([front,3.27,side*.35],[front,3.89,side*.57],.038);
   }
   i.box(.09,.075,1.18,paint,front,3.22,0);
   for(const z of [-.26,.26]) i.box(.055,.72,.05,paint,front,3.94,z);
