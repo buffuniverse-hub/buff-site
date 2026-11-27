@@ -4265,9 +4265,10 @@ function addBasketNet(centerX, rimHeight) {
   const columns = 12;
   const radii = [.228, .213, .192, .163, .136, .124];
   const drops = [.017, .082, .166, .251, .342, .425];
-  const strand = new dn(.004, .004, 1, 6);
+  const strand = new dn(.0028, .0028, 1, 7);
   const cotton = l(0xf7f3e8, .92);
   const net = new wn(strand, cotton, (radii.length - 1) * columns * 2 + columns * 3);
+  const knots = new wn(new as(.0047,6,4),cotton,(radii.length-1)*columns);
   const up = new L(0, 1, 0);
   const axis = new L();
   const middle = new L();
@@ -4275,6 +4276,7 @@ function addBasketNet(centerX, rimHeight) {
   const rotation = new ze();
   const matrix = new Yt();
   let index = 0;
+  let knotIndex = 0;
   const point = (row, column) => {
     const angle = (column + (row % 2) * .5) * 2 * Math.PI / columns;
     const radius = radii[row] + (row ? .004 * Math.sin(angle * 3 + row) : 0);
@@ -4290,7 +4292,8 @@ function addBasketNet(centerX, rimHeight) {
   };
   for (let column = 0; column < columns; column++) {
     const hook = point(0, column);
-    connect(hook, hook.clone().setY(rimHeight + .002));
+    connect(hook, hook.clone().setY(rimHeight - .011));
+    for(let row=1;row<radii.length;row++) knots.setMatrixAt(knotIndex++,matrix.makeTranslation(...point(row,column).toArray()));
     for (let row = 0; row < radii.length - 1; row++) {
       connect(point(row, column), point(row + 1, column));
       connect(point(row, column), point(row + 1, column + (row % 2 ? 1 : -1)));
@@ -4303,10 +4306,56 @@ function addBasketNet(centerX, rimHeight) {
     connect(from, sag);
     connect(sag, to);
   }
-  net.instanceMatrix.needsUpdate = true;
-  n.add(net);
+  net.name = "Basketball net cords";
+  knots.name = "Basketball net knots";
+  net.instanceMatrix.needsUpdate = knots.instanceMatrix.needsUpdate = true;
+  n.add(net,knots);
 }
-for(let O of[-1,1]){let H=O*(m/2-1.2),J=O*(m/2-1.575),b=O*(m/2+.95);i.box(.03,1.05,1.8,ft,H,3.425,0,{cast:!1});for(let[q,z,j,ht]of[[2.925,.05,0,1.8],[3.925,.05,0,1.8]])i.box(.045,z,ht,Q,H,q,j);for(let q of[-.875,.875])i.box(.035,1.05,.05,Q,H,3.425,q);i.box(.036,.45,.04,Q,H,3.275,.29),i.box(.036,.45,.04,Q,H,3.275,-.29),i.box(.036,.035,.59,Q,H,3.48,0),i.box(.036,.035,.59,Q,H,3.07,0),i.box(.06,.14,1.82,ut,H,2.84,0,{bevel:.02});let v=new Lt(new ti(.2295,.01,8,40),dt);v.rotation.x=Math.PI/2,v.position.set(J,3.05,0),v.castShadow=!0,n.add(v),i.box(.15,.04,.12,dt,(J+H)/2,3.03,0);addBasketNet(J,3.05);
+
+const boardInk = l(0xf0ede4,.76);
+const boardPadding = l(0x14223c,.83);
+const rimFastener = l(0x282a2c,.52,{metalness:.55});
+for(const O of [-1,1]){
+  const H=O*(m/2-1.2);
+  const J=O*(m/2-1.575);
+  const b=O*(m/2+.95);
+  const faceX=H-O*.016;
+  const rimHeight=3.05;
+  const glassBoard=i.box(.022,1.05,1.80,ft,H,3.425,0,{cast:!1,bevel:.003});
+  glassBoard.name="Clear backboard";
+  for(const railY of [2.904,3.961]) i.box(.048,.038,1.84,Q,H,railY,0,{bevel:.004});
+  for(const side of [-1,1]){
+    i.box(.046,1.055,.037,Q,H,3.43,side*.905,{bevel:.003});
+    i.box(.075,.207,.064,boardPadding,H,3.009,side*.902,{bevel:.01});
+    i.box(.002,.45,.040,boardInk,faceX,3.285,side*.275,{cast:!1});
+  }
+  for(const y of [3.071,3.504]) i.box(.002,.039,.585,boardInk,faceX,y,0,{cast:!1});
+  i.box(.094,.082,1.855,boardPadding,H,2.882,0,{bevel:.014});
+
+  // A steel plate bridges the gap from the acrylic board to the ring.
+  i.box(.035,.158,.205,dt,faceX-O*.018,3.03,0,{bevel:.006});
+  const ringRear=J+O*.2295;
+  i.box(Math.abs(ringRear-faceX)+.024,.044,.118,dt,(ringRear+faceX)/2,3.027,0,{bevel:.007});
+  for(const y of [2.983,3.082]) for(const z of [-.074,.074]){
+    const bolt=i.cyl(.012,.015,rimFastener,faceX-O*.045,y,z,{seg:6,cast:!1});
+    bolt.rotation.z=Math.PI/2;
+  }
+  const rim=new Lt(new ti(.2295,.0094,10,64),dt);
+  rim.name="Red steel basketball rim";
+  rim.rotation.x=Math.PI/2;
+  rim.position.set(J,rimHeight,0);
+  rim.castShadow=true;
+  n.add(rim);
+  const hooks=new wn(new be(.014,.014,.010),dt,12);
+  const hookMatrix=new Yt();
+  for(let k=0;k<12;k++){
+    const angle=k*Math.PI/6;
+    hooks.setMatrixAt(k,hookMatrix.makeTranslation(J+.228*Math.cos(angle),rimHeight-.013,.228*Math.sin(angle)));
+  }
+  hooks.instanceMatrix.needsUpdate=true;
+  hooks.name="Rim net anchors";
+  n.add(hooks);
+  addBasketNet(J,rimHeight);
 {
   // Padded mobile stanchion with a folding cantilever and backboard braces.
   const backing = new Lt(new dn(.43, .69, 1.62, 4, 1), ut);
@@ -4317,6 +4366,15 @@ for(let O of[-1,1]){let H=O*(m/2-1.2),J=O*(m/2-1.575),b=O*(m/2+.95);i.box(.03,1.
   n.add(backing);
   i.box(2.36,.28,1.39,l(0x17191b,.8),b+O*.47,.16,0,{bevel:.04});
   i.box(1.24,.045,1.37,l(0x272a2d,.81),b+O*.91,.31,0,{bevel:.012});
+  const rubber = l(0x121416,.92);
+  const wheelHub = l(0x4b5158,.48,{metalness:.45});
+  for(const offset of [-.43,1.2]) for(const side of [-1,1]){
+    const x=b+O*offset, z=side*.668;
+    const wheel=i.cyl(.079,.088,rubber,x,.088,z,{seg:16,cast:!1});
+    wheel.rotation.x=Math.PI/2;
+    const hub=i.cyl(.035,.012,wheelHub,x,.088,z+side*.049,{seg:10,cast:!1});
+    hub.rotation.x=Math.PI/2;
+  }
   
   // Simple Icons Under Armour SVG — https://github.com/simple-icons/simple-icons/blob/develop/icons/underarmour.svg
   const uaLogo = a.load("data:image/svg+xml," + encodeURIComponent("<svg role=\"img\" width=\"480\" height=\"284\" viewBox=\"0 4.85 24 14.3\" xmlns=\"http://www.w3.org/2000/svg\"><title>Under Armour</title><path fill=\"#f5f3ee\" d=\"M15.954 12c-.089.066-.195.142-.324.233-.826.585-2.023.985-3.58.985h-.104c-1.556 0-2.755-.4-3.58-.985A36.43 36.43 0 018.042 12c.09-.067.196-.143.324-.234.825-.584 2.024-.985 3.58-.985h.104c1.557 0 2.756.401 3.58.985.129.09.235.167.325.234M24 7.181s-.709-.541-2.95-1.365c-1.968-.721-3.452-.883-3.452-.883l.006 4.243c0 .598-.162 1.143-.618 1.765-1.672-.61-3.254-.985-4.981-.985-1.728 0-3.308.375-4.98.985-.457-.619-.62-1.168-.62-1.765l.007-4.243s-1.494.16-3.463.883C.709 6.642 0 7.181 0 7.181c.093 1.926 1.78 3.638 4.435 4.82C1.777 13.18.09 14.887 0 16.818c0 0 .709.54 2.949 1.365 1.968.721 3.453.883 3.453.883l-.007-4.244c0-.597.164-1.143.619-1.764 1.672.61 3.252.983 4.98.983 1.727 0 3.309-.374 4.98-.983.457.62.62 1.167.62 1.764l-.006 4.244s1.484-.16 3.452-.883c2.241-.826 2.95-1.365 2.95-1.365-.093-1.927-1.78-3.64-4.435-4.819 2.657-1.182 4.343-2.888 4.435-4.82\"/></svg>"), () => i.dirty&&i.dirty());
@@ -4373,6 +4431,7 @@ for(let O of[-1,1]){let H=O*(m/2-1.2),J=O*(m/2-1.575),b=O*(m/2+.95);i.box(.03,1.
     tube([front,3.27,side*.35],[front,3.89,side*.57],.038);
   }
   i.box(.09,.075,1.18,paint,front,3.22,0);
+  for(const z of [-.43,.43]) i.box(.14,.15,.14,paint,front,3.29,z,{bevel:.009});
   for(const z of [-.26,.26]) i.box(.055,.72,.05,paint,front,3.94,z);
   i.box(.24,.51,.72,l(0x101112,.48),front,4.38,0,{bevel:.015});
   i.plaque([
