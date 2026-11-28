@@ -1,6 +1,7 @@
 (function(){
   'use strict';
   var TABLE='partner_profiles',VARIANTS={freelance:'개인 프리랜서',business:'개인사업자',company:'법인사업자'};
+  var AREAS=['사진','영상','디자인','마케팅 기획','브랜딩','기타'];
   function fmtPhone(raw){
     var t=String(raw||'').trim();if(!t||t.indexOf('@')>=0)return t;
     var d=t.replace(/\D/g,'');if(d.indexOf('82')===0&&d.length>=11)d='0'+d.slice(2);
@@ -21,8 +22,13 @@
       var name=(info.name||'').trim();if(!name)return Promise.reject(new Error('파트너 이름이 필요합니다.'));
       var fields={name:name,phone:fmtPhone(info.phone),email:(info.email||'').trim(),updated_at:new Date().toISOString()};
       if(info.variant)fields.variant=info.variant;
-      return req('GET','select=id&name=eq.'+encodeURIComponent(name)+'&limit=1').then(function(rows){
-        if(rows&&rows[0])return req('PATCH','id=eq.'+rows[0].id+'&select=id',fields,RET).then(function(r){return r[0]});
+      var add=(info.areas||[]).filter(Boolean);
+      return req('GET','select=id,areas&name=eq.'+encodeURIComponent(name)+'&limit=1').then(function(rows){
+        if(rows&&rows[0]){
+          var merged=(rows[0].areas||[]).slice();add.forEach(function(a){if(merged.indexOf(a)<0)merged.push(a)});fields.areas=merged;
+          return req('PATCH','id=eq.'+rows[0].id+'&select=id',fields,RET).then(function(r){return r[0]});
+        }
+        fields.areas=add;
         return req('POST','select=id',fields,RET).then(function(r){return r[0]});
       });
     }
@@ -38,12 +44,24 @@
     });
     var vw=el('div',null,'f'),vs=el('select');vw.append(el('label','구분'),vs);
     Object.keys(VARIANTS).forEach(function(k){var o=el('option',VARIANTS[k]);o.value=k;vs.append(o)});vs.value=row.variant||'freelance';fe.append(vw);
+    var aw=el('div',null,'f'),chosen=(row.areas||[]).slice(),chips=el('div');aw.append(el('label','업무 영역 (여러 개 선택 가능)'),chips);chips.style.cssText='display:flex;flex-wrap:wrap;gap:8px';
+    var extra=chosen.filter(function(a){return AREAS.indexOf(a)<0});
+    function drawChips(){
+      chips.replaceChildren();
+      AREAS.concat(extra).forEach(function(a){
+        var on=chosen.indexOf(a)>=0,b=el('button',a,on?'btn sm':'btn line sm');b.type='button';
+        b.onclick=function(){var i=chosen.indexOf(a);if(i>=0)chosen.splice(i,1);else chosen.push(a);drawChips()};chips.append(b);
+      });
+      var add=el('button','+ 직접 추가','btn line sm');add.type='button';
+      add.onclick=function(){var v=(prompt('업무 영역 이름')||'').trim();if(v&&AREAS.concat(extra).indexOf(v)<0){extra.push(v);chosen.push(v)}drawChips()};chips.append(add);
+    }
+    drawChips();fe.append(aw);
     var mw=el('div',null,'f'),memo=el('textarea');memo.rows=3;memo.value=row.memo||'';mw.append(el('label','메모'),memo);fe.append(mw);
     var cancel=el('button','취소','btn line'),save=el('button','저장','btn');cancel.type=save.type='button';foot.append(cancel,save);
     cancel.onclick=function(){ov.remove()};
     save.onclick=function(){
       var name=inputs.name.value.trim();if(!name){err.textContent='이름을 입력해 주세요.';return}
-      var body={name:name,phone:fmtPhone(inputs.phone.value),email:inputs.email.value.trim(),variant:vs.value,memo:memo.value,updated_at:new Date().toISOString()};
+      var body={name:name,phone:fmtPhone(inputs.phone.value),email:inputs.email.value.trim(),variant:vs.value,areas:chosen,memo:memo.value,updated_at:new Date().toISOString()};
       save.disabled=true;
       (row.id?req('PATCH','id=eq.'+row.id+'&select=id',body,RET):req('POST','select=id',body,RET)).then(function(){ov.remove();done()})
         .catch(function(e){err.textContent=e.message;save.disabled=false});
@@ -66,6 +84,7 @@
       rows.forEach(function(r){
         var row=el('div',null,'row'),t=el('div',null,'t'),b=el('b',r.name),sub=el('span',(VARIANTS[r.variant]||'')+(r.memo?' · '+r.memo:''));
         t.append(b,sub);
+        var areaRow=el('div');areaRow.style.cssText='margin-top:6px;display:flex;flex-wrap:wrap;gap:6px';(r.areas||[]).forEach(function(a){var c=el('span',a);c.style.cssText='font-size:12px;font-weight:700;background:#eef0f5;border-radius:99px;padding:3px 10px';areaRow.append(c)});t.append(areaRow);
         var contact=el('div',null,'t');contact.style.flex='1.4';
         var ph=el('button',r.phone||'전화번호 없음','btn line sm'),em=el('button',r.email||'이메일 없음','btn line sm');
         ph.type=em.type='button';ph.style.marginRight='8px';ph.onclick=function(){copy(r.phone,'전화번호')};em.onclick=function(){copy(r.email,'이메일')};

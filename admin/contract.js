@@ -517,7 +517,7 @@
     var operation=previous?patch(previous,body):request('POST','select=id,revision',body,RETURN_ROW).then(function(rows){return rows&&rows[0]});
     return operation.then(function(row){
       if(!row)throw new Error('저장 결과를 확인하지 못했습니다.');
-      if(window.buffPartners&&name)window.buffPartners.upsert({name:name,phone:partner.contact,email:partner.email,variant:selected}).catch(function(){});
+      if(window.buffPartners&&name)window.buffPartners.upsert({name:name,phone:partner.contact,email:partner.email,variant:selected,areas:[data.role==='기타 제작'?'':data.role]}).catch(function(){});
       if(shared===data){
         record=row;
         dirty=baseJson!==JSON.stringify({fields:shared,partner:currentParty()})||type!==selected;
@@ -574,7 +574,7 @@
         var p=currentParty();
         if(!value(p,'partner')){window.buffToast('수행자 이름 또는 상호를 먼저 입력해 주세요.',true);return}
         keep.disabled=true;
-        window.buffPartners.upsert({name:p.partner,phone:p.contact,email:p.email,variant:type}).then(function(){keep.textContent='✓ 파트너로 등록됨 (다시 누르면 정보 갱신)';window.buffToast('파트너 관리에 등록했어요.')})
+        window.buffPartners.upsert({name:p.partner,phone:p.contact,email:p.email,variant:type,areas:[shared.role==='기타 제작'?'':shared.role]}).then(function(){keep.textContent='✓ 파트너로 등록됨 (다시 누르면 정보 갱신)';window.buffToast('파트너 관리에 등록했어요.')})
           .catch(function(e){window.buffToast(e.message,true)}).finally(function(){keep.disabled=false});
       };
       group.append(keep);
