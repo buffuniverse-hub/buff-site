@@ -7,39 +7,49 @@
     company:{title:'법인사업자',fields:[['partner','법인 상호'],['representative','대표자'],['registration','사업자등록번호'],['address','본점 주소'],['signer','서명자 성명·직위 (대표자 대리 시)'],['contact','연락처']],settlement:['부가세 별도','부가세 포함','부가세 해당 없음']}
   };
   var groups=[
-    ['프로젝트와 작업 범위',[
-      ['project','프로젝트명'],['client','지정 고객사'],['role','업무 유형',['사진','영상','디자인','기타 제작']],
+    ['프로젝트와 작업',[
+      ['project','프로젝트명'],['client','고객사'],['role','작업 유형',['사진','영상','디자인','기타 제작']],
+      ['scope','작업 범위','textarea']
+    ]],
+    ['납품과 보수',[
+      ['deliverables','납품물·수량·형식','textarea'],['due','납품일','date'],
+      ['fee','보수 (원)','number'],['payDue','지급일','date'],
+      ['payment','지급 방식',['계좌이체','현금 지급']],['settlement','정산 기준']
+    ]],
+    ['이용 조건',[
+      ['use','BUFF·고객사 이용 매체·지역','textarea'],['credit','파트너 크레딧']
+    ]],
+    ['계약 기간·추가 조건',[
       ['contractDate','체결일','date'],['start','계약 시작일','date'],['end','계약 종료일','date'],
-      ['workDate','작업일·시간'],['place','작업 장소'],['scope','업무 범위·투입 인력','textarea']
-    ]],
-    ['납품과 검수',[
-      ['deliverables','납품물·수량·형식','textarea'],['due','최종 납품일','date'],['revisions','포함 수정 횟수','number'],
-      ['deliveryLink','BUFF 지정 업로드 링크 (선택)','url'],['originals','원본·편집 파일 포함 여부']
-    ]],
-    ['용역대금과 정산',[
-      ['fee','합의 금액 (원)','number'],['payDue','지급일','date'],['payment','지급 방식',['계좌이체','현금 지급']],
-      ['expenses','별도 경비·정산 기준','textarea']
-    ]],
-    ['이용 범위와 특약',[
-      ['use','BUFF·고객사 이용 매체 및 지역','textarea'],['buffShare','BUFF 저작재산권 지분 (%)','number'],
-      ['credit','파트너 크레딧 이름'],['extras','취소·재촬영·보험·기타 특약 (선택)','textarea']
-    ]]
+      ['revisions','포함 수정 횟수','number'],['buffShare','BUFF 저작재산권 지분 (%)','number'],
+      ['deliveryLink','업로드 링크','url'],['originals','원본·편집 파일 포함 여부'],
+      ['expenses','별도 경비','textarea'],['extras','취소·재촬영·보험 등 특약','textarea']
+    ],true]
   ];
   var issuer='버프유니버스(BUFF UNIVERSE)\n대표자 김동준 · 사업자등록번호 295-24-02126\n서울특별시 관악구 남부순환로 1921-1, 202-E4호(봉천동, 범산빌딩)';
   var defaults={role:'사진',payment:'계좌이체',revisions:'1',buffShare:'50'};
-  var type='freelance',shared=Object.assign({},defaults),parties={};
+  var type='freelance',shared=Object.assign({},defaults),parties={},record=null,editing=false,saving=false,docxLoad=null,archivedList=false,dirty=false;
   var css=[
+    '@font-face{font-family:ContractPaper;src:url(vendor/Paperozi.ttf) format("truetype");font-weight:400;font-display:swap}',
+    '@font-face{font-family:ContractPaper;src:url(vendor/PaperoziBold.ttf) format("truetype");font-weight:700;font-display:swap}',
     '.ct-tools{display:flex;gap:8px;flex-wrap:wrap}',
     '.ct-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.28fr);gap:18px;align-items:start}',
     '.ct-panel,.ct-paper{min-width:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}',
     '.ct-group{margin:0 0 19px;padding:0 0 15px;border:0;border-bottom:1px solid var(--line);min-width:0}',
     '.ct-group:last-child{border:0;margin:0;padding:0}',
     '.ct-group legend{font-size:16px;font-weight:700;padding:0 0 10px}',
+    '.ct-details{margin-top:12px}.ct-details summary{cursor:pointer;font-size:15px;font-weight:700;padding:12px 0}.ct-details .ct-group{border:0;margin:0}',
+    '.ct-schedule{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}.ct-schedule .ct-group{margin:0;padding:0;border:0}.ct-schedule .ct-tools{margin-top:8px}',
     '.ct-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}',
     '.ct-field{display:grid;gap:4px;min-width:0}.ct-wide{grid-column:1/-1}',
     '.ct-field label{font-size:13px;font-weight:600}.ct-field input,.ct-field select,.ct-field textarea{width:100%;min-width:0}',
     '.ct-field textarea{min-height:66px;resize:vertical}',
-    '.ct-paper{overflow-wrap:anywhere}.ct-paper h2{font-size:24px;margin:0 0 9px}',
+    '.ct-paper{overflow-wrap:anywhere;font-family:ContractPaper,Paperozi,sans-serif;color:#1d1d1f;padding:clamp(18px,3vw,36px)}',
+    '.ct-paper h2{font-size:clamp(24px,3.15vw,44px);line-height:1.02;letter-spacing:-.035em;margin:0 0 7px}',
+    '.ct-paper .ct-subtitle{font-size:19px;font-weight:700}.ct-paper .ct-variant{color:#6e6e73;margin-bottom:15px}',
+    '.ct-paper thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a}',
+    '.ct-brand{background:#0a0a0a;padding:14px 17px;margin-top:23px;break-inside:avoid}.ct-brand img{display:block;width:96px;height:30px;object-fit:contain}',
+    '.ct-list{display:grid;gap:8px}.ct-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 15px}.ct-list-row b,.ct-list-row small{display:block}.ct-list-row small{color:var(--mute);margin-top:3px}.ct-tools label{display:flex;align-items:center;gap:6px;font-size:14px}',
     '.ct-paper h3{font-size:16px;margin:14px 0 4px}',
     '.ct-paper p,.ct-paper td,.ct-paper th{font-size:14px;line-height:1.55;white-space:pre-wrap}',
     '.ct-paper p{margin:0 0 6px}.ct-paper table{border-collapse:collapse;width:100%;margin:14px 0}',
@@ -47,7 +57,7 @@
     '.ct-paper th{width:27%;background:#f5f5f7}.ct-signature{border-top:1px solid var(--line);padding-top:10px;margin-top:18px}',
     '@media(max-width:900px){.ct-grid{grid-template-columns:minmax(0,1fr)}}',
     '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel,.ct-paper{padding:15px}}',
-    '@media print{@page{size:A4;margin:16mm}body{background:white}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:20px}.ct-paper p,.ct-paper td,.ct-paper th{font-size:10pt}}'
+    '@media print{@page{size:A4;margin:16mm}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:20px}.ct-paper p,.ct-paper td,.ct-paper th{font-size:10pt}}'
   ].join('\n');
 
   function element(tag,text){
@@ -74,37 +84,74 @@
     ];
   }
   function currentParty(){return parties[type]||(parties[type]={});}
-  function addFields(container,title,fields,data){
+  function addFields(container,title,fields,data,collapsed,prefix){
     var fieldset=element('fieldset'),grid=element('div');
     fieldset.className='ct-group';grid.className='ct-fields';
-    fieldset.append(element('legend',title));
+    if(!collapsed)fieldset.append(element('legend',title));
     fields.forEach(function(field){
       var key=field[0],kind=field[2],choices=Array.isArray(kind),block=element('div');
       var control=element(choices?'select':kind==='textarea'?'textarea':'input'),name=element('label',field[1]);
       var values=key==='settlement'?currentParty():data;
       block.className='ct-field'+(kind==='textarea'||kind==='url'?' ct-wide':'');
-      control.id='ct-'+key;name.htmlFor=control.id;
+      control.id='ct-'+(prefix||'')+key;name.htmlFor=control.id;
       if(choices)kind.forEach(function(choice){control.append(element('option',choice))});
       else if(kind!=='textarea')control.type=kind||'text';
       if(kind==='number'){control.min=key==='buffShare'?'1':'0';if(key==='buffShare')control.max='99'}
       if(kind==='url')control.placeholder='https://';
+      if(key==='place')control.placeholder='예: 조천체육관 또는 원격';
       control.value=value(values,key)||(choices?kind[0]:'');
       if(choices)values[key]=control.value;
       control.addEventListener('input',function(){values[key]=control.value;renderPreview()});
       block.append(name,control);grid.append(block);
     });
-    fieldset.append(grid);container.append(fieldset);
+    fieldset.append(grid);
+    if(collapsed){
+      var details=element('details');details.className='ct-details';
+      details.append(element('summary',title),fieldset);container.append(details);
+    }else container.append(fieldset);
   }
-  function renderPreview(){
-    var paper=document.getElementById('contract-preview');
-    if(!paper)return;
+  function schedules(){
+    if(!Array.isArray(shared.schedule))shared.schedule=[{}];
+    return shared.schedule;
+  }
+  function addSchedules(container){
+    var block=element('fieldset'),list=element('div'),add=element('button','+ 일정 추가');
+    block.className='ct-group';add.type='button';add.className='btn line sm';
+    block.append(element('legend','작업 일정'),list,add);container.append(block);
+    function draw(){
+      var items=schedules();list.replaceChildren();
+      items.forEach(function(item,index){
+        var row=element('div');row.className='ct-schedule';
+        var fields=[['date','날짜','date'],['place','장소 (또는 원격)'],['startTime','시작 시간','time'],['endTime','종료 시간','time']];
+        addFields(row,'일정 '+(index+1),fields,item,false,'schedule-'+index+'-');
+        if(items.length>1){
+          var actions=element('div'),remove=element('button','일정 삭제');
+          actions.className='ct-tools';remove.type='button';remove.className='btn line sm';
+          remove.onclick=function(){items.splice(index,1);draw();document.getElementById('ct-form').dispatchEvent(new Event('input'));renderPreview();add.focus()};
+          actions.append(remove);row.append(actions);
+        }
+        list.append(row);
+      });
+    }
+    add.onclick=function(){schedules().push({});draw();list.lastElementChild.querySelector('input').focus()};
+    draw();
+  }
+  function scheduleText(){
+    return schedules().filter(function(row){return row.date||row.place||row.startTime||row.endTime}).map(function(row){
+      var start=value(row,'startTime'),end=value(row,'endTime');
+      var time=start?(end?start+'–'+(end<start?'익일 ':'')+end:start+' 시작'):(end?end+' 종료':'');
+      return [value(row,'date'),time,value(row,'place')].filter(Boolean).join(' · ');
+    }).join('\n')||'________________';
+  }
+  function contractModel(){
     var template=templates[type],partner=currentParty(),s=shared;
     var share=Number(s.buffShare),fee=value(s,'fee'),link=value(s,'deliveryLink');
     var rows=[
       ['위탁자 (BUFF)',issuer],
       ['수행자',template.fields.filter(function(field){return field[0]!=='signer'||value(partner,'signer')}).map(function(field){return field[1]+' '+label(partner,field[0])}).join('\n')],
       ['프로젝트·지정 고객사',label(s,'project')+' / '+label(s,'client')+'\n업무 유형 '+label(s,'role')],
-      ['계약 기간·작업',label(s,'start')+' ~ '+label(s,'end')+'\n'+label(s,'workDate')+' / '+label(s,'place')+'\n'+label(s,'scope')],
+      ['계약 기간·업무',label(s,'start')+' ~ '+label(s,'end')+'\n'+label(s,'scope')],
+      ['작업 일정',scheduleText()],
       ['납품·수정',label(s,'deliverables')+'\n'+label(s,'due')+'까지 · 포함 수정 '+label(s,'revisions')+'회\n원본·편집 파일 '+label(s,'originals')+'\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
       ['용역대금·지급', (fee?Number(fee).toLocaleString('ko-KR')+'원':'________________원')+' / '+label(partner,'settlement')+'\n'+label(s,'payDue')+' · '+label(s,'payment')+'\n경비 '+label(s,'expenses')],
       ['저작재산권 지분',Number.isInteger(share)&&share>=1&&share<=99?'BUFF '+share+'% / 파트너 '+(100-share)+'%':'공동 지분 기재'],
@@ -112,48 +159,177 @@
       ['포트폴리오 크레딧','제작 BUFF / '+label(s,'role')+' '+label(s,'credit')],
       ['특약',value(s,'extras')||'없음']
     ];
-    var table=element('table'),body=element('tbody');
-    table.setAttribute('aria-label','프로젝트별 작업확인서');
-    rows.forEach(function(row){var tr=element('tr'),th=element('th',row[0]);th.scope='row';tr.append(th,element('td',row[1]));body.append(tr)});
-    table.append(body);
-    var signature=element('div');signature.className='ct-signature';
-    signature.append(element('p','체결일 '+label(s,'contractDate')),element('p','위탁자  버프유니버스 · 김동준  (서명 또는 날인) __________________'),element('p','수행자  '+(value(partner,'signer')||value(partner,'representative')||label(partner,'partner'))+'  (서명 또는 날인) __________________'));
-    paper.replaceChildren(element('h2','BUFF 표준 제작 용역 계약서'),element('p','계약 유형 · '+template.title),element('p','BUFF와 수행자는 아래 조건에 따라 제작 용역 계약을 체결합니다. 아래 작업확인서는 계약의 일부입니다.'),table);
-    clauses().forEach(function(clause){var section=element('section');section.append(element('h3',clause[0]),element('p',clause[1]));paper.append(section)});
-    paper.append(signature);
+    return {
+      title:'SERVICE AGREEMENT',subtitle:'표준 제작 용역 계약서',variant:template.title,
+      intro:'BUFF와 수행자는 아래 조건에 따라 제작 용역 계약을 체결합니다. 아래 작업확인서는 계약의 일부입니다.',
+      rows:rows,clauses:clauses(),project:value(s,'project'),
+      signature:['체결일 '+label(s,'contractDate'),'위탁자  버프유니버스 · 김동준  (서명 또는 날인) __________________','수행자  '+(value(partner,'signer')||value(partner,'representative')||label(partner,'partner'))+'  (서명 또는 날인) __________________']
+    };
   }
-  function clearDraft(){type='freelance';shared=Object.assign({},defaults);parties={}}
+
+  function renderPreview(){
+    var paper=document.getElementById('contract-preview');
+    if(!paper)return;
+    var model=contractModel();
+    var table=element('table'),head=element('thead'),headRow=element('tr'),body=element('tbody');
+    table.setAttribute('aria-label','프로젝트별 작업확인서');
+    ['작업확인서','PROJECT DETAILS'].forEach(function(title){var th=element('th',title);th.scope='col';headRow.append(th)});
+    head.append(headRow);
+    model.rows.forEach(function(row){var tr=element('tr'),th=element('th',row[0]);th.scope='row';tr.append(th,element('td',row[1]));body.append(tr)});
+    table.append(head,body);
+    var signature=element('div');signature.className='ct-signature';
+    model.signature.forEach(function(line){signature.append(element('p',line))});
+    var subtitle=element('p',model.subtitle),variant=element('p',model.variant);
+    subtitle.className='ct-subtitle';variant.className='ct-variant';
+    paper.replaceChildren(element('h2',model.title),subtitle,variant,element('p',model.intro),table);
+    model.clauses.forEach(function(clause){
+      var section=element('section');
+      section.append(element('h3',clause[0]),element('p',clause[1]));
+      paper.append(section);
+    });
+    var brand=element('div'),logo=element('img');brand.className='ct-brand';logo.src='vendor/logo_white.png';logo.alt='BUFF';
+    brand.append(logo);paper.append(signature,brand);
+  }
+
+  function loadScript(path){
+    return new Promise(function(resolve,reject){
+      var script=element('script');script.src=path;script.onload=resolve;
+      script.onerror=function(){script.remove();reject(new Error('문서 모듈을 불러오지 못했습니다.'))};
+      document.head.append(script);
+    });
+  }
+  function exportDocx(model,button){
+    var old=button.textContent;
+    button.disabled=true;button.textContent='만드는 중…';
+    if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
+      .then(function(){return loadScript('contract_docx.js?v=1')})
+      .catch(function(error){docxLoad=null;throw error});
+    return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
+      var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
+      var url=URL.createObjectURL(blob),link=element('a');
+      link.href=url;link.download='BUFF_용역계약서'+(project?'_'+project:'')+'.docx';
+      document.body.append(link);link.click();link.remove();
+      setTimeout(function(){URL.revokeObjectURL(url)},1000);
+    }).catch(function(error){window.buffToast('Word 저장 실패: '+error.message,true)}).finally(function(){
+      button.disabled=false;button.textContent=old;
+    });
+  }
+
+  var TABLE='partner_contracts',RETURN_ROW={Prefer:'return=representation'};
+  function request(method,query,body,headers){return window.buffRest(method,TABLE,query,body,headers)}
+  function clearDraft(){type='freelance';shared=Object.assign({},defaults);parties={};record=null;editing=false;archivedList=false;dirty=false}
   window.clearContractDraft=clearDraft;
-  window.openContractTab=function(){
+
+  function patch(row,changes){
+    return request('PATCH','id=eq.'+encodeURIComponent(row.id)+'&revision=eq.'+row.revision+'&select=id,revision',
+      Object.assign({revision:row.revision+1,updated_at:new Date().toISOString()},changes),RETURN_ROW)
+      .then(function(rows){if(!rows||!rows.length)throw new Error('다른 관리자가 변경했습니다. 목록에서 다시 열어 주세요.');return rows[0]});
+  }
+  function openSaved(row,button){
+    button.disabled=true;
+    return request('GET','id=eq.'+encodeURIComponent(row.id)+'&select=id,revision,variant,data,archived').then(function(rows){
+      if(!button.isConnected)return;
+      var found=rows&&rows[0];
+      if(!found)throw new Error('계약서를 찾을 수 없습니다.');
+      type=found.variant;shared=Object.assign({},defaults,found.data.fields);parties={};
+      parties[type]=found.data.partner||{};record=found;editing=true;dirty=false;
+      return drawEditor();
+    }).catch(function(error){if(button.isConnected)window.buffToast(error.message,true)}).finally(function(){button.disabled=false});
+  }
+  function drawList(offset){
+    var main=document.getElementById('main'),title=element('h2','계약서 목록'),toolbar=element('div'),actions=element('div');
+    var header=element('div'),create=element('button','+ 계약서 작성'),toggle=element('button',archivedList?'작성 목록':'보관함');
+    var list=element('div'),loading=element('p','불러오는 중…');
+    header.className='bar';actions.className='ct-tools';toolbar.className='ct-tools';list.className='ct-list';loading.className='muted';
+    create.type=toggle.type='button';create.className='btn';toggle.className='btn line';actions.append(toggle,create);header.append(title,actions);
+    main.replaceChildren(element('style',css),header,list,toolbar);list.append(loading);
+    create.onclick=function(){var wasArchived=archivedList;clearDraft();archivedList=wasArchived;editing=true;drawEditor()};
+    toggle.onclick=function(){archivedList=!archivedList;drawList(0)};
+    return request('GET','select=id,project,partner,variant,revision,updated_at&archived=eq.'+archivedList+'&order=updated_at.desc,id.asc&limit=51&offset='+offset).then(function(rows){
+      if(!list.isConnected)return;
+      rows=rows||[];list.replaceChildren();
+      if(!rows.length)list.append(element('p',archivedList?'보관한 계약서가 없습니다.':'저장된 계약서가 없습니다.'));
+      rows.slice(0,50).forEach(function(row){
+        var item=element('div'),info=element('div'),buttons=element('div');
+        var open=element('button','열기'),archive=element('button',archivedList?'복원':'보관');
+        item.className='ct-list-row';buttons.className='ct-tools';open.type=archive.type='button';
+        open.className='btn line sm';archive.className='btn line sm';
+        info.append(element('b',row.project),element('small',row.partner+' · '+templates[row.variant].title+' · '+new Date(row.updated_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})));
+        buttons.append(open,archive);item.append(info,buttons);list.append(item);
+        open.onclick=function(){openSaved(row,open)};
+        archive.onclick=function(){
+          archive.disabled=true;
+          patch(row,{archived:!archivedList}).then(function(){if(list.isConnected)return drawList(offset&&rows.length===1?offset-50:offset)})
+            .catch(function(error){window.buffToast(error.message,true);archive.disabled=false});
+        };
+      });
+      if(offset>0){
+        var prev=element('button','이전');prev.className='btn line sm';prev.onclick=function(){drawList(offset-50)};toolbar.append(prev);
+      }
+      if(rows.length>50){
+        var next=element('button','다음');next.className='btn line sm';next.onclick=function(){drawList(offset+50)};toolbar.append(next);
+      }
+    }).catch(function(error){if(list.isConnected)loading.textContent='목록을 불러오지 못했습니다. '+error.message});
+  }
+  function saveDraft(form,button,status){
+    if(saving||!form.reportValidity())return;
+    var partner=currentParty(),project=value(shared,'project'),name=value(partner,'partner');
+    if(!project||!name){window.buffToast('프로젝트명과 수행자 이름 또는 상호를 입력해 주세요.',true);return;}
+    var data=shared,selected=type,previous=record;
+    var body={project:project,partner:name,variant:selected,data:JSON.parse(JSON.stringify({fields:shared,partner:partner}))};
+    saving=true;button.disabled=true;status.textContent='저장 중…';
+    var operation=previous?patch(previous,body):request('POST','select=id,revision',body,RETURN_ROW).then(function(rows){return rows&&rows[0]});
+    return operation.then(function(row){
+      if(!row)throw new Error('저장 결과를 확인하지 못했습니다.');
+      if(shared===data){
+        record=row;
+        dirty=JSON.stringify(body.data)!==JSON.stringify({fields:shared,partner:currentParty()})||type!==selected;
+        if(status.isConnected)status.textContent=dirty?'저장하지 않은 변경사항이 있어요.':'저장됨';
+      }
+    }).catch(function(error){
+      if(status.isConnected)status.textContent='저장 실패';
+      window.buffToast(error.message,true);
+    }).finally(function(){
+      saving=false;
+      var current=document.getElementById('ct-save');
+      if(current)current.disabled=false;
+    });
+  }
+
+  function drawEditor(){
     var main=document.getElementById('main');
-    main.innerHTML='<div class="bar ct-screen"><h2>계약서</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-reset">새로 작성</button><button type="button" class="btn" id="ct-print">인쇄 · PDF 저장</button></div></div>'
-      +'<p class="hint ct-screen">거래 상대 유형을 선택하고 작업확인서를 작성하세요. 입력 내용은 이 탭을 이동해도 현재 페이지에 남으며 새로고침하면 초기화됩니다.</p>'
-      +'<div class="ct-grid"><form class="ct-panel ct-screen" id="ct-form"><div class="ct-field" style="margin-bottom:16px"><label for="ct-template">계약 유형</label><select id="ct-template"></select></div><div id="ct-fields"></div></form><article class="ct-paper" id="contract-preview"></article></div>';
+    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
+      +'<p class="hint ct-screen" id="ct-status" role="status"></p><div class="ct-grid"><form class="ct-panel ct-screen" id="ct-form"><div class="ct-field" style="margin-bottom:16px"><label for="ct-template">계약 유형</label><select id="ct-template"></select></div><div id="ct-fields"></div></form><article class="ct-paper" id="contract-preview"></article></div>';
     main.prepend(element('style',css));
     var chooser=document.getElementById('ct-template'),form=document.getElementById('ct-form'),fields=document.getElementById('ct-fields');
+    var status=document.getElementById('ct-status'),save=document.getElementById('ct-save');
+    status.textContent=dirty?'저장하지 않은 변경사항이 있어요.':record?'저장된 계약서':'작성한 계약서를 보관하려면 저장을 눌러 주세요.';
+    save.disabled=saving;
     Object.keys(templates).forEach(function(key){var option=element('option',templates[key].title);option.value=key;chooser.append(option)});
     chooser.value=type;
     function drawFields(){
       var template=templates[type],partner=currentParty();
       fields.replaceChildren();
-      addFields(fields,'수행자 정보',template.fields,partner);
-      groups.forEach(function(group){
-        addFields(fields,group[0],group[0]==='용역대금과 정산'?group[1].concat([['settlement','정산 기준',template.settlement]]):group[1],shared);
+      addFields(fields,'수행자',template.fields,partner);
+      groups.forEach(function(group,index){
+        var inputs=group[1].map(function(field){return field[0]==='settlement'?['settlement','정산 기준',template.settlement]:field});
+        addFields(fields,group[0],inputs,shared,group[2]);
+        if(index===0)addSchedules(fields);
       });
       renderPreview();
     }
-    chooser.addEventListener('change',function(){
-      type=chooser.value;drawFields();
-    });
+    chooser.addEventListener('change',function(){type=chooser.value;drawFields()});
     form.addEventListener('submit',function(event){event.preventDefault()});
-    document.getElementById('ct-reset').addEventListener('click',function(){
-      if(!confirm('현재 계약서 입력 내용을 지우고 새로 작성할까요?'))return;
-      clearDraft();chooser.value=type;drawFields();
-    });
-    document.getElementById('ct-print').addEventListener('click',function(){
-      if(form.reportValidity())window.print();
-    });
+    form.addEventListener('input',function(){dirty=true;status.textContent='저장하지 않은 변경사항이 있어요.'});
+    document.getElementById('ct-list').onclick=function(){
+      if(dirty&&!confirm('저장하지 않은 변경사항이 있습니다. 목록으로 돌아갈까요?'))return;
+      editing=false;drawList(0);
+    };
+    document.getElementById('ct-print').onclick=function(){if(form.reportValidity())window.print()};
+    document.getElementById('ct-docx').onclick=function(){if(form.reportValidity())exportDocx(contractModel(),this)};
+    save.onclick=function(){saveDraft(form,save,status)};
     drawFields();
     return Promise.resolve();
-  };
+  }
+  window.openContractTab=function(){return editing?drawEditor():drawList(0)};
 })();
