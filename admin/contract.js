@@ -227,7 +227,7 @@
     var rows=[
       ['계약 기간·업무',label(s,'start')+' ~ '+label(s,'end')+'\n'+label(s,'scope')],
       [scheduleLabel(),scheduleText()],
-      ['납품·수정','\u27E6'+label(s,'deliverables')+'\u27E7\n'+label(s,'due')+'까지 · \u27E6포함 수정 '+label(s,'revisions')+'회\u27E7\n\u27E6원본·편집 파일 '+label(s,'originals')+'\u27E7\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
+      ['납품·수정','\u27E6'+label(s,'deliverables')+'\u27E7\n\u27E6'+label(s,'due')+'까지\u27E7 · \u27E6포함 수정 '+label(s,'revisions')+'회\u27E7\n\u27E6원본·편집 파일 '+label(s,'originals')+'\u27E7\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
       ['용역대금·지급', (fee?Number(fee).toLocaleString('ko-KR')+'원':'________________원')+' / '+label(partner,'settlement')+'\n'+label(s,'payDue')+' · '+label(s,'payment')+'\n경비 '+label(s,'expenses')],
       ['저작재산권 지분',Number.isInteger(share)&&share>=1&&share<=99?'BUFF '+share+'% / 파트너 '+(100-share)+'%':'공동 지분 기재'],
       ['BUFF·고객사 이용',label(s,'use')+'\n이용 기간 제한 없음'],
@@ -391,7 +391,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-20')})
+      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-21')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
