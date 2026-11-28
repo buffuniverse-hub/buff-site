@@ -23,7 +23,7 @@
       function paragraph(text,options){
         options=options||{};
         return new D.Paragraph({
-          heading:options.heading,keepNext:options.keepNext,alignment:options.align,
+          heading:options.heading,keepNext:options.keepNext,pageBreakBefore:options.pageBreakBefore,alignment:options.align,
           children:Array.isArray(text)?text:[run(text,options)],spacing:{before:options.before||0,after:options.after||0,line:options.line||270}
         });
       }
@@ -73,8 +73,8 @@
           {heading:D.HeadingLevel.TITLE,line:300,after:200,keepNext:true}),
         header,paragraph(model.intro,{before:160,after:140,keepNext:true}),table
       ];
-      model.clauses.forEach(function(clause){
-        children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:20,before:380,after:110,keepNext:true}));
+      model.clauses.forEach(function(clause,clauseIndex){
+        children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:20,before:clauseIndex?380:0,after:110,keepNext:true,pageBreakBefore:clauseIndex===0}));
         clause[1].split('\n\n').forEach(function(block){children.push(paragraph(block,{after:130}))});
       });
       model.signature.forEach(function(text,index){
