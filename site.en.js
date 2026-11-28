@@ -80,13 +80,13 @@ function workCardMeta(w,categories){
   }).map(function(key){return WORK_CARD_CATEGORY_LABELS[key]});
   return [wYear(w)].concat(services,kinds).filter(Boolean).join(', ');
 }
-function worksHtml(r,cat){return r.map(workCard).join('')}
-function workCard(w){
+function worksHtml(r){return r.map(function(w){return workCard(w,true)}).join('')}
+function workCard(w,showMeta){
   var categories=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category];
   return '<a href="/en/'+esc(wHref(w))+'" data-cat="'+esc(categories.join(' '))+'" data-field="'+esc(w.field||'sports')+'" data-ctype="'+esc(w.culture_type||'')+'" data-sport="'+esc((w.sports||[]).join(' '))+'" data-year="'+esc(wYear(w))+'" data-mem="'+esc((w.members||[]).join('|'))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
   +'<div style="position: relative; overflow: hidden; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px; aspect-ratio: 16 / 9; width: 100%"><img draggable="false" src="'+esc(thumbOf(w))+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; height: 100%; object-fit: cover; object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"></div>'
   +'<span title="'+esc(w.title)+'" style="pointer-events: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
-  +'<span class="wm" style="pointer-events: none; font-size: 17px">'+esc(workCardMeta(w,categories))+'</span></a>';
+  +'<span class="wm" style="pointer-events: none; font-size: 17px">'+esc(showMeta===true?workCardMeta(w,categories):tagOf(w))+'</span></a>';
 }
 function newsCard(n){
   var d=n.published_at?String(n.published_at).slice(0,10).replace(/-/g,'.'):'';
@@ -128,7 +128,7 @@ function bindLists(){
   var jobs=[];
   var wl=$('[data-sb="works-list"]');
   if(wl){var cat=wl.getAttribute('data-cat');
-    jobs.push(getData('works','select=*&published=eq.true'+(cat==='all'?'':'&category=eq.'+cat)+'&order=sort_order.asc,created_at.asc').then(function(r){if(r.length)wl.innerHTML=worksHtml(r,cat);if(window.__wfApply)window.__wfApply()}))}
+    jobs.push(getData('works','select=*&published=eq.true'+(cat==='all'?'':'&category=eq.'+cat)+'&order=sort_order.asc,created_at.asc').then(function(r){if(r.length)wl.innerHTML=worksHtml(r);if(window.__wfApply)window.__wfApply()}))}
   var wf=$('[data-sb="works-featured"]');
   if(wf)jobs.push(getData('site_settings','select=*&key=eq.home_featured').catch(function(){return[]}).then(function(rows){
     var ids=rows[0]&&rows[0].value?String(rows[0].value).split(',').filter(Boolean):[];
@@ -718,13 +718,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (function(){
   var TO='buff.universe@gmail.com',el=null;
   function css(){if(document.getElementById('cm-css'))return;var st=document.createElement('style');st.id='cm-css';
-  st.textContent='#cm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}#cm .cd{position:relative;background:#fff;border-radius:24px;max-width:560px;width:100%;padding:40px 36px 36px;box-sizing:border-box;color:#1D1D1F;font-family:inherit}#cm h3{margin:0 0 6px;font-size:26px;letter-spacing:-.02em}#cm p{margin:0 0 22px;font-size:15px;color:#6E6E73}#cm label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}#cm input,#cm textarea{width:100%;box-sizing:border-box;font:inherit;font-size:17px;border:1px solid #D2D2D7;border-radius:12px;padding:12px 14px;outline:none;background:#fff}#cm input:focus,#cm textarea:focus{border-color:#1D1D1F}#cm textarea{min-height:120px;resize:vertical}#cm .x{position:absolute;top:14px;right:16px;width:36px;height:36px;border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:#6E6E73}#cm .go{display:block;margin-top:22px;text-align:center;background:#1D1D1F;color:#fff;border-radius:980px;padding:14px 20px;font-size:16px;font-weight:600;text-decoration:none;opacity:.35;pointer-events:none}#cm .go.on{opacity:1;pointer-events:auto}@media(max-width:640px){#cm .cd{padding:32px 20px 24px;border-radius:20px}#cm h3{font-size:22px}}';
+  st.textContent='#cm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}#cm .cd{position:relative;background:#fff;border-radius:24px;max-width:560px;width:100%;padding:40px 36px 36px;box-sizing:border-box;color:#1D1D1F;font-family:inherit}#cm h3{margin:0 0 6px;font-size:26px;letter-spacing:-.02em}#cm p{margin:0 0 22px;font-size:13px;line-height:1.5;color:#6E6E73}#cm p span{display:block}#cm label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}#cm input,#cm textarea{width:100%;box-sizing:border-box;font:inherit;font-size:17px;border:1px solid #D2D2D7;border-radius:12px;padding:12px 14px;outline:none;background:#fff}#cm input:focus,#cm textarea:focus{border-color:#1D1D1F}#cm textarea{min-height:120px;resize:vertical}#cm .x{position:absolute;top:14px;right:16px;width:36px;height:36px;border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:#6E6E73}#cm .go{display:block;margin-top:22px;text-align:center;background:#1D1D1F;color:#fff;border-radius:980px;padding:14px 20px;font-size:16px;font-weight:600;text-decoration:none;opacity:.35;pointer-events:none}#cm .go.on{opacity:1;pointer-events:auto}@media(max-width:640px){#cm .cd{padding:32px 20px 24px;border-radius:20px}#cm h3{font-size:22px}}';
   document.head.appendChild(st)}
   function close(){if(el){el.remove();el=null;document.body.style.overflow=''}}
   function open(){
     if(el)return;css();
     el=document.createElement('div');el.id='cm';
-    el.innerHTML='<div class="cd" role="dialog" aria-modal="true" aria-label="Contact us via Gmail"><button class="x" aria-label="Close">×</button><h3>Contact us via Gmail</h3><p>Your details are automatically filled in a new Gmail message. Review the message in Gmail, then send it.</p><label>Name / Organization</label><input id="cm-n" placeholder="Jane Doe / Team or organization"><label>Contact (email or phone)</label><input id="cm-c" placeholder="example@email.com"><label>Message</label><textarea id="cm-m" placeholder="Which sport, and what kind of work do you need?"></textarea><a class="go" id="cm-g" target="_blank" rel="noopener">Open Gmail to compose</a></div>';
+    el.innerHTML='<div class="cd" role="dialog" aria-modal="true" aria-label="Contact us via Gmail"><button class="x" aria-label="Close">×</button><h3>Contact us via Gmail</h3><p><span>Your details fill a new Gmail draft.</span><span>Review the message, then send it.</span></p><label>Name / Organization</label><input id="cm-n" placeholder="Jane Doe / Team or organization"><label>Contact (email or phone)</label><input id="cm-c" placeholder="example@email.com"><label>Message</label><textarea id="cm-m" placeholder="Which sport, and what kind of work do you need?"></textarea><a class="go" id="cm-g" target="_blank" rel="noopener">Open Gmail to compose</a></div>';
     document.body.appendChild(el);document.body.style.overflow='hidden';
     var n=el.querySelector('#cm-n'),c=el.querySelector('#cm-c'),m=el.querySelector('#cm-m'),g=el.querySelector('#cm-g');
     function upd(){var ok=n.value.trim()&&c.value.trim()&&m.value.trim();g.classList.toggle('on',!!ok);
