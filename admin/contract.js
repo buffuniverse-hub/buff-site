@@ -275,6 +275,76 @@
     }
   }
 
+
+  var SIGN_BASE='https://buffuniverse.co.kr/sign.html?t=';
+  function sha256(text){
+    return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
+    });
+  }
+  function copyText(text,okMsg){
+    var p=navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject();
+    p.then(function(){window.buffToast(okMsg)}).catch(function(){window.prompt('복사해 주세요',text)});
+  }
+  function inviteText(model,link){
+    return '[BUFF UNIVERSE] '+(value(currentParty(),'partner')||'')+'님, '+(model.project||'프로젝트')+' 용역 계약서입니다.\n아래 링크에서 내용을 확인하시고 전자서명 부탁드립니다.\n'+link;
+  }
+  function openSendDialog(button){
+    var model=contractModel(),partner=currentParty(),name=value(partner,'partner');
+    if(!name||!model.project){window.buffToast('프로젝트명과 수행자 이름 또는 상호를 먼저 입력해 주세요.',true);return}
+    var ov=element('div'),panel=element('div'),box=element('div'),foot=element('div'),err=element('div');
+    ov.className='ov';panel.className='panel';box.id='fe';foot.className='foot';err.className='err';
+    panel.append(element('h3','전자서명 발송'),box,err,foot);ov.append(panel);document.body.append(ov);
+    var close=element('button','닫기'),make=element('button','서명 링크 만들기');close.type=make.type='button';close.className='btn line';make.className='btn';
+    foot.append(close,make);close.onclick=function(){ov.remove()};
+    var hist=element('div');
+    box.append(element('p','현재 입력된 내용 그대로 고정(스냅샷)해서 서명 링크를 만듭니다. 발송 후 내용을 고치면 새 링크를 다시 만들어야 해요. 링크는 30일간 유효하고, 서명 시각·IP·기기 정보가 함께 기록됩니다.'));
+    var out=element('div');box.append(out,hist);
+    function status(row){return row.status==='signed'?'서명 완료 '+new Date(row.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):row.status==='canceled'?'취소됨':(new Date(row.expires_at)<new Date()?'만료':'서명 대기')}
+    function drawHistory(){
+      return window.buffRest('GET','contract_signings','select=id,token,status,signed_at,signer_name,created_at,expires_at&project=eq.'+encodeURIComponent(model.project)+'&partner=eq.'+encodeURIComponent(name)+'&order=created_at.desc&limit=10').then(function(rows){
+        hist.replaceChildren();if(!rows||!rows.length)return;
+        hist.append(element('h4','발송 내역'));
+        rows.forEach(function(row){
+          var line=element('div'),info=element('span',new Date(row.created_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})+' · '+status(row)+(row.signer_name?' · '+row.signer_name:''));
+          var cp=element('button',row.status==='signed'?'서명본 보기':'링크 복사');cp.type='button';cp.className='btn line sm';cp.style.marginLeft='8px';
+          cp.onclick=function(){if(row.status==='signed')window.open(SIGN_BASE+row.token,'_blank');else copyText(SIGN_BASE+row.token,'링크를 복사했어요.')};
+          line.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px';
+          line.append(info);var acts=element('span');acts.append(cp);
+          if(row.status==='sent'&&new Date(row.expires_at)>new Date()){
+            var cx=element('button','취소');cx.type='button';cx.className='btn danger sm';cx.style.marginLeft='6px';
+            cx.onclick=function(){window.buffRest('PATCH','contract_signings','id=eq.'+row.id,{status:'canceled'}).then(drawHistory).catch(function(e){window.buffToast(e.message,true)})};
+            acts.append(cx);
+          }
+          line.append(acts);hist.append(line);
+        });
+      }).catch(function(){});
+    }
+    drawHistory();
+    make.onclick=function(){
+      make.disabled=true;err.textContent='';
+      var bytes=new Uint8Array(24);crypto.getRandomValues(bytes);
+      var token=Array.prototype.map.call(bytes,function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
+      sha256(JSON.stringify(model)).then(function(hash){
+        return window.buffRest('POST','contract_signings','select=id',{token:token,contract_id:record?record.id:null,project:model.project,partner:name,snapshot:model,doc_hash:hash},RETURN_ROW);
+      }).then(function(){
+        var link=SIGN_BASE+token,text=inviteText(model,link),email=value(partner,'email');
+        make.remove();out.replaceChildren();
+        var input=element('input');input.type='text';input.readOnly=true;input.value=link;input.onfocus=function(){input.select()};
+        out.append(element('label','서명 링크'),input);
+        var row=element('div');row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
+        function btn(t,fn){var b=element('button',t);b.type='button';b.className='btn line sm';b.onclick=fn;row.append(b)}
+        btn('링크 복사',function(){copyText(link,'링크를 복사했어요.')});
+        btn('카톡용 문구 복사',function(){copyText(text,'문구를 복사했어요. 카카오톡에 붙여넣어 보내세요.')});
+        if(navigator.share)btn('공유 (카톡 등)',function(){navigator.share({title:'BUFF 용역 계약서',text:text}).catch(function(){})});
+        btn('이메일로 보내기',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent(text)});
+        out.append(row);
+        if(!email)out.append(element('p','수행자 이메일을 입력하면 이메일 수신인이 자동으로 채워져요.'));
+        drawHistory();
+      }).catch(function(e){err.textContent=e.message;make.disabled=false});
+    };
+  }
+
   function loadScript(path){
     return new Promise(function(resolve,reject){
       var script=element('script');script.src=path;script.onload=resolve;
@@ -383,7 +453,7 @@
 
   function drawEditor(){
     var main=document.getElementById('main');
-    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
+    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn line" id="ct-send">전자서명 발송</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
       +'<p class="hint ct-screen" id="ct-status" role="status"></p><div class="ct-grid"><form class="ct-panel ct-screen" id="ct-form"><div class="ct-field" style="margin-bottom:16px"><label for="ct-template">계약 유형</label><select id="ct-template"></select></div><div id="ct-fields"></div></form><article class="ct-paper" id="contract-preview"></article></div>';
     main.prepend(element('style',css));
     var chooser=document.getElementById('ct-template'),form=document.getElementById('ct-form'),fields=document.getElementById('ct-fields');
@@ -396,7 +466,7 @@
       var template=templates[type],partner=currentParty();
       fields.replaceChildren();
       var pick=element('div'),pickSel=element('select'),pickLabel=element('label','저장된 파트너 불러오기');
-      pick.className='ct-field';pickLabel.htmlFor='ct-pick';pickSel.id='ct-pick';pickSel.append(element('option','선택 안 함'));
+      pick.className='ct-field';pick.style.marginBottom='22px';pickLabel.htmlFor='ct-pick';pickSel.id='ct-pick';pickSel.append(element('option','선택 안 함'));
       pick.append(pickLabel,pickSel);fields.append(pick);
       if(window.buffPartners)window.buffPartners.list().then(function(rows){
         if(!pickSel.isConnected)return;
@@ -434,6 +504,7 @@
     };
     document.getElementById('ct-print').onclick=function(){if(form.reportValidity())window.print()};
     document.getElementById('ct-docx').onclick=function(){if(form.reportValidity())exportDocx(contractModel(),this)};
+    document.getElementById('ct-send').onclick=function(){if(form.reportValidity())openSendDialog(this)};
     save.onclick=function(){saveDraft(form,save,status)};
     drawFields();
     return Promise.resolve();
