@@ -543,3 +543,23 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   sync();document.addEventListener('DOMContentLoaded',sync);window.addEventListener('load',sync);setTimeout(sync,600);
 })();
+(function(){
+  /* 모바일 상단 헤더: KO | EN 대신 지구본 아이콘 (인라인 !important 스타일을 덮어써야 해서 JS로 처리) */
+  var mq=window.matchMedia('(max-width:640px)'),SVG='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" aria-hidden="true" style="display:block"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.8 2.7 4.2 5.9 4.2 9.5s-1.4 6.8-4.2 9.5c-2.8-2.7-4.2-5.9-4.2-9.5s1.4-6.8 4.2-9.5z"/></svg>';
+  function apply(){
+    var a=document.querySelector('header nav a.lang');if(!a)return;
+    var st=['border','padding','margin-left','display','height','width','align-items'];
+    if(mq.matches){
+      if(a.dataset.orig!=null&&a.querySelector('svg'))return;
+      if(a.dataset.orig==null){a.dataset.orig=a.innerHTML;a.dataset.style=a.getAttribute('style')||''}
+      a.innerHTML=SVG;a.setAttribute('aria-label',/^\/en(\/|$)/.test(location.pathname)?'한국어':'English');
+      a.style.setProperty('border','0','important');a.style.setProperty('padding','4px 2px 4px 6px','important');a.style.setProperty('margin-left','2px','important');
+      a.style.setProperty('display','inline-flex','important');a.style.setProperty('align-items','center','important');
+    }else if(a.dataset.orig!=null){
+      a.innerHTML=a.dataset.orig;a.setAttribute('style',a.dataset.style);a.removeAttribute('aria-label');delete a.dataset.orig;delete a.dataset.style;
+    }
+  }
+  apply();document.addEventListener('DOMContentLoaded',apply);window.addEventListener('load',apply);setTimeout(apply,600);
+  (mq.addEventListener?mq.addEventListener('change',apply):mq.addListener(apply));
+  try{var t=null;new MutationObserver(function(){clearTimeout(t);t=setTimeout(apply,50)}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
+})();
