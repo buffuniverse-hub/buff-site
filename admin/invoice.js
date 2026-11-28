@@ -136,11 +136,12 @@ function accOpts(){var o='<option value="">선택…</option>';if(DB&&DB.bank)o+
 function sec(n,t,open,body){return '<details class="sec ivs"'+(open?' open':'')+'><summary><span class="no">'+n+'</span>'+t+'</summary><div class="ivb">'+body+'</div></details>'}
 function inp(id,lab,val,type,ph){return '<label>'+lab+'</label><input type="'+(type||'text')+'" data-k="'+id+'" value="'+E(val)+'"'+(ph?' placeholder="'+E(ph)+'"':'')+'>'}
 var UNITS=['건 / case','경기 / match','대회 / event','장 / photos','편 / video','시간 / hrs','일 / days','개월 / mo','명 / person','개 / pcs'];
+function fmtNum(v){var t=String(v==null?'':v).replace(/[^\d.]/g,'');if(!t)return '';var p=t.split('.'),ip=p[0].replace(/^0+(?=\d)/,''),out=ip?Number(ip).toLocaleString('ko-KR'):'0';return p.length>1?out+'.'+p.slice(1).join(''):out}
 function unitCtl(it,i){if(it.custom)return '<input type="text" data-i="'+i+'" data-f="unit" value="'+E(it.unit)+'" placeholder="직접 입력">';return '<select data-i="'+i+'" data-f="unit"><option value="">선택 안 함</option>'+UNITS.map(function(u){return '<option'+(it.unit===u?' selected':'')+'>'+u+'</option>'}).join('')+'<option value="__custom">직접 입력…</option></select>'}
 function itemsForm(){return S.items.map(function(it,i){return '<div class="ivit"><div class="h"><span>항목 '+(i+1)+'</span><button class="ivx" data-del="'+i+'" type="button">삭제</button></div>'
  +'<input type="text" data-i="'+i+'" data-f="desc" value="'+E(it.desc)+'" placeholder="서비스/용역 내역">'
  +'<input type="text" class="ivsubin" data-i="'+i+'" data-f="sub" value="'+E(it.sub)+'" placeholder="상세 설명 (선택)">'
- +'<div class="g"><div><label>수량</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="qty" value="'+E(it.qty)+'"></div><div><label>단위</label>'+unitCtl(it,i)+'</div><div><label>단가</label><input type="number" min="0" step="any" data-i="'+i+'" data-f="price" value="'+E(it.price)+'"></div></div></div>'}).join('')}
+ +'<div class="g"><div><label>수량</label><input type="text" inputmode="decimal" autocomplete="off" data-num="1" data-i="'+i+'" data-f="qty" value="'+E(fmtNum(it.qty))+'"></div><div><label>단위</label>'+unitCtl(it,i)+'</div><div><label>단가</label><input type="text" inputmode="decimal" autocomplete="off" data-num="1" placeholder="예: 1,000,000" data-i="'+i+'" data-f="price" value="'+E(fmtNum(it.price))+'"></div></div></div>'}).join('')}
 
 function loadScript(u){return new Promise(function(res,rej){var x=document.createElement('script');x.src=u;x.onload=res;x.onerror=function(){rej(new Error(u+' 로드 실패'))};document.head.appendChild(x)})}
 function loadDocx(){var v='?v='+Date.now();return loadScript('vendor/docx.iife.js').then(function(){return loadScript('invoice_docx.js'+v)})}
@@ -178,7 +179,9 @@ function draw(keep){
       tm.classList.toggle('hide',S.ts!=='custom');
       if(k==='ts'||k==='due'||k==='issue'){if(S.ts==='custom'&&k!=='terms'&&!S.terms)S.terms=''}
       sv()}
-    else if(t.getAttribute('data-f')){var it=S.items[+t.getAttribute('data-i')];if(t.getAttribute('data-f')==='unit'&&t.tagName==='SELECT'&&t.value==='__custom'){it.custom=true;it.unit='';redraw();return}it[t.getAttribute('data-f')]=t.value}
+    else if(t.getAttribute('data-f')){var it=S.items[+t.getAttribute('data-i')];if(t.getAttribute('data-f')==='unit'&&t.tagName==='SELECT'&&t.value==='__custom'){it.custom=true;it.unit='';redraw();return}
+      if(t.getAttribute('data-num')){var left=t.value.slice(0,t.selectionStart).replace(/[^\d.]/g,'').length,raw=t.value.replace(/[^\d.]/g,'');t.value=fmtNum(raw);it[t.getAttribute('data-f')]=raw.replace(/^0+(?=\d)/,'');var pos=0,seen=0;while(pos<t.value.length&&seen<left){if(/[\d.]/.test(t.value.charAt(pos)))seen++;pos++}try{t.setSelectionRange(pos,pos)}catch(x){}}
+      else it[t.getAttribute('data-f')]=t.value}
     paint();schedule()});
   m.querySelector('.ivform').addEventListener('change',function(e){if(/^(lang|cur|vm|ts)$/.test(e.target.getAttribute('data-k')||''))paint()});
   function redraw(){document.getElementById('ivitems').innerHTML=itemsForm();bind();paint();schedule()}

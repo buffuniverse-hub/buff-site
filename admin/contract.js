@@ -18,7 +18,7 @@
       ['originals','원본·편집 파일 포함 여부'],['deliveryLink','업로드 링크','url']
     ]],
     ['용역대금·지급',[
-      ['fee','용역대금 (원)','number'],['settlement','정산 기준'],['payDue','지급일','date'],
+      ['fee','용역대금 (원)','money'],['settlement','정산 기준'],['payDue','지급일','date'],
       ['payment','지급 방식',['계좌이체','현금 지급']],['expenses','별도 경비','textarea']
     ]],
     ['이용·크레딧',[
@@ -162,13 +162,24 @@
       control.id='ct-'+(prefix||'')+key;name.htmlFor=control.id;
       if(choices)kind.forEach(function(choice){control.append(element('option',choice))});
       else if(kind==='date'||kind==='time'){control.type='text';control.inputMode='numeric';control.autocomplete='off';control.placeholder=kind==='date'?'1201 또는 2026-12-01':'1430';control.addEventListener('change',function(){var v=kind==='date'?parseDate(control.value):parseTime(control.value);if(v!==null){control.value=v;values[key]=v;renderPreview()}})}
+      else if(kind==='money'){control.type='text';control.inputMode='numeric';control.autocomplete='off';control.placeholder='예: 1,000,000'}
       else if(kind!=='textarea')control.type=kind||'text';
       if(kind==='number'){control.min=key==='buffShare'?'1':'0';if(key==='buffShare')control.max='99'}
       if(kind==='url')control.placeholder='https://';
       if(key==='place')control.placeholder='예: 조천체육관 또는 원격';
       control.value=value(values,key)||(choices?kind[0]:'');
       if(choices)values[key]=control.value;
-      control.addEventListener('input',function(){values[key]=control.value;renderPreview()});
+      if(kind==='money'){
+        control.value=values[key]?Number(String(values[key]).replace(/\D/g,'')).toLocaleString('ko-KR'):'';
+        control.addEventListener('input',function(){
+          var before=control.selectionStart,left=control.value.slice(0,before).replace(/\D/g,'').length;
+          var digits=control.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+          values[key]=digits;control.value=digits?Number(digits).toLocaleString('ko-KR'):'';
+          var pos=0,seen=0;while(pos<control.value.length&&seen<left){if(/\d/.test(control.value.charAt(pos)))seen++;pos++}
+          try{control.setSelectionRange(pos,pos)}catch(x){}
+          renderPreview();
+        });
+      }else control.addEventListener('input',function(){values[key]=control.value;renderPreview()});
       block.append(name,control);grid.append(block);
     });
     fieldset.append(grid);
