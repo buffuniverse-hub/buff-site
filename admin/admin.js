@@ -12,7 +12,12 @@ function token(){
   if(Date.now()<S.exp)return Promise.resolve(S.access);
   return auth('token?grant_type=refresh_token',{refresh_token:S.refresh}).then(function(j){saveSession(j);return S.access}).catch(function(){logout();throw new Error('로그인이 만료되었습니다.')});
 }
-function logout(){S=null;localStorage.removeItem('buff_admin');show(false)}
+function logout(){
+  S=null;localStorage.removeItem('buff_admin');
+  if(window.clearContractDraft)window.clearContractDraft();
+  if(cur==='contract')$('#main').replaceChildren();
+  show(false);
+}
 
 /* ---------- API ---------- */
 function api(method,path,body,extra){
@@ -112,7 +117,7 @@ window.buffRest=rest;window.buffToast=toast;
 })();
 var TABS=[
   ['home','메인'],['news','NEWS'],['works','WORKS'],['clients','CLIENTS'],
-  ['career_positions','CAREERS'],['team_members','ABOUT US'],['invoice','인보이스'],['quotation','견적서']
+  ['career_positions','CAREERS'],['team_members','ABOUT US'],['invoice','인보이스'],['quotation','견적서'],['contract','계약서']
 ];
 var CAREER_TABS=[['career_positions','채용 공고'],['settings','페이지 문구']];
 var DOC_TABS={invoice:'inv',quotation:'qt'};
@@ -140,6 +145,7 @@ function go(k){
   settled.then(function(){
     if(request!==navigation)return;
     if(documents)return window.openInvoiceTab(documents);
+    if(k==='contract')return window.openContractTab();
     if(k==='settings')return drawSettings();
     if(k==='home')return drawHome();
     return drawList(k);
