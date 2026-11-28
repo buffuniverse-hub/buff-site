@@ -7,28 +7,32 @@
     company:{title:'법인사업자',fields:[['partner','법인 상호'],['representative','대표자'],['registration','사업자등록번호'],['address','본점 주소'],['signer','서명자 성명·직위 (대표자 대리 시)'],['contact','전화번호'],['email','이메일']],settlement:['부가세 별도','부가세 포함','부가세 해당 없음']}
   };
   var groups=[
-    ['프로젝트와 작업',[
-      ['project','프로젝트명'],['client','고객사'],['role','작업 유형',['사진','영상','디자인','기타 제작']],
-      ['scope','작업 범위','textarea']
+    ['프로젝트 정보',[
+      ['project','프로젝트명'],['client','고객사'],['role','작업 유형',['사진','영상','디자인','기타 제작']],['contractDate','체결일','date']
     ]],
-    ['납품과 보수',[
-      ['deliverables','납품물·수량·형식','textarea'],['due','납품일','date'],
-      ['fee','보수 (원)','number'],['settlement','정산 기준'],
-      ['payment','지급 방식',['계좌이체','현금 지급']],['payDue','지급일','date']
+    ['계약 기간·업무',[
+      ['start','계약 시작일 (비우면 첫 일정)','date'],['end','계약 종료일 (비우면 마지막 일정·납품일)','date'],['scope','작업 범위','textarea']
     ]],
-    ['이용 조건',[
-      ['use','BUFF·고객사 이용 매체·지역','textarea',{preset:['BUFF·고객사 홍보·광고·보도 전 매체 (국내외)','BUFF 포트폴리오·공식 SNS·웹사이트 (국내외)','고객사 홍보·광고·보도 자료 (국내)','비상업적 포트폴리오·SNS 한정 (국내외)']}],['credit','파트너 크레딧','text',{preset:function(){return [value(currentParty(),'partner'),'표기하지 않음'].filter(Boolean)}}]
+    ['납품·수정',[
+      ['deliverables','납품물·수량·형식','textarea'],['due','납품일','date'],['revisions','포함 수정 횟수','number'],
+      ['originals','원본·편집 파일 포함 여부'],['deliveryLink','업로드 링크','url']
     ]],
-    ['계약 기간·추가 조건',[
-      ['contractDate','체결일','date'],['start','계약 시작일','date'],['end','계약 종료일','date'],
-      ['revisions','포함 수정 횟수','number'],['buffShare','BUFF 저작재산권 지분 (%)','number'],
-      ['deliveryLink','업로드 링크','url'],['originals','원본·편집 파일 포함 여부'],
-      ['expenses','별도 경비','textarea'],['extras','취소·재촬영·보험 등 특약','textarea']
-    ],true]
+    ['용역대금·지급',[
+      ['fee','보수 (원)','number'],['settlement','정산 기준'],['payDue','지급일','date'],
+      ['payment','지급 방식',['계좌이체','현금 지급']],['expenses','별도 경비','textarea']
+    ]],
+    ['저작재산권·이용·크레딧',[
+      ['buffShare','BUFF 저작재산권 지분 (%)','number'],
+      ['use','BUFF·고객사 이용 매체·지역','textarea',{preset:['BUFF·고객사 홍보·광고·보도 전 매체 (국내외)','BUFF 포트폴리오·공식 SNS·웹사이트 (국내외)','고객사 홍보·광고·보도 자료 (국내)','비상업적 포트폴리오·SNS 한정 (국내외)']}],
+      ['credit','파트너 크레딧','text',{preset:function(){return [value(currentParty(),'partner'),'표기하지 않음'].filter(Boolean)}}]
+    ]],
+    ['특약',[
+      ['extras','취소·재촬영·보험 등 특약','textarea']
+    ]]
   ];
   var issuer='버프유니버스(BUFF UNIVERSE)\n대표자 김동준 · 사업자등록번호 295-24-02126\n서울특별시 관악구 남부순환로 1921-1, 202-E4호(봉천동, 범산빌딩)';
   var defaults={role:'사진',payment:'계좌이체',revisions:'1',buffShare:'50',contractDate:todayIso()};
-  var type='freelance',shared=Object.assign({},defaults),parties={},record=null,editing=false,saving=false,docxLoad=null,archivedList=false,dirty=false;
+  var keepExtra={},type='freelance',shared=Object.assign({},defaults),parties={},record=null,editing=false,saving=false,docxLoad=null,archivedList=false,dirty=false;
   var css=[
     '@font-face{font-family:ContractPaper;src:url(vendor/Paperozi.ttf) format("truetype");font-weight:400;font-display:swap}',
     '@font-face{font-family:ContractPaper;src:url(vendor/PaperoziBold.ttf) format("truetype");font-weight:700;font-display:swap}',
@@ -400,7 +404,7 @@
 
   var TABLE='partner_contracts',RETURN_ROW={Prefer:'return=representation'};
   function request(method,query,body,headers){return window.buffRest(method,TABLE,query,body,headers)}
-  function clearDraft(){type='freelance';shared=Object.assign({},defaults);parties={};record=null;editing=false;archivedList=false;dirty=false}
+  function clearDraft(){keepExtra={};type='freelance';shared=Object.assign({},defaults);parties={};record=null;editing=false;archivedList=false;dirty=false}
   window.clearContractDraft=clearDraft;
 
   function patch(row,changes){
@@ -415,7 +419,7 @@
       var found=rows&&rows[0];
       if(!found)throw new Error('계약서를 찾을 수 없습니다.');
       type=found.variant;shared=Object.assign({},defaults,found.data.fields);parties={};
-      parties[type]=found.data.partner||{};record=found;editing=true;dirty=false;
+      parties[type]=found.data.partner||{};record=found;keepExtra={manualSign:found.data.manualSign,manualSignAt:found.data.manualSignAt};editing=true;dirty=false;
       return drawEditor();
     }).catch(function(error){if(button.isConnected)window.buffToast(error.message,true)}).finally(function(){button.disabled=false});
   }
@@ -428,7 +432,9 @@
     main.replaceChildren(element('style',css),header,list,toolbar);list.append(loading);
     create.onclick=function(){var wasArchived=archivedList;clearDraft();archivedList=wasArchived;editing=true;drawEditor()};
     toggle.onclick=function(){archivedList=!archivedList;drawList(0)};
-    return request('GET','select=id,project,partner,variant,revision,updated_at&archived=eq.'+archivedList+'&order=updated_at.desc,id.asc&limit=51&offset='+offset).then(function(rows){
+    var signingsReq=window.buffRest('GET','contract_signings','select=project,partner,status,signed_at,expires_at,created_at&order=created_at.desc&limit=300').catch(function(){return []});
+    return Promise.all([request('GET','select=id,project,partner,variant,revision,updated_at,manual:data->>manualSign&archived=eq.'+archivedList+'&order=updated_at.desc,id.asc&limit=51&offset='+offset),signingsReq]).then(function(res){
+      var rows=res[0],latest={};(res[1]||[]).forEach(function(sg){var k=sg.project+'\u0000'+sg.partner;if(!latest[k])latest[k]=sg});
       if(!list.isConnected)return;
       rows=rows||[];list.replaceChildren();
       if(!rows.length)list.append(element('p',archivedList?'보관한 계약서가 없습니다.':'저장된 계약서가 없습니다.'));
@@ -438,7 +444,23 @@
         item.className='ct-list-row';buttons.className='ct-tools';open.type=archive.type='button';
         open.className='btn line sm';archive.className='btn line sm';
         info.append(element('b',row.project),element('small',row.partner+' · '+templates[row.variant].title+' · '+new Date(row.updated_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})));
-        buttons.append(open,archive);item.append(info,buttons);list.append(item);
+        var sg=latest[row.project+'\u0000'+row.partner],manual=row.manual||'',chip=element('span'),stateSel=element('select');
+        var shown=sg&&sg.status==='signed'?['전자서명 완료','ok']:manual==='stamped'?['서명·날인 완료','ok']:manual==='signed'?['서명 완료','ok']:
+          sg&&sg.status==='sent'&&new Date(sg.expires_at)>new Date()?['서명 대기 (전자)','wait']:manual==='pending'?['서명 대기','wait']:
+          manual==='canceled'||(sg&&sg.status==='canceled')?['취소','cancel']:['진행 전','none'];
+        chip.textContent=shown[0];chip.style.cssText='display:inline-block;margin-left:8px;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:'+({ok:'#e4f6e9',wait:'#fff2d9',cancel:'#fde7e7',none:'#eee'}[shown[1]])+';color:'+({ok:'#0a6b2a',wait:'#8a5a00',cancel:'#b3261e',none:'#6e6e73'}[shown[1]]);
+        info.firstChild.append(chip);
+        [['','상태 변경'],['none','진행 전'],['pending','서명 대기'],['signed','서명 완료'],['stamped','서명·날인 완료'],['canceled','취소']].forEach(function(o){var op=element('option',o[1]);op.value=o[0];stateSel.append(op)});
+        stateSel.className='btn line sm';stateSel.title='전자서명 외에 직접 서명·날인한 경우 여기서 상태를 기록하세요';
+        stateSel.onchange=function(){
+          var v=stateSel.value;if(!v)return;stateSel.disabled=true;
+          request('GET','id=eq.'+encodeURIComponent(row.id)+'&select=id,revision,data').then(function(r){
+            var cur=r&&r[0];if(!cur)throw new Error('계약서를 찾을 수 없습니다.');
+            var data=cur.data||{};if(v==='none')delete data.manualSign;else data.manualSign=v;data.manualSignAt=new Date().toISOString();
+            return patch(cur,{data:data});
+          }).then(function(){return drawList(offset)}).catch(function(error){window.buffToast(error.message,true);stateSel.disabled=false;stateSel.value=''});
+        };
+        buttons.append(stateSel,open,archive);item.append(info,buttons);list.append(item);
         open.onclick=function(){openSaved(row,open)};
         archive.onclick=function(){
           archive.disabled=true;
@@ -460,7 +482,8 @@
     if(window.buffFmtPhone&&partner.contact)partner.contact=window.buffFmtPhone(partner.contact);
     if(!project||!name){window.buffToast('프로젝트명과 수행자 이름 또는 상호를 입력해 주세요.',true);return;}
     var data=shared,selected=type,previous=record;
-    var body={project:project,partner:name,variant:selected,data:JSON.parse(JSON.stringify({fields:shared,partner:partner}))};
+    var body={project:project,partner:name,variant:selected,data:Object.assign(JSON.parse(JSON.stringify({fields:shared,partner:partner})),keepExtra.manualSign?{manualSign:keepExtra.manualSign,manualSignAt:keepExtra.manualSignAt}:{})};
+    var baseJson=JSON.stringify({fields:shared,partner:partner});
     saving=true;button.disabled=true;status.textContent='저장 중…';
     var operation=previous?patch(previous,body):request('POST','select=id,revision',body,RETURN_ROW).then(function(rows){return rows&&rows[0]});
     return operation.then(function(row){
@@ -468,7 +491,7 @@
       if(window.buffPartners&&name)window.buffPartners.upsert({name:name,phone:partner.contact,email:partner.email,variant:selected}).catch(function(){});
       if(shared===data){
         record=row;
-        dirty=JSON.stringify(body.data)!==JSON.stringify({fields:shared,partner:currentParty()})||type!==selected;
+        dirty=baseJson!==JSON.stringify({fields:shared,partner:currentParty()})||type!==selected;
         if(status.isConnected)status.textContent=dirty?'저장하지 않은 변경사항이 있어요.':'저장됨';
       }
     }).catch(function(error){
@@ -529,7 +552,7 @@
       groups.forEach(function(group,index){
         var inputs=group[1].map(function(field){return field[0]==='settlement'?['settlement','정산 기준',template.settlement]:field});
         addFields(fields,group[0],inputs,shared,group[2]);
-        if(index===0)addSchedules(fields);
+        if(index===1)addSchedules(fields);
       });
       renderPreview();
     }
