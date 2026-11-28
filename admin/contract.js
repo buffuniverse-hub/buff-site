@@ -428,6 +428,7 @@
   function saveDraft(form,button,status){
     if(saving||!form.reportValidity())return;
     var partner=currentParty(),project=value(shared,'project'),name=value(partner,'partner');
+    if(window.buffFmtPhone&&partner.contact)partner.contact=window.buffFmtPhone(partner.contact);
     if(!project||!name){window.buffToast('프로젝트명과 수행자 이름 또는 상호를 입력해 주세요.',true);return;}
     var data=shared,selected=type,previous=record;
     var body={project:project,partner:name,variant:selected,data:JSON.parse(JSON.stringify({fields:shared,partner:partner}))};
@@ -483,6 +484,7 @@
       pick.style.marginBottom='14px';group.insertBefore(pick,gridEl);
       var phoneBox=group.querySelector('#ct-contact'),mailBox=group.querySelector('#ct-email');
       if(phoneBox){phoneBox.inputMode='tel';phoneBox.placeholder='010-0000-0000';phoneBox.addEventListener('change',function(){
+        if(window.buffFmtPhone&&phoneBox.value.indexOf('@')<0){var f=window.buffFmtPhone(phoneBox.value);if(f!==phoneBox.value){phoneBox.value=f;partner.contact=f;renderPreview()}}
         if(phoneBox.value.indexOf('@')>=0&&mailBox&&!mailBox.value){mailBox.value=phoneBox.value.trim();phoneBox.value='';partner.email=mailBox.value;partner.contact='';mailBox.dispatchEvent(new Event('input',{bubbles:true}));phoneBox.dispatchEvent(new Event('input',{bubbles:true}));window.buffToast('이메일 주소라서 이메일 칸으로 옮겼어요.')}
       })}
       if(mailBox){mailBox.type='email';mailBox.placeholder='name@example.com';mailBox.parentNode.classList.add('ct-wide')}

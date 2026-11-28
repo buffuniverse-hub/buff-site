@@ -1,6 +1,16 @@
 (function(){
   'use strict';
   var TABLE='partner_profiles',VARIANTS={freelance:'개인 프리랜서',business:'개인사업자',company:'법인사업자'};
+  function fmtPhone(raw){
+    var t=String(raw||'').trim();if(!t||t.indexOf('@')>=0)return t;
+    var d=t.replace(/\D/g,'');if(d.indexOf('82')===0&&d.length>=11)d='0'+d.slice(2);
+    var m;
+    if(d.indexOf('02')===0){m=d.length===9?[2,3,4]:d.length===10?[2,4,4]:null}
+    else if(d.length===11)m=[3,4,4];else if(d.length===10)m=[3,3,4];else if(d.length===8)m=[4,4];else m=null;
+    if(!m)return t;
+    var out=[],i=0;m.forEach(function(n){out.push(d.slice(i,i+n));i+=n});return out.join('-');
+  }
+  window.buffFmtPhone=fmtPhone;
   function el(tag,text,cls){var e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e}
   function req(method,query,body,headers){return window.buffRest(method,TABLE,query,body,headers)}
   var RET={Prefer:'return=representation'};
@@ -9,7 +19,7 @@
     /* 이름이 같은 파트너가 있으면 갱신, 없으면 새로 저장 */
     upsert:function(info){
       var name=(info.name||'').trim();if(!name)return Promise.reject(new Error('파트너 이름이 필요합니다.'));
-      var fields={name:name,phone:(info.phone||'').trim(),email:(info.email||'').trim(),updated_at:new Date().toISOString()};
+      var fields={name:name,phone:fmtPhone(info.phone),email:(info.email||'').trim(),updated_at:new Date().toISOString()};
       if(info.variant)fields.variant=info.variant;
       return req('GET','select=id&name=eq.'+encodeURIComponent(name)+'&limit=1').then(function(rows){
         if(rows&&rows[0])return req('PATCH','id=eq.'+rows[0].id+'&select=id',fields,RET).then(function(r){return r[0]});
@@ -33,7 +43,7 @@
     cancel.onclick=function(){ov.remove()};
     save.onclick=function(){
       var name=inputs.name.value.trim();if(!name){err.textContent='이름을 입력해 주세요.';return}
-      var body={name:name,phone:inputs.phone.value.trim(),email:inputs.email.value.trim(),variant:vs.value,memo:memo.value,updated_at:new Date().toISOString()};
+      var body={name:name,phone:fmtPhone(inputs.phone.value),email:inputs.email.value.trim(),variant:vs.value,memo:memo.value,updated_at:new Date().toISOString()};
       save.disabled=true;
       (row.id?req('PATCH','id=eq.'+row.id+'&select=id',body,RET):req('POST','select=id',body,RET)).then(function(){ov.remove();done()})
         .catch(function(e){err.textContent=e.message;save.disabled=false});
