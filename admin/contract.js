@@ -21,8 +21,7 @@
       ['fee','용역대금 (원)','number'],['settlement','정산 기준'],['payDue','지급일','date'],
       ['payment','지급 방식',['계좌이체','현금 지급']],['expenses','별도 경비','textarea']
     ]],
-    ['저작재산권·이용·크레딧',[
-      ['buffShare','BUFF 저작재산권 지분 (%)','number'],
+    ['이용·크레딧',[
       ['use','BUFF·고객사 이용 매체·지역','textarea',{preset:['BUFF·고객사 홍보·광고·보도 전 매체 (국내외)','BUFF 포트폴리오·공식 SNS·웹사이트 (국내외)','고객사 홍보·광고·보도 자료 (국내)','비상업적 포트폴리오·SNS 한정 (국내외)']}],
       ['credit','파트너 크레딧','text',{preset:function(){return [value(currentParty(),'partner'),'표기하지 않음'].filter(Boolean)}}]
     ]],
@@ -31,7 +30,7 @@
     ]]
   ];
   var issuer='버프유니버스(BUFF UNIVERSE)\n대표자 김동준 · 사업자등록번호 295-24-02126\n서울특별시 관악구 남부순환로 1921-1, 202-E4호(봉천동, 범산빌딩)';
-  var defaults={role:'사진',payment:'계좌이체',revisions:'1',buffShare:'50',contractDate:todayIso()};
+  var defaults={role:'사진',payment:'계좌이체',revisions:'1',contractDate:todayIso()};
   var keepExtra={},type='freelance',shared=Object.assign({},defaults),parties={},record=null,editing=false,saving=false,docxLoad=null,archivedList=false,dirty=false;
   var css=[
     '@font-face{font-family:ContractPaper;src:url(vendor/Paperozi.ttf) format("truetype");font-weight:400;font-display:swap}',
@@ -88,12 +87,12 @@
       ['제1조 목적과 수행 범위','BUFF는 작업확인서에 명시된 제작 용역을 수행자에게 위탁하고, 수행자는 이를 수행하여 BUFF에 납품한다. BUFF는 작업에 필요한 자료·출입 권한·현장 안내를 제공한다. 업무 범위, 일정, 인력, 비용을 변경하거나 추가 작업이 필요할 때에는 작업 전에 서면으로 합의한다. 수행자는 BUFF의 사전 서면 동의를 받아 업무를 재위탁할 수 있다. 양 당사자는 상호, 대표자, 연락처 등 계약 이행에 영향을 주는 사항이 변경되면 지체 없이 서면으로 통지한다.'],
       ['제2조 납품과 검수','수행자는 합의한 납품물 전부를 납품일까지 BUFF가 지정한 링크에 업로드하고 완료를 알린다. BUFF는 필요한 업로드 링크와 권한을 납품 전에 제공한다. 원본과 편집 파일은 작업확인서에 포함된 경우 인도한다.\n\nGoogle Drive로 납품하는 사진 중 수행자가 소유한 개별 파일은 소유자 지위를 BUFF가 지정한 계정으로 이전한다. 수행자는 납품일까지 필요한 이전 요청을 보내고, BUFF는 수락이 필요하면 지체 없이 처리한다. 계정 정책상 직접 이전이 제한되면 BUFF가 소유·관리할 수 있는 위치로 인도하는 방법을 따로 합의한다. 결과물의 저작재산권은 제4조에 따른다.\n\nBUFF는 납품물을 받은 날부터 5영업일 안에 승인하거나, 합의한 검수 기준에 따라 보완할 사항을 구체적으로 적어 서면으로 요청한다. 관계 법령이 더 짧은 기한을 정하고 있으면 그 기한에 따른다. 이 기간 안에 회신이 없으면 검수가 완료된 것으로 본다. 합의한 기준에 미달한 부분을 보완하는 작업은 포함 수정 횟수에 산입하지 않는다. 합의한 범위를 넘는 추가 작업의 비용과 납기는 사전에 합의한다.'],
       ['제3조 용역대금과 정산',payment],
-      ['제4조 저작재산권과 이용 범위','최종 납품물의 저작재산권은 작업확인서에 정한 비율로 BUFF와 수행자가 공유하며, 수행자는 용역대금을 모두 지급받은 때에 BUFF의 지분에 해당하는 저작재산권을 BUFF에 양도한다. 양도 대상에는 2차적저작물작성권이 포함된다. 저작인격권과 기존 자료 및 제3자 자료에 관한 권리는 각 권리자에게 귀속된다. 수행자가 다른 창작자를 투입하는 경우, 수행자는 이 계약에 따른 권리의 이전과 이용에 필요한 권한을 그 창작자로부터 확보한다.\n\n양 당사자는 BUFF와 지정 고객사가 프로젝트 종료 후에도 작업확인서에 정한 매체와 지역 등의 이용 조건에 따라 최종 납품물을 기간 제한 없이 이용할 수 있음에 동의한다. 약정한 범위를 벗어나는 광고 이용, 제3자 제공, 재편집, 지분 처분은 사전에 서면으로 합의한다. 각 당사자는 자신이 제공한 음원, 폰트, 스톡 소재 등 제3자 소재의 이용 조건을 확인하여 상대방에게 알린다.'],
-      ['제5조 포트폴리오와 크레딧','수행자는 BUFF 또는 고객사가 최종 납품물을 공식 공개한 이후에, 비밀유지 의무와 초상 이용 동의 및 고객사와 합의한 공개 조건의 범위에서 최종 납품물을 포트폴리오에 게시할 수 있다. 게시할 때에는 작업확인서에 적힌 BUFF와 수행자의 크레딧을 함께 표기한다.'],
+      ['제4조 저작재산권과 이용 범위','최종 납품물의 저작재산권(2차적저작물작성권을 포함한다)은 수행자가 용역대금을 모두 지급받은 때에 BUFF에 양도되어 BUFF에 귀속된다. 수행자는 BUFF와 고객사가 최종 납품물을 이용하면서 필요한 범위에서 수정·편집하더라도 저작인격권을 행사하지 않는다. 기존 자료 및 제3자 자료에 관한 권리는 각 권리자에게 귀속된다. 수행자가 다른 창작자를 투입하는 경우, 수행자는 이 계약에 따른 권리의 이전과 이용에 필요한 권한을 그 창작자로부터 확보한다.\n\nBUFF와 지정 고객사는 프로젝트 종료 후에도 작업확인서에 정한 매체와 지역 등의 이용 조건에 따라 최종 납품물을 기간 제한 없이 이용할 수 있다. 각 당사자는 자신이 제공한 음원, 폰트, 스톡 소재 등 제3자 소재의 이용 조건을 확인하여 상대방에게 알린다.'],
+      ['제5조 수행자의 포트폴리오 활용','BUFF는 수행자가 최종 납품물을 수행자의 포트폴리오와 자기 홍보(개인 웹사이트와 SNS를 포함한다) 목적으로 이용하는 것을 무상으로 허락하며, 이 허락은 비독점적이다. 다만 BUFF 또는 고객사가 최종 납품물을 공식 공개한 이후에, 비밀유지 의무와 초상 이용 동의 및 고객사와 합의한 공개 조건의 범위에서 이용할 수 있다. 게시할 때에는 작업확인서에 적힌 BUFF와 수행자의 크레딧을 함께 표기한다.'],
       ['제6조 현장 안전과 보험','양 당사자는 각자가 통제하는 인력, 장비 및 작업 구역에 관한 안전조치를 이행하고, 사고나 위험이 발생하면 상대방에게 즉시 알린다. 현장 위험으로 작업이 어려우면 안전을 확보하기 위해 작업을 중단하고 일정과 비용을 협의한다. 법령상 가입 의무가 있는 보험은 각 의무자가 가입하고, 프로젝트별 추가 보험의 가입 주체와 비용은 작업확인서에 명시한다.'],
       ['제7조 비밀유지와 개인정보','양 당사자는 미공개 결과물, 고객 정보, 상대방의 비밀정보를 계약 이행 목적으로만 사용하고, 합의한 경로와 권한 범위에서 관리한다. 법령에 따른 공개와 상대방이 승인한 공개는 예외로 한다. 계약 이행이 끝나면 법령상 보존해야 하는 자료를 제외하고 상대방의 요청에 따라 반환하거나 삭제한다. 개인정보 처리를 위탁하는 경우에는 착수 전에 처리 범위, 보호조치, 재위탁 제한, 감독과 책임을 별도 서면으로 정한다.'],
       ['제8조 변경·취소·해지 및 책임','중대한 계약 위반이 있으면 상대방은 사유와 합리적인 시정 기한을 서면으로 통지하고, 기한 내 시정이 없거나 시정이 불가능하면 해지할 수 있다. 고객사 또는 BUFF의 사정으로 작업이 취소되면 완료된 업무의 대가와 사전에 승인된 회수 불가능한 실비를 정산한다. 우천이나 대회 취소 등 양 당사자가 통제하기 어려운 사유가 생기면 대체 일정과 정산 기준을 협의한다. 계약 위반으로 생긴 손해는 귀책 사유가 있는 당사자가 관계 법령에 따라 부담한다.'],
-      ['제9조 계약 체결과 분쟁','양 당사자는 계약서와 작업확인서의 내용을 확인한 뒤 서명 또는 날인하고 각자 보관한다. 이 계약은 전자서명으로 체결할 수 있으며, 전자서명한 계약서는 서면에 서명 또는 날인한 계약서와 같은 효력을 가진다. 이 계약에는 대한민국 법령을 적용하고, 분쟁은 먼저 협의하여 해결하되 협의가 되지 않으면 민사소송법상 관할 법원에서 해결한다. 강행 법령에 어긋나는 부분은 그 법령에 따른다.']
+      ['제9조 계약 체결과 분쟁','양 당사자는 계약서와 작업확인서의 내용을 확인한 뒤 서명 또는 날인하고 각자 보관한다. 이 계약은 전자서명으로 체결할 수 있으며, 전자서명한 계약서는 서면에 서명 또는 날인한 계약서와 같은 효력을 가진다. 이 계약에는 대한민국 법령을 적용하고, 분쟁은 먼저 협의하여 해결하되 협의가 되지 않으면 서울중앙지방법원을 제1심 전속적 합의관할 법원으로 한다. 강행 법령에 어긋나는 부분은 그 법령에 따른다.']
     ];
   }
   function currentParty(){return parties[type]||(parties[type]={});}
@@ -216,7 +215,7 @@
     var template=templates[type],partner=currentParty(),s=Object.assign({},shared);
     var dates=schedules().map(function(row){return row.date}).filter(Boolean).sort();
     s.contractDate=s.contractDate||todayIso();s.start=s.start||dates[0]||s.contractDate;s.end=s.end||[dates[dates.length-1],s.due].filter(Boolean).sort().pop()||'';
-    var share=Number(s.buffShare),fee=value(s,'fee'),link=value(s,'deliveryLink');
+    var fee=value(s,'fee'),link=value(s,'deliveryLink');
     var partnerDetails=template.fields.filter(function(field){return field[0]!=='signer'||value(partner,'signer')}).map(function(field){return field[1]+' '+label(partner,field[0])});
     var details=[
       ['프로젝트명','Project',label(s,'project')],
@@ -229,7 +228,7 @@
       [scheduleLabel(),scheduleText()],
       ['납품·수정','\u27E6'+label(s,'deliverables')+'\u27E7\n\u27E6'+label(s,'due')+'까지\u27E7 · \u27E6포함 수정 '+label(s,'revisions')+'회\u27E7\n\u27E6원본·편집 파일 '+label(s,'originals')+'\u27E7\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
       ['용역대금·지급', (fee?Number(fee).toLocaleString('ko-KR')+'원':'________________원')+' / '+label(partner,'settlement')+'\n'+label(s,'payDue')+' · '+label(s,'payment')+'\n경비 '+label(s,'expenses')],
-      ['저작재산권 지분',Number.isInteger(share)&&share>=1&&share<=99?'BUFF '+share+'% / 파트너 '+(100-share)+'%':'공동 지분 기재'],
+      ['저작재산권 귀속','BUFF (용역대금 완납 시 양도)\n수행자 포트폴리오 이용 가능'],
       ['BUFF·고객사 이용',label(s,'use')+'\n이용 기간 제한 없음'],
       ['포트폴리오 크레딧','제작 BUFF / '+label(s,'role')+' '+label(s,'credit')],
       ['특약',value(s,'extras')||'없음']
@@ -391,7 +390,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-23')})
+      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-24')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
