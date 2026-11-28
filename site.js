@@ -507,7 +507,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function open(){
     if(el)return;css();
     el=document.createElement('div');el.id='cm';
-    el.innerHTML='<div class="cd" role="dialog" aria-modal="true" aria-label="문의하기"><button class="x" aria-label="닫기">×</button><h3>문의하기</h3><p>남겨주시면 메일로 이어집니다. 확인 후 빠르게 답변드릴게요.</p><label>이름 / 소속</label><input id="cm-n" placeholder="홍길동 / 팀·단체명"><label>연락처 (이메일 또는 전화)</label><input id="cm-c" placeholder="example@email.com"><label>문의 내용</label><textarea id="cm-m" placeholder="어떤 종목, 어떤 작업이 필요하신가요?"></textarea><a class="go" id="cm-g" target="_blank" rel="noopener">메일로 문의 보내기</a></div>';
+    el.innerHTML='<div class="cd" role="dialog" aria-modal="true" aria-label="Gmail로 문의하기"><button class="x" aria-label="닫기">×</button><h3>Gmail로 문의하기</h3><p>입력한 내용은 Gmail의 새 메일에 자동으로 채워집니다. 내용을 확인한 뒤 보내주세요.</p><label>이름 / 소속</label><input id="cm-n" placeholder="홍길동 / 팀·단체명"><label>연락처 (이메일 또는 전화)</label><input id="cm-c" placeholder="example@email.com"><label>문의 내용</label><textarea id="cm-m" placeholder="어떤 종목, 어떤 작업이 필요하신가요?"></textarea><a class="go" id="cm-g" target="_blank" rel="noopener">Gmail에서 메일 작성하기</a></div>';
     document.body.appendChild(el);document.body.style.overflow='hidden';
     var n=el.querySelector('#cm-n'),c=el.querySelector('#cm-c'),m=el.querySelector('#cm-m'),g=el.querySelector('#cm-g');
     function upd(){var ok=n.value.trim()&&c.value.trim()&&m.value.trim();g.classList.toggle('on',!!ok);

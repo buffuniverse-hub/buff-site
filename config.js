@@ -1,5 +1,20 @@
-/* 홈페이지 기본 배율 90% (데스크톱만). 관리자·서명 페이지는 제외 */
-(function(){if(/^\/(admin|sign)/.test(location.pathname))return;var st=document.createElement('style');st.textContent='@media(min-width:900px){html{zoom:0.9}}';(document.head||document.documentElement).appendChild(st)})();
+/* 공개 사이트 공통 헤더 */
+(function(){
+  function orderLinks(root){
+    root.querySelectorAll('header nav').forEach(function(nav){
+      var news=nav.querySelector(':scope > a[href$="News"]');
+      var works=nav.querySelector(':scope > a[href$="Works"], :scope > .nav-works');
+      if(news&&works&&news.nextElementSibling!==works)nav.insertBefore(news,works);
+    });
+  }
+  function setupNavigation(){
+    orderLinks(document);
+    var template=document.getElementById('dc-tpl');
+    if(template)orderLinks(template.content);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupNavigation,{once:true});
+  else setupNavigation();
+})();
 /* Supabase 공개용 키(publishable)는 브라우저에 노출되어도 안전합니다. 접근 제어는 DB의 RLS 정책이 합니다. */
 window.BUFF_CONFIG={
   url:'https://cexwmuhsjfxzemnwtwjc.supabase.co',
