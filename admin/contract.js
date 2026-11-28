@@ -17,7 +17,7 @@
       ['payment','지급 방식',['계좌이체','현금 지급']],['payDue','지급일','date']
     ]],
     ['이용 조건',[
-      ['use','BUFF·고객사 이용 매체·지역','textarea'],['credit','파트너 크레딧']
+      ['use','BUFF·고객사 이용 매체·지역','textarea',{preset:['BUFF·고객사 홍보·광고·보도 전 매체 (국내외)','BUFF 포트폴리오·공식 SNS·웹사이트 (국내외)','고객사 홍보·광고·보도 자료 (국내)','비상업적 포트폴리오·SNS 한정 (국내외)']}],['credit','파트너 크레딧','text',{preset:function(){return [value(currentParty(),'partner'),'표기하지 않음'].filter(Boolean)}}]
     ]],
     ['계약 기간·추가 조건',[
       ['contractDate','체결일','date'],['start','계약 시작일','date'],['end','계약 종료일','date'],
@@ -119,6 +119,33 @@
     if(!collapsed)fieldset.append(element('legend',title));
     fields.forEach(function(field){
       var key=field[0],kind=field[2],choices=Array.isArray(kind),block=element('div');
+      if(field[3]&&field[3].preset){
+        var pre=field[3].preset,opts=typeof pre==='function'?pre():pre,vals=data,cur=value(vals,key);
+        var sel=element('select'),custom=element(kind==='textarea'?'textarea':'input'),lab=element('label',field[1]);
+        block.className='ct-field ct-wide';sel.id='ct-'+(prefix||'')+key;lab.htmlFor=sel.id;
+        function build(){
+          var keepVal=sel.value;sel.replaceChildren();opts=typeof pre==='function'?pre():pre;
+          var first=element('option','선택해 주세요');first.value='';sel.append(first);
+          opts.forEach(function(o){var op=element('option',o);op.value=o;sel.append(op)});
+          var other=element('option','직접 입력…');other.value='__custom';sel.append(other);
+          if(keepVal)sel.value=keepVal;
+        }
+        build();sel._rebuild=function(){
+          if(sel.value==='__custom')return;var now=value(vals,key);build();if(typeof pre==='function'&&sel._auto&&opts[0]&&now!==opts[0]){vals[key]=now=opts[0];renderPreview()}
+          if(now&&opts.indexOf(now)<0){sel.value='__custom';custom.hidden=false;custom.value=now}else sel.value=now||'';
+        };
+        if(kind==='textarea')custom.rows=2;else custom.type='text';
+        custom.placeholder='직접 입력';custom.style.marginTop='6px';
+        if(cur&&opts.indexOf(cur)<0){sel.value='__custom';custom.value=cur}else{sel.value=cur||'';custom.hidden=true;sel._auto=typeof pre==='function'&&sel.selectedIndex===1}
+        sel.addEventListener('change',function(){
+          sel._auto=typeof pre==='function'&&sel.selectedIndex===1;
+          if(sel.value==='__custom'){custom.hidden=false;vals[key]=custom.value;custom.focus()}
+          else{custom.hidden=true;vals[key]=sel.value}
+          renderPreview();
+        });
+        custom.addEventListener('input',function(){vals[key]=custom.value;renderPreview()});
+        block.append(lab,sel,custom);grid.append(block);return;
+      }
       var control=element(choices?'select':kind==='textarea'?'textarea':'input'),name=element('label',field[1]);
       var values=key==='settlement'?currentParty():data;
       block.className='ct-field'+(kind==='textarea'||kind==='url'?' ct-wide':'');
@@ -508,7 +535,7 @@
     }
     chooser.addEventListener('change',function(){type=chooser.value;drawFields()});
     form.addEventListener('submit',function(event){event.preventDefault()});
-    form.addEventListener('input',function(){dirty=true;status.textContent='저장하지 않은 변경사항이 있어요.'});
+    form.addEventListener('input',function(ev){[].forEach.call(form.querySelectorAll('select'),function(x){if(x._rebuild&&x!==ev.target&&ev.target.tagName!=='SELECT')x._rebuild()});dirty=true;status.textContent='저장하지 않은 변경사항이 있어요.'});
     document.getElementById('ct-list').onclick=function(){
       if(dirty&&!confirm('저장하지 않은 변경사항이 있습니다. 목록으로 돌아갈까요?'))return;
       editing=false;drawList(0);
