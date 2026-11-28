@@ -45,10 +45,16 @@ function wsCss(){
 .woption:hover,.woption:focus-visible{background:#F1F1F3}
 .woption[aria-pressed="true"]{background:#000;color:#fff;font-weight:700}
 .wselect:focus-visible,.woption:focus-visible,.wrs:focus-visible{outline:2px solid #0A84FF;outline-offset:-2px}
-.wrs{display:block;margin:3px auto 0;border:0;padding:4px 8px;background:none;color:#6E6E73;font:inherit;font-size:12px;cursor:pointer}
+.wrs{display:block;margin:3px 0 0 auto;border:0;padding:4px 8px;background:none;color:#6E6E73;font:inherit;font-size:12px;cursor:pointer}
 .wrs[hidden]{display:block;visibility:hidden}
 .wrs:hover{color:#1D1D1F;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:860px){.wmenu{width:100%}}
+@media(min-width:1024px){
+  .wfilters{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+  .wchips{grid-column:2}
+  .wchoice{width:152px}
+  .wrs{justify-self:start;margin:0 0 0 8px}
+}
 .wl #works-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:36px 20px}
 .wl #works-grid>a{text-align:left!important;gap:4px!important}
 .wl #works-grid>a>img,.wl #works-grid>a>div{border-radius:12px!important;margin-bottom:10px!important;aspect-ratio:16/9!important}
