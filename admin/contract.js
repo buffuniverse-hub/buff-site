@@ -65,7 +65,7 @@
     '.ct-tight h2{font-size:28pt!important;margin:0 0 8mm!important}.ct-tight .ct-doc-head{margin-bottom:6mm!important}.ct-tight .ct-intro{margin-bottom:6mm!important}.ct-tight td,.ct-tight th{padding:5px 9px!important;font-size:8.75pt!important}',
     '.ct-page mark{background:#ffe94d;color:inherit;padding:0 2px;border-radius:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
     '.ct-page th{width:27%;background:#f5f5f7}.ct-page thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-size:8.25pt}',
-    '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:block}.ct-sign-grid .ct-party{display:grid;grid-template-columns:minmax(0,1fr) 64mm;gap:8mm;align-items:end;padding:5mm 0;border-top:1px solid #e5e5ea}.ct-sign-grid .ct-party:first-child{border-top:0;padding-top:0}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{position:relative;height:27mm;margin:0;border:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:8.5pt}.ct-sign-line span{position:absolute;right:6px;bottom:4px}',
+    '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:block}.ct-sign-grid .ct-party{display:grid;grid-template-columns:minmax(0,1fr) 64mm;gap:8mm;align-items:end;padding:5mm 0;border-top:1px solid #e5e5ea}.ct-sign-grid .ct-party:first-child{border-top:0;padding-top:0}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{position:relative;height:27mm;margin:0;border:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:8.5pt}.ct-seal{position:absolute;left:3mm;top:3mm;width:calc(100% - 6mm);height:calc(100% - 10mm);object-fit:contain}.ct-sign-line span{position:absolute;right:6px;bottom:4px}',
     '.ct-brand{position:absolute;left:0;right:0;bottom:0;height:34mm;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;box-sizing:border-box;background:#0a0a0a;color:#fff;padding:0 14mm 0 15mm}',
     '.ct-brand img{display:block;width:125px;height:auto}.ct-brand div{text-align:right}.ct-page .ct-brand p{font-size:8pt;margin:0;line-height:1.45}',
     '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel{padding:15px}}',
@@ -280,7 +280,7 @@
     var signature=element('div');signature.className='ct-signature';
     signature.append(element('p',model.signature[0]));
     var parties=element('div');parties.className='ct-sign-grid';
-    model.signParties.forEach(function(party){var row=element('div'),box=element('div'),head=element('b',party.role);row.className='ct-party';box.append(head);party.lines.forEach(function(line){box.append(element('p',line))});var sig=element('div');sig.className='ct-sign-line';sig.append(element('span','(서명 또는 날인)'));row.append(box,sig);parties.append(row)});
+    model.signParties.forEach(function(party){var row=element('div'),box=element('div'),head=element('b',party.role);row.className='ct-party';box.append(head);party.lines.forEach(function(line){box.append(element('p',line))});var sig=element('div');sig.className='ct-sign-line';if(party===model.signParties[0]&&sealData){var si=element('img');si.src=sealData.signature;si.className='ct-seal';sig.append(si)}sig.append(element('span',party===model.signParties[0]&&sealData?'서명: '+sealData.signer_name:'(서명 또는 날인)'));row.append(box,sig);parties.append(row)});
     signature.append(parties);
     var title=element('h2',model.title),subtitle=element('span',model.subtitle);
     subtitle.className='ct-subtitle';title.append(subtitle);
@@ -337,6 +337,34 @@
   }
 
 
+  var sealData=null;
+  function loadSeal(){return window.buffRest('GET','seal_requests','select=signer_name,signature,signed_at&status=eq.signed&order=signed_at.desc&limit=1').then(function(r){sealData=(r&&r[0])||null;return sealData}).catch(function(){return null})}
+  function openSealDialog(){
+    var ov=element('div'),panel=element('div'),box=element('div'),foot=element('div'),err=element('div'),close=element('button','닫기');
+    ov.className='ov';panel.className='panel';box.id='fe';foot.className='foot';err.className='err';close.type='button';close.className='btn line';close.onclick=function(){ov.remove()};
+    function draw(){
+      box.replaceChildren();
+      var t=element('b','대표 날인 (일회용 링크)');t.style.cssText='display:block;margin-bottom:8px';box.append(t);
+      loadSeal().then(function(sd){
+        if(sd){var c=element('div');c.style.cssText='border:1px solid #d2d2d7;border-radius:12px;padding:12px;margin-bottom:14px;background:#fff';var im=element('img');im.src=sd.signature;im.style.cssText='max-height:90px;display:block;margin-bottom:6px';c.append(im,element('span','등록됨 · '+sd.signer_name+' · '+new Date(sd.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})));box.append(c);renderPreview()}
+        else box.append(element('p','아직 등록된 날인이 없어요. 링크를 대표님께 보내 한 번만 받아두면 이후 모든 계약서 갑 칸에 자동으로 들어가요.'));
+        var btnRow=element('div');btnRow.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
+        var mk=element('button',sd?'새 날인 요청 링크 만들기':'날인 요청 링크 만들기');mk.type='button';mk.className='btn sm';
+        mk.onclick=function(){
+          mk.disabled=true;var bytes=new Uint8Array(12),AB='abcdefghijkmnpqrstuvwxyz23456789';crypto.getRandomValues(bytes);
+          var token=Array.prototype.map.call(bytes,function(b){return AB.charAt(b%32)}).join(''),link=SIGN_BASE+token;
+          window.buffRest('POST','seal_requests','select=id',{token:token},RETURN_ROW).then(function(){
+            var inp=element('input');inp.type='text';inp.readOnly=true;inp.value=link;inp.onfocus=function(){inp.select()};inp.style.marginTop='12px';box.append(inp);
+            var r2=element('div');r2.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
+            var cp=element('button','요청 문구 + 링크 복사');cp.type='button';cp.className='btn sm';cp.onclick=function(){copyText('[BUFF UNIVERSE]\n\n김동준 대표님,\n전자계약용 날인 등록을\n요청드립니다.\n\n아래 링크에서 서명해 주시면\n앞으로 발송하는 계약서의\n위탁자(갑) 칸에 적용됩니다.\n\n감사합니다.\n\n(날인 링크 · 일회용)\n'+link,'날인 요청 문구와 링크를 복사했어요.')};
+            r2.append(cp);box.append(r2,element('p','이 링크는 한 번만 쓸 수 있고 7일 뒤 만료돼요.'));
+          }).catch(function(e){err.textContent=e.message;mk.disabled=false});
+        };
+        btnRow.append(mk);box.append(btnRow);
+      });
+    }
+    draw();foot.append(close);panel.append(element('h2','대표 날인'),box,err,foot);ov.append(panel);document.body.append(ov);
+  }
   var SIGN_BASE='https://buffuniverse.co.kr/sign?t=';
   function sha256(text){
     return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(buf){
@@ -406,20 +434,9 @@
       });
     }
     sha256(JSON.stringify(model)).then(function(hash){
-      return Promise.all([ensure(hash,'issuer'),ensure(hash,'partner')]);
+      return Promise.all([null,ensure(hash,'partner')]);
     }).then(function(rs){
       out.replaceChildren();
-      var iss=rs[0],head=element('b','① 대표 날인 (우리 쪽 · 먼저 받아 주세요)');head.style.cssText='display:block;margin-bottom:8px';out.append(head);
-      var ilink=SIGN_BASE+iss.token;
-      if(iss.signed){var ok=element('div','✓ 날인 완료 · '+iss.signed.signer_name+' · '+new Date(iss.signed.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}));ok.style.cssText='background:#e4f6e9;color:#0a6b2a;border-radius:12px;padding:12px 16px;font-weight:700';out.append(ok)}
-      else{
-        var ii=element('input');ii.type='text';ii.readOnly=true;ii.value=ilink;ii.onfocus=function(){ii.select()};out.append(ii);
-        var ir=row(),cap=(name?'':'');
-        btn(ir,'날인 요청 문구 + 링크 복사',function(){copyText('[BUFF UNIVERSE]\n\n김동준 대표님,\n'+model.project+'\n용역 계약서 날인을\n요청드립니다.\n\n아래 링크에서 내용을 확인하시고\n날인 부탁드립니다.\n\n감사합니다.\n\n(날인 링크)\n'+ilink,'대표 날인 요청 문구와 링크를 복사했어요.')},true);
-        btn(ir,'링크만 복사',function(){copyText(ilink,'링크를 복사했어요.')});out.append(ir);
-      }
-      var sep=element('div');sep.style.cssText='height:1px;background:#e5e5ea;margin:18px 0';out.append(sep);
-      var h2=element('b','② 수행자 서명 요청'+(iss.signed?'':' (날인 후 보내면 갑 날인이 함께 보여요)'));h2.style.cssText='display:block;margin-bottom:8px';out.append(h2);
       show(rs[1].token,rs[1].signed,true);
     }).catch(function(e){out.replaceChildren();err.textContent=e.message});
   }
@@ -552,7 +569,7 @@
 
   function drawEditor(){
     var main=document.getElementById('main');
-    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn line" id="ct-send">전자서명 요청</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
+    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn line" id="ct-seal">대표 날인</button><button type="button" class="btn line" id="ct-send">전자서명 요청</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
       +'<p class="hint ct-screen" id="ct-status" role="status"></p><div class="ct-grid"><form class="ct-panel ct-screen" id="ct-form"><div class="ct-field" style="margin-bottom:16px"><label for="ct-template">계약 유형</label><select id="ct-template"></select></div><div id="ct-fields"></div></form><article class="ct-paper" id="contract-preview"></article></div>';
     main.prepend(element('style',css));
     var chooser=document.getElementById('ct-template'),form=document.getElementById('ct-form'),fields=document.getElementById('ct-fields');
@@ -611,6 +628,7 @@
     };
     document.getElementById('ct-print').onclick=function(){if(form.reportValidity())window.print()};
     document.getElementById('ct-docx').onclick=function(){if(form.reportValidity())exportDocx(contractModel(),this)};
+    document.getElementById('ct-seal').onclick=openSealDialog;loadSeal().then(function(){renderPreview()});
     document.getElementById('ct-send').onclick=function(){if(form.reportValidity())openSendDialog(this)};
     save.onclick=function(){saveDraft(form,save,status)};
     drawFields();

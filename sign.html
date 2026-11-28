@@ -80,9 +80,9 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
       var row=e('div',null,'party'),info=e('div');info.append(e('b',p.role));p.lines.forEach(function(l){info.append(e('p',l))});
       var box=e('div',null,'sbox'),lab=e('span',null,'lab'),im=e('img');im.alt='서명';im.hidden=true;box.append(im);
       var sig=i===mine?res.signature:(i===0?res.issuer_signature:null),nm=i===mine?res.signer_name:res.issuer_name,at=i===mine?res.signed_at:res.issuer_signed_at;
-      if(sig){im.src=sig;im.hidden=false;lab.textContent='서명: '+nm+' · '+fmt(at)}
+      if(sig){im.src=sig;im.hidden=false;lab.textContent='서명: '+nm+(at?' · '+fmt(at):'')}
       else if(i===mine){live.img=im;live.box=box;live.lab=lab;box.classList.add('click');lab.textContent='(서명 또는 날인)';var hint=e('span','✍ 여기를 눌러 서명','hint');box.append(hint);live.hint=hint}
-      else lab.textContent=i===0?'(대표 날인 전)':'(서명 또는 날인)';
+      else lab.textContent='(서명 또는 날인)';
       if(i===mine&&sig){live.img=im;live.box=box;live.lab=lab}
       box.append(lab);row.append(info,box);ps.append(row);
     });
@@ -134,10 +134,25 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
     };
     return {el:p,init:function(){}};
   }
+  function sealPage(sr){
+    m.replaceChildren();document.title='BUFF 대표 날인';
+    if(sr.status==='signed')return msg('이미 날인이 완료된 링크입니다. 감사합니다.');
+    if(sr.status!=='sent')return msg('기한이 지난 링크입니다. BUFF 담당자에게 새 링크를 요청해 주세요.');
+    var p=e('div',null,'panel'),sp=pad(),name=e('input'),agree=e('input'),go=e('button','날인 등록'),err=e('div',null,'err'),clr=e('button','다시 쓰기','line');
+    name.type='text';name.value='김동준';agree.type='checkbox';clr.type='button';
+    p.append(e('h2','대표 날인 등록'),e('p','버프유니버스(BUFF UNIVERSE) 위탁자(갑) 서명·날인으로 등록됩니다. 앞으로 발송되는 계약서의 갑 칸에 이 서명이 표시돼요.'),e('label','성함'),name,e('label','아래 칸에 서명해 주세요'),sp.el);
+    var row=e('div',null,'row');row.append(clr);p.append(row);
+    var lab=e('label',null,'chk');lab.append(agree,e('span','위 서명을 BUFF UNIVERSE 대표자의 전자 서명·날인으로 사용하는 데 동의합니다.'));p.append(lab,go,err);
+    m.append(p);sp.init();
+    function chk(){go.disabled=!(name.value.trim()&&sp.has()&&agree.checked)}
+    [name,sp.el].forEach(function(x){x.addEventListener('input',chk);x.addEventListener('ink',chk)});agree.addEventListener('change',chk);chk();
+    clr.onclick=function(){sp.clear();chk()};
+    go.onclick=function(){go.disabled=true;rpc('submit_seal',{p_token:token,p_name:name.value.trim(),p_signature:sp.data()}).then(function(){msg('날인이 등록되었습니다. 감사합니다.')}).catch(function(x){err.textContent=x.message;go.disabled=false})};
+  }
   function load(){
     if(!token)return msg('올바르지 않은 서명 링크입니다.');
     rpc('get_signing',{p_token:token}).then(function(res){
-      if(!res)return msg('서명 링크를 찾을 수 없습니다.');
+      if(!res)return rpc('get_seal_request',{p_token:token}).then(function(sr){if(!sr)return msg('서명 링크를 찾을 수 없습니다.');sealPage(sr)});
       if(res.status==='canceled')return msg('이 링크는 더 이상 사용할 수 없어요. 이미 다른 링크로 서명이 끝났거나 내용이 수정된 계약서일 수 있어요. 필요하면 BUFF 담당자에게 문의해 주세요.');
       if(res.status==='expired')return msg('서명 기한이 지났어요. BUFF 담당자에게 새 링크를 요청해 주세요.');
       m.replaceChildren();
