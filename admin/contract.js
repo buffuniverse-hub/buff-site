@@ -44,11 +44,16 @@
     '.ct-field{display:grid;gap:4px;min-width:0}.ct-wide{grid-column:1/-1}',
     '.ct-field label{font-size:13px;font-weight:600}.ct-field input,.ct-field select,.ct-field textarea{width:100%;min-width:0}',
     '.ct-field textarea{min-height:66px;resize:vertical}',
-    '.ct-paper{overflow-wrap:anywhere;font-family:ContractPaper,Paperozi,sans-serif;color:#1d1d1f;padding:clamp(18px,3vw,36px)}',
-    '.ct-paper h2{font-size:clamp(24px,3.15vw,44px);line-height:1.02;letter-spacing:-.035em;margin:0 0 7px}',
-    '.ct-paper .ct-subtitle{font-size:19px;font-weight:700}.ct-paper .ct-variant{color:#6e6e73;margin-bottom:15px}',
+    '.ct-paper{--ct-inset:clamp(18px,3vw,36px);overflow:hidden;overflow-wrap:anywhere;font-family:ContractPaper,Paperozi,sans-serif;color:#1d1d1f;padding:var(--ct-inset)}',
+    '.ct-paper h2{display:flex;align-items:baseline;gap:7px 13px;flex-wrap:wrap;font-size:clamp(24px,3.15vw,44px);line-height:1.05;letter-spacing:-.035em;margin:0 0 24px}',
+    '.ct-paper .ct-subtitle{font-size:.47em;font-weight:400;letter-spacing:.075em;white-space:nowrap}',
+    '.ct-doc-head{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin:0 0 19px}.ct-doc-head section:last-child{text-align:right}',
+    '.ct-paper .ct-doc-head p{margin:0 0 2px}.ct-paper .ct-doc-head .ct-meta{margin-bottom:8px}',
+    '.ct-doc-head small,.ct-paper thead small{font-size:.72em;color:#6e6e73;font-weight:400}.ct-paper thead small{color:#b0b0b8}',
+    '.ct-paper .ct-intro{margin-bottom:15px}',
     '.ct-paper thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a}',
-    '.ct-brand{background:#0a0a0a;padding:14px 17px;margin-top:23px;break-inside:avoid}.ct-brand img{display:block;width:96px;height:30px;object-fit:contain}',
+    '.ct-brand{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;background:#0a0a0a;color:#fff;padding:16px var(--ct-inset);margin:23px calc(-1 * var(--ct-inset)) calc(-1 * var(--ct-inset));break-inside:avoid}',
+    '.ct-brand img{display:block;width:96px;height:30px;object-fit:contain}.ct-brand div{text-align:right}.ct-paper .ct-brand p{font-size:11px;margin:0;line-height:1.45}',
     '.ct-list{display:grid;gap:8px}.ct-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 15px}.ct-list-row b,.ct-list-row small{display:block}.ct-list-row small{color:var(--mute);margin-top:3px}.ct-tools label{display:flex;align-items:center;gap:6px;font-size:14px}',
     '.ct-paper h3{font-size:16px;margin:14px 0 4px}',
     '.ct-paper p,.ct-paper td,.ct-paper th{font-size:14px;line-height:1.55;white-space:pre-wrap}',
@@ -56,8 +61,8 @@
     '.ct-paper td,.ct-paper th{padding:7px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}',
     '.ct-paper th{width:27%;background:#f5f5f7}.ct-signature{border-top:1px solid var(--line);padding-top:10px;margin-top:18px}',
     '@media(max-width:900px){.ct-grid{grid-template-columns:minmax(0,1fr)}}',
-    '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel,.ct-paper{padding:15px}}',
-    '@media print{@page{size:A4;margin:16mm}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:20px}.ct-paper p,.ct-paper td,.ct-paper th{font-size:10pt}}'
+    '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel{padding:15px}.ct-paper{--ct-inset:15px}.ct-brand img{width:66px;height:auto}}',
+    '@media print{@page{size:A4;margin:16mm}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0;overflow:visible}.ct-brand{margin:18px 0 0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:20px}.ct-paper p,.ct-paper td,.ct-paper th{font-size:10pt}}'
   ].join('\n');
 
   function element(tag,text){
@@ -146,10 +151,14 @@
   function contractModel(){
     var template=templates[type],partner=currentParty(),s=shared;
     var share=Number(s.buffShare),fee=value(s,'fee'),link=value(s,'deliveryLink');
+    var partnerDetails=template.fields.filter(function(field){return field[0]!=='signer'||value(partner,'signer')}).map(function(field){return field[1]+' '+label(partner,field[0])});
+    var details=[
+      ['프로젝트명','Project',label(s,'project')],
+      ['고객사','Client',label(s,'client')],
+      ['계약 유형','Contract Type',template.title+' · '+label(s,'role')],
+      ['체결일','Agreement Date',label(s,'contractDate')]
+    ];
     var rows=[
-      ['위탁자 (BUFF)',issuer],
-      ['수행자',template.fields.filter(function(field){return field[0]!=='signer'||value(partner,'signer')}).map(function(field){return field[1]+' '+label(partner,field[0])}).join('\n')],
-      ['프로젝트·지정 고객사',label(s,'project')+' / '+label(s,'client')+'\n업무 유형 '+label(s,'role')],
       ['계약 기간·업무',label(s,'start')+' ~ '+label(s,'end')+'\n'+label(s,'scope')],
       ['작업 일정',scheduleText()],
       ['납품·수정',label(s,'deliverables')+'\n'+label(s,'due')+'까지 · 포함 수정 '+label(s,'revisions')+'회\n원본·편집 파일 '+label(s,'originals')+'\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
@@ -160,8 +169,8 @@
       ['특약',value(s,'extras')||'없음']
     ];
     return {
-      title:'SERVICE AGREEMENT',subtitle:'표준 제작 용역 계약서',variant:template.title,
-      intro:'BUFF와 수행자는 아래 조건에 따라 제작 용역 계약을 체결합니다. 아래 작업확인서는 계약의 일부입니다.',
+      title:'SERVICE AGREEMENT',subtitle:'용역 계약서',partnerDetails:partnerDetails,details:details,issuer:issuer.split('\n'),
+      intro:'하단에 표시한 위탁자 BUFF와 위 수행자는 아래 조건에 따라 제작 용역 계약을 체결합니다. 작업확인서는 계약의 일부입니다.',
       rows:rows,clauses:clauses(),project:value(s,'project'),
       signature:['체결일 '+label(s,'contractDate'),'위탁자  버프유니버스 · 김동준  (서명 또는 날인) __________________','수행자  '+(value(partner,'signer')||value(partner,'representative')||label(partner,'partner'))+'  (서명 또는 날인) __________________']
     };
@@ -173,22 +182,37 @@
     var model=contractModel();
     var table=element('table'),head=element('thead'),headRow=element('tr'),body=element('tbody');
     table.setAttribute('aria-label','프로젝트별 작업확인서');
-    ['작업확인서','PROJECT DETAILS'].forEach(function(title){var th=element('th',title);th.scope='col';headRow.append(th)});
+    var itemHead=element('th','항목 '),detailHead=element('th','작업확인서 ');
+    itemHead.scope=detailHead.scope='col';
+    itemHead.append(element('small','ITEM'));detailHead.append(element('small','PROJECT DETAILS'));
+    headRow.append(itemHead,detailHead);
     head.append(headRow);
     model.rows.forEach(function(row){var tr=element('tr'),th=element('th',row[0]);th.scope='row';tr.append(th,element('td',row[1]));body.append(tr)});
     table.append(head,body);
     var signature=element('div');signature.className='ct-signature';
     model.signature.forEach(function(line){signature.append(element('p',line))});
-    var subtitle=element('p',model.subtitle),variant=element('p',model.variant);
-    subtitle.className='ct-subtitle';variant.className='ct-variant';
-    paper.replaceChildren(element('h2',model.title),subtitle,variant,element('p',model.intro),table);
+    var title=element('h2',model.title),subtitle=element('span',model.subtitle);
+    subtitle.className='ct-subtitle';title.append(subtitle);
+    var info=element('div'),party=element('section'),details=element('section'),partyHeading=element('p');
+    info.className='ct-doc-head';
+    partyHeading.append(element('b','수행자 '),element('small','SERVICE PROVIDER'));party.append(partyHeading);
+    model.partnerDetails.forEach(function(line){party.append(element('p',line))});
+    model.details.forEach(function(entry){
+      var paragraph=element('p'),value=element('p',entry[2]);value.className='ct-meta';
+      paragraph.append(element('b',entry[0]+' '),element('small',entry[1]));details.append(paragraph,value);
+    });
+    info.append(party,details);
+    var intro=element('p',model.intro);intro.className='ct-intro';
+    paper.replaceChildren(title,info,intro,table);
     model.clauses.forEach(function(clause){
       var section=element('section');
       section.append(element('h3',clause[0]),element('p',clause[1]));
       paper.append(section);
     });
     var brand=element('div'),logo=element('img');brand.className='ct-brand';logo.src='vendor/logo_white.png';logo.alt='BUFF';
-    brand.append(logo);paper.append(signature,brand);
+    var business=element('div');
+    model.issuer.forEach(function(line,index){business.append(element('p',(index===0?'위탁자 · ':'')+line))});
+    brand.append(logo,business);paper.append(signature,brand);
   }
 
   function loadScript(path){
@@ -202,7 +226,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=1')})
+      .then(function(){return loadScript('contract_docx.js?v=invoice-layout-1')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
