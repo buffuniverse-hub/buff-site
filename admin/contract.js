@@ -27,7 +27,7 @@
     ],true]
   ];
   var issuer='버프유니버스(BUFF UNIVERSE)\n대표자 김동준 · 사업자등록번호 295-24-02126\n서울특별시 관악구 남부순환로 1921-1, 202-E4호(봉천동, 범산빌딩)';
-  var defaults={role:'사진',payment:'계좌이체',revisions:'1',buffShare:'50'};
+  var defaults={role:'사진',payment:'계좌이체',revisions:'1',buffShare:'50',contractDate:todayIso()};
   var type='freelance',shared=Object.assign({},defaults),parties={},record=null,editing=false,saving=false,docxLoad=null,archivedList=false,dirty=false;
   var css=[
     '@font-face{font-family:ContractPaper;src:url(vendor/Paperozi.ttf) format("truetype");font-weight:400;font-display:swap}',
@@ -92,6 +92,27 @@
     ];
   }
   function currentParty(){return parties[type]||(parties[type]={});}
+  function pad(n){return ('0'+n).slice(-2)}
+  function todayIso(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function parseDate(raw){
+    var t=String(raw||'').trim();if(!t)return '';
+    var parts=t.split(/[^0-9]+/).filter(Boolean),y=new Date().getFullYear(),m,d;
+    if(parts.length===1){var n=parts[0];
+      if(n.length===4){m=n.slice(0,2);d=n.slice(2)}else if(n.length===6){y=2000+Number(n.slice(0,2));m=n.slice(2,4);d=n.slice(4)}else if(n.length===8){y=Number(n.slice(0,4));m=n.slice(4,6);d=n.slice(6)}else if(n.length<=2){m=new Date().getMonth()+1;d=n}else return null}
+    else if(parts.length===2){m=parts[0];d=parts[1]}
+    else{y=Number(parts[0]);if(y<100)y+=2000;m=parts[1];d=parts[2]}
+    m=Number(m);d=Number(d);
+    if(!(m>=1&&m<=12&&d>=1&&d<=31))return null;
+    return y+'-'+pad(m)+'-'+pad(d);
+  }
+  function parseTime(raw){
+    var t=String(raw||'').trim();if(!t)return '';
+    var parts=t.split(/[^0-9]+/).filter(Boolean),h,m=0;
+    if(parts.length>=2){h=Number(parts[0]);m=Number(parts[1])}
+    else{var n=parts[0]||'';if(n.length<=2)h=Number(n);else{h=Number(n.slice(0,n.length-2));m=Number(n.slice(-2))}}
+    if(!(h>=0&&h<=24&&m>=0&&m<60))return null;
+    return pad(h)+':'+pad(m);
+  }
   function addFields(container,title,fields,data,collapsed,prefix){
     var fieldset=element('fieldset'),grid=element('div');
     fieldset.className='ct-group';grid.className='ct-fields';
@@ -103,6 +124,7 @@
       block.className='ct-field'+(kind==='textarea'||kind==='url'?' ct-wide':'');
       control.id='ct-'+(prefix||'')+key;name.htmlFor=control.id;
       if(choices)kind.forEach(function(choice){control.append(element('option',choice))});
+      else if(kind==='date'||kind==='time'){control.type='text';control.inputMode='numeric';control.autocomplete='off';control.placeholder=kind==='date'?'1201 또는 2026-12-01':'1430';control.addEventListener('change',function(){var v=kind==='date'?parseDate(control.value):parseTime(control.value);if(v!==null){control.value=v;values[key]=v;renderPreview()}})}
       else if(kind!=='textarea')control.type=kind||'text';
       if(kind==='number'){control.min=key==='buffShare'?'1':'0';if(key==='buffShare')control.max='99'}
       if(kind==='url')control.placeholder='https://';
@@ -152,7 +174,9 @@
     }).join('\n')||'________________';
   }
   function contractModel(){
-    var template=templates[type],partner=currentParty(),s=shared;
+    var template=templates[type],partner=currentParty(),s=Object.assign({},shared);
+    var dates=schedules().map(function(row){return row.date}).filter(Boolean).sort();
+    s.contractDate=s.contractDate||todayIso();s.start=s.start||dates[0]||s.contractDate;s.end=s.end||[dates[dates.length-1],s.due].filter(Boolean).sort().pop()||'';
     var share=Number(s.buffShare),fee=value(s,'fee'),link=value(s,'deliveryLink');
     var partnerDetails=template.fields.filter(function(field){return field[0]!=='signer'||value(partner,'signer')}).map(function(field){return field[1]+' '+label(partner,field[0])});
     var details=[
