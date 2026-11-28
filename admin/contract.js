@@ -326,7 +326,7 @@
   }
 
 
-  var SIGN_BASE='https://buffuniverse.co.kr/sign.html?t=';
+  var SIGN_BASE='https://buffuniverse.co.kr/sign?t=';
   function sha256(text){
     return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(buf){
       return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
@@ -338,7 +338,7 @@
   }
   function inviteText(model){
     var who=value(currentParty(),'partner');
-    return '[BUFF UNIVERSE]\n\n'+(who?who+'님, 안녕하세요.\n':'안녕하세요.\n')+(model.project||'프로젝트')+' 용역 계약서 전자서명을 요청드립니다.\n\n아래 링크에서 계약 내용을 확인하시고\n서명 부탁드립니다. 감사합니다.';
+    return '[BUFF UNIVERSE]\n\n'+(who?who+'님, 안녕하세요.\n':'안녕하세요.\n')+(model.project||'프로젝트')+'\n용역 계약서 전자서명을\n요청드립니다.\n\n아래 링크에서 내용을 확인하시고\n서명 부탁드립니다.\n';
   }
   function openSendDialog(button){
     var model=contractModel(),partner=currentParty(),name=value(partner,'partner');
@@ -370,8 +370,8 @@
         c.innerHTML=svg;x.append(c,element('span',label));x.onclick=fn;r.append(x);
       }
       r.style.gap='20px';
-      iconBtn('카카오톡','#fee500','#191919','<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.4 2 10.6c0 2.7 1.8 5.1 4.6 6.4l-1 3.6c-.1.3.2.5.5.4l4.2-2.8c.6.1 1.1.1 1.7.1 5.5 0 10-3.4 10-7.7S17.5 3 12 3z"/></svg>',function(){copyText(text+'\n'+link,'카톡에 붙여넣을 문구와 링크를 복사했어요.')});
-      iconBtn('이메일','#e8f0fe','#1a56db','<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg>',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent(text.replace(/\n/g,'\r\n')+'\r\n\r\n'+link)});
+      iconBtn('카카오톡','#fee500','#191919','<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.4 2 10.6c0 2.7 1.8 5.1 4.6 6.4l-1 3.6c-.1.3.2.5.5.4l4.2-2.8c.6.1 1.1.1 1.7.1 5.5 0 10-3.4 10-7.7S17.5 3 12 3z"/></svg>',function(){copyText(text+link+'\n\n감사합니다.','카톡에 붙여넣을 문구와 링크를 복사했어요.')});
+      iconBtn('이메일','#e8f0fe','#1a56db','<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg>',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent((text+link+'\n\n감사합니다.').replace(/\n/g,'\r\n'))});
       out.append(r);
       var hint=element('p','같은 계약서는 링크가 하나로 유지돼요. 여러 번 보내도 한 번만 서명하면 완료됩니다. 내용을 고친 뒤에 다시 열면 새 링크가 만들어지고, 이전 링크는 취소돼요.');
       hint.style.cssText='font-size:13px;color:#6e6e73;margin-top:14px';out.append(hint);
@@ -385,8 +385,8 @@
         if(signed){show(signed.token,signed);return}
         var live=same.filter(function(x){return x.status==='sent'&&new Date(x.expires_at)>new Date()})[0];
         if(live){show(live.token);return}
-        var bytes=new Uint8Array(24);crypto.getRandomValues(bytes);
-        var token=Array.prototype.map.call(bytes,function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
+        var bytes=new Uint8Array(12),AB='abcdefghijkmnpqrstuvwxyz23456789';crypto.getRandomValues(bytes);
+        var token=Array.prototype.map.call(bytes,function(b){return AB.charAt(b%32)}).join('');
         var stale=rows.filter(function(x){return x.status==='sent'});
         return window.buffRest('POST','contract_signings','select=id',{token:token,contract_id:record?record.id:null,project:model.project,partner:name,snapshot:model,doc_hash:hash},RETURN_ROW).then(function(){
           show(token);
