@@ -110,20 +110,48 @@ window.buffRest=rest;window.buffToast=toast;
     F_('template','상세 페이지 템플릿'),F_('sections','[템플릿 2] 섹션 구성 (JSON)'),F_('metrics','[템플릿 2] 성과 수치 (JSON)'),F_('pdf_url','포트폴리오 PDF 링크'),F_('sort_order','정렬 순서 (목록에서 드래그로도 바꿀 수 있음)')
   ];
 })();
-var TABS=['home','news','works','clients','team_members','career_positions','settings','invoice'];
-var cur='home', cache={};
+var TABS=[
+  ['home','메인'],['news','NEWS'],['works','WORKS'],['clients','CLIENTS'],
+  ['career_positions','CAREERS'],['team_members','ABOUT US'],['invoice','인보이스'],['quotation','견적서']
+];
+var CAREER_TABS=[['career_positions','채용 공고'],['settings','페이지 문구']];
+var DOC_TABS={invoice:'inv',quotation:'qt'};
+var cur='home', cache={}, navigation=0;
 
 /* ---------- 화면 ---------- */
 function show(on){$('#login').classList.toggle('hide',on);$('#app').classList.toggle('hide',!on);$('#viewsite').classList.toggle('hide',!on);$('#logout').classList.toggle('hide',!on);if(on)go(cur)}
-function drawTabs(){
-  $('#tabs').innerHTML=TABS.map(function(k){var l=k==='settings'?'Careers 문구':k==='home'?'메인':k==='invoice'?'인보이스•견적서':T[k].label;return '<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+esc(l)+'</button>'}).join('');
-  [].forEach.call($('#tabs').children,function(b){b.onclick=function(){go(b.getAttribute('data-k'))}});
+function renderTabs(target,tabs,active){
+  target.innerHTML=tabs.map(function(tab){
+    var selected=tab[0]===active;
+    return '<button type="button" data-k="'+tab[0]+'"'+(selected?' class="on" aria-current="page"':'')+'>'+esc(tab[1])+'</button>';
+  }).join('');
+  [].forEach.call(target.children,function(button){button.onclick=function(){go(button.getAttribute('data-k'))}});
 }
-function go(k){cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';(k==='settings'?drawSettings():k==='home'?drawHome():k==='invoice'?window.openInvoiceTab():drawList(k)).catch(function(e){$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>'})}
+function drawTabs(){
+  var careers=cur==='career_positions'||cur==='settings', subTabs=$('#career-tabs');
+  renderTabs($('#tabs'),TABS,careers?'career_positions':cur);
+  subTabs.hidden=!careers;
+  if(careers)renderTabs(subTabs,CAREER_TABS,cur);
+}
+function go(k){
+  var request=++navigation, documents=DOC_TABS[k];
+  var settled=window.closeInvoiceTab?window.closeInvoiceTab():Promise.resolve();
+  cur=k;drawTabs();$('#main').innerHTML='<div class="empty">불러오는 중…</div>';
+  settled.then(function(){
+    if(request!==navigation)return;
+    if(documents)return window.openInvoiceTab(documents);
+    if(k==='settings')return drawSettings();
+    if(k==='home')return drawHome();
+    return drawList(k);
+  }).catch(function(e){
+    if(request===navigation)$('#main').innerHTML='<div class="empty">'+esc(e.message)+'</div>';
+  });
+}
 
 function drawList(k){
   var d=T[k];
   return rest('GET',k,'select=*&order='+d.order).then(function(rows){
+    if(cur!==k)return;
     cache[k]=rows;
     var h='<div class="bar"><h2>'+esc(d.title)+'</h2><button class="btn" id="add">+ 새로 추가</button></div><p class="hint">'+esc(d.hint)+'</p>';
     if(!rows.length)h+='<div class="empty">아직 항목이 없습니다.</div>';
@@ -356,7 +384,9 @@ function videoList(w,F,key){
 /* ---------- 메인(홈) ---------- */
 var HOME=[['home_lead','첫 화면 제목 앞부분','text','로고 앞에 붙는 글자 (예: we)'],['home_tail','첫 화면 제목 뒷부분','text','로고 뒤에 붙는 글자 (예: your moment)'],['home_text','첫 화면 소개 문구','textarea','줄바꿈은 그대로 반영됩니다.'],['home_btn1','첫 번째 버튼 글자','text'],['home_btn2','두 번째 버튼 글자','text']];
 function drawHome(){
+  var request=navigation;
   return Promise.all([rest('GET','site_settings','select=*'),rest('GET','works','select=id,title,tag,category,thumbnail_url,featured,sort_order,created_at&published=eq.true&order=category.asc,sort_order.asc,created_at.asc')]).then(function(r){
+    if(request!==navigation)return;
     var cur={};r[0].forEach(function(x){cur[x.key]=x.value});
     var all=r[1],byId={};all.forEach(function(w){byId[w.id]=w});
     var ids=cur.home_featured!=null&&cur.home_featured!==''?String(cur.home_featured).split(',').filter(function(i){return byId[i]}):all.filter(function(w){return w.featured}).slice(0,4).map(function(w){return w.id});
@@ -401,7 +431,9 @@ function drawHome(){
 
 /* ---------- Careers 문구 ---------- */
 function drawSettings(){
+  var request=navigation;
   return rest('GET','site_settings','select=*').then(function(rows){
+    if(request!==navigation)return;
     var cur={};rows.forEach(function(r){cur[r.key]=r.value});
     $('#main').innerHTML='<div class="bar"><h2>Careers 문구</h2><button class="btn" id="saveS">저장</button></div><p class="hint">Careers 페이지에 보이는 문구입니다. 줄바꿈은 그대로 반영됩니다.</p><div class="card" style="max-width:none;padding:28px" id="sf"></div><div class="err" id="serr"></div>';
     var box=$('#sf');

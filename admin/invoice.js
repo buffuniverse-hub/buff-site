@@ -13,29 +13,52 @@ function mk(l){var ko=l==='ko',f=function(x){return Array.isArray(x[0])?x.map(f)
 var TX={ko:mk('ko'),en:mk('en')};TX.ko.title=TX.en.title=['SERVICE INVOICE','인보이스'];
 var DEF={lang:'ko',cur:'KRW',vm:'ex',fCo:'',fAd:'',fAdK:'',fNm:'',fEm:'',fTx:'',bank:'',holder:'',acct:'',swift:'',bAd:'',hAd:'',hTel:'',notes:'',qnotes:''};
 var DB=null,KEYS=['lang','cur','vm','fCo','fAd','fAdK','fNm','fEm','fTx','bank','holder','acct','swift','bAd','hAd','hTel','notes','qnotes'];
-var S,tmr=null,saving=false;
+var S,tmr=null,saving=null,queuedSave=null,view=0,docType='inv';
 var rest=function(){return window.buffRest.apply(null,arguments)};
 function meaningful(){return S.cCo||S.cNm||S.items.some(function(i){return i.desc||i.price})}
 function stamp(t){var e=document.getElementById('ivst');if(e)e.textContent=t}
 function hm(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
-function schedule(){clearTimeout(tmr);if(!meaningful())return;stamp('저장 중…');tmr=setTimeout(saveDraft,1500)}
-function saveDraft(){clearTimeout(tmr);if(!S||!meaningful())return Promise.resolve();if(saving){tmr=setTimeout(saveDraft,800);return Promise.resolve()}
-  saving=true;var r={doc:S.doc,no:S.no,client:S.cCo||'',total:totals().tot,cur:S.cur,status:S.status||'draft',data:S,updated_at:new Date().toISOString()};
-  var p=S.id?rest('PATCH','invoices','id=eq.'+S.id,r,{Prefer:'return=minimal'}):rest('POST','invoices','select=id',r,{Prefer:'return=representation'}).then(function(x){if(x&&x[0])S.id=x[0].id});
-  return p.then(function(){stamp('자동 저장됨 '+hm())}).catch(function(e){stamp('저장 실패: '+e.message)}).then(function(){saving=false})}
+function schedule(){clearTimeout(tmr);tmr=null;if(!meaningful())return;stamp('저장 중…');tmr=setTimeout(saveDraft,1500)}
+function saveDraft(){
+  clearTimeout(tmr);tmr=null;
+  var draft=S;
+  if(!draft||!meaningful())return Promise.resolve();
+  if(saving){
+    if(!queuedSave)queuedSave=saving.then(function(){queuedSave=null;if(S===draft)return saveDraft()});
+    return queuedSave;
+  }
+  var r={doc:draft.doc,no:draft.no,client:draft.cCo||'',total:totals().tot,cur:draft.cur,status:draft.status||'draft',data:JSON.parse(JSON.stringify(draft)),updated_at:new Date().toISOString()};
+  var p=draft.id?rest('PATCH','invoices','id=eq.'+draft.id,r,{Prefer:'return=minimal'}):rest('POST','invoices','select=id',r,{Prefer:'return=representation'}).then(function(x){if(x&&x[0])draft.id=x[0].id});
+  saving=p.then(function(){if(S===draft)stamp('자동 저장됨 '+hm())}).catch(function(e){
+    if(S===draft&&document.getElementById('ivst'))stamp('저장 실패: '+e.message);
+    else window.buffToast('문서 저장 실패: '+e.message,true);
+  }).finally(function(){saving=null});
+  return saving;
+}
 function amt(n,c){var k=CUR[c]||CUR.KRW;return k[0]+(+n||0).toLocaleString('en-US',{minimumFractionDigits:k[1],maximumFractionDigits:k[1]})}
-function showList(){clearTimeout(tmr);var m=document.getElementById('main');
-  m.innerHTML='<style>'+CSS+'</style><div class="bar"><h2>인보이스•견적서 목록</h2><button class="btn" id="ivnew" type="button">+ 새로 작성</button></div><div id="ivl" class="empty">불러오는 중…</div>';
-  document.getElementById('ivnew').onclick=function(){window.drawInvoice()};
-  rest('GET','invoices','select=id,doc,no,client,total,cur,status,updated_at&order=updated_at.desc&limit=200').then(function(rows){var box=document.getElementById('ivl');
+function showList(){
+  var request=++view,type=docType,label=type==='qt'?'견적서':'인보이스',m=document.getElementById('main');
+  m.innerHTML='<style>'+CSS+'</style><div class="bar"><h2>'+label+' 목록</h2><button class="btn" id="ivnew" type="button">+ '+label+' 작성</button></div><div id="ivl" class="empty">불러오는 중…</div>';
+  var box=document.getElementById('ivl');
+  document.getElementById('ivnew').onclick=function(){window.drawInvoice().catch(function(e){window.buffToast(e.message,true)})};
+  return rest('GET','invoices','select=id,no,client,total,cur,status,updated_at&doc=eq.'+type+'&order=updated_at.desc&limit=200').then(function(rows){
+    if(request!==view||!box.isConnected)return;
     if(!rows||!rows.length){box.textContent='저장된 문서가 없습니다. 작성하면 자동으로 저장됩니다.';return}
-    box.className='';box.innerHTML='<table class="ivlt"><thead><tr><th>종류</th><th>번호</th><th>고객</th><th>금액</th><th>상태</th><th>수정일</th><th></th></tr></thead><tbody>'+rows.map(function(r){var d=new Date(r.updated_at);
-      return '<tr class="r" data-id="'+r.id+'"><td>'+(r.doc==='qt'?'견적서':'인보이스')+'</td><td>'+E(r.no)+'</td><td>'+E(r.client||'—')+'</td><td>'+amt(r.total,r.cur)+'</td><td><select class="st'+(r.status==='issued'?' ok':'')+'" data-st="'+r.id+'"><option value="draft"'+(r.status==='issued'?'':' selected')+'>작성 중</option><option value="issued"'+(r.status==='issued'?' selected':'')+'>발행</option></select></td><td>'+today(d)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+'</td><td><button class="btn danger sm" data-del="'+r.id+'" type="button">삭제</button></td></tr>'}).join('')+'</tbody></table>';
+    box.className='';box.innerHTML='<table class="ivlt"><thead><tr><th>번호</th><th>고객</th><th>금액</th><th>상태</th><th>수정일</th><th></th></tr></thead><tbody>'+rows.map(function(r){var d=new Date(r.updated_at);
+      return '<tr class="r" data-id="'+r.id+'"><td>'+E(r.no)+'</td><td>'+E(r.client||'—')+'</td><td>'+amt(r.total,r.cur)+'</td><td><select class="st'+(r.status==='issued'?' ok':'')+'" data-st="'+r.id+'"><option value="draft"'+(r.status==='issued'?'':' selected')+'>작성 중</option><option value="issued"'+(r.status==='issued'?' selected':'')+'>발행</option></select></td><td>'+today(d)+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+'</td><td><button class="btn danger sm" data-del="'+r.id+'" type="button">삭제</button></td></tr>'}).join('')+'</tbody></table>';
     [].forEach.call(box.querySelectorAll('select[data-st]'),function(sel){sel.onclick=function(e){e.stopPropagation()};sel.onchange=function(){var v=sel.value;sel.className='st'+(v==='issued'?' ok':'');rest('PATCH','invoices','id=eq.'+sel.getAttribute('data-st'),{status:v},{Prefer:'return=minimal'}).then(function(){window.buffToast('상태 변경: '+(v==='issued'?'발행':'작성 중'))}).catch(function(x){window.buffToast('상태 변경 실패: '+x.message,true)})}});
     [].forEach.call(box.querySelectorAll('tr.r'),function(tr){tr.onclick=function(e){var del=e.target.getAttribute&&e.target.getAttribute('data-del');
-      if(del){e.stopPropagation();if(confirm('이 문서를 삭제할까요? 되돌릴 수 없습니다.'))rest('DELETE','invoices','id=eq.'+del).then(showList).catch(function(x){window.buffToast('삭제 실패: '+x.message,true)});return}
-      rest('GET','invoices','select=id,status,data&id=eq.'+tr.getAttribute('data-id')).then(function(r){if(!r||!r[0])return;S=Object.assign({},DEF,DB||{},r[0].data);S.id=r[0].id;if(!S.fAdK&&DB&&DB.fAdK)S.fAdK=DB.fAdK;S.status=r[0].status;window.drawInvoice(true)})}})
-  }).catch(function(e){document.getElementById('ivl').textContent='불러오기 실패: '+e.message})}
+      if(del){e.stopPropagation();if(confirm('이 문서를 삭제할까요? 되돌릴 수 없습니다.'))rest('DELETE','invoices','id=eq.'+del).then(function(){if(request===view&&box.isConnected)return showList()}).catch(function(x){window.buffToast('삭제 실패: '+x.message,true)});return}
+      rest('GET','invoices','select=id,doc,status,data&doc=eq.'+type+'&id=eq.'+tr.getAttribute('data-id')).then(function(r){
+        if(request!==view||!box.isConnected||!r||!r[0])return;
+        var row=r[0];
+        S=Object.assign({},DEF,DB||{},row.data,{id:row.id,doc:row.doc,status:row.status});
+        if(!S.fAdK&&DB&&DB.fAdK)S.fAdK=DB.fAdK;
+        return window.drawInvoice(true);
+      }).catch(function(e){if(box.isConnected)window.buffToast('문서 불러오기 실패: '+e.message,true)});
+    }});
+  }).catch(function(e){if(request===view&&box.isConnected)box.textContent='불러오기 실패: '+e.message});
+}
 function ld(){return Object.assign({},DEF,DB||{})}
 function sv(){}
 function E(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -122,13 +145,13 @@ function itemsForm(){return S.items.map(function(it,i){return '<div class="ivit"
 function loadScript(u){return new Promise(function(res,rej){var x=document.createElement('script');x.src=u;x.onload=res;x.onerror=function(){rej(new Error(u+' 로드 실패'))};document.head.appendChild(x)})}
 function loadDocx(){var v='?v='+Date.now();return loadScript('vendor/docx.iife.js').then(function(){return loadScript('invoice_docx.js'+v)})}
 function draw(keep){
-  if(!keep){S=ld();S.doc='inv';S.no=nextNo();S.issue=today();S.due=addDays(14);S.ts='14';S.terms=termText('14');
+  if(!keep){S=ld();S.doc=docType;S.no=nextNo();S.issue=today();S.due=addDays(qt()?30:14);S.ts='14';S.terms=termText('14');
   S.cCo='';S.cNm='';S.cAd='';S.cEm='';S.cTx='';S.status='draft';delete S.id;S.items=[{desc:'',sub:'',qty:1,unit:'',price:''}];}
   var m=document.getElementById('main');
   m.innerHTML='<style>'+CSS+'</style><div class="bar ivbar"><h2>'+(qt()?'견적서 작성':'인보이스 발급')+'</h2><span id="ivst" class="hint" style="margin:0 8px 0 auto"></span><button class="btn line" id="ivlist" type="button">저장 목록</button><button class="btn line" id="ivreset" type="button">새로 작성</button><button class="btn line" id="ivprint" type="button">PDF로 저장 / 인쇄</button><button class="btn" id="ivdocx" type="button">Word(docx) 저장</button></div>'
   +'<p class="hint ivbar">입력하면 오른쪽 미리보기에 바로 반영되고 자동 저장됩니다.</p>'
   +'<div class="ivw"><div class="ivform">'
-  +sec(1,'문서 설정',true,'<div class="grid2"><div><label>문서 종류</label><select data-k="doc"><option value="inv">인보이스</option><option value="qt">견적서</option></select></div><div><label>발행 상태</label><select data-k="status"><option value="draft">작성 중</option><option value="issued">발행</option></select></div></div>'
+  +sec(1,'문서 설정',true,'<label>발행 상태</label><select data-k="status"><option value="draft">작성 중</option><option value="issued">발행</option></select>'
     +'<div class="grid2"><div><label>통화</label><select data-k="cur">'+Object.keys(CUR).map(function(k){return '<option value="'+k+'">'+CUR[k][2]+'</option>'}).join('')+'</select></div><div><label>부가세</label><select data-k="vm"><option value="ex">별도 (+10%)</option><option value="in">포함 (역산)</option><option value="none">없음</option></select></div></div>'
     +'<label>표기 순서 (국·영문 병기)</label><select data-k="lang"><option value="ko">국문 위 · 영문 아래</option><option value="en">영문 위 · 국문 아래</option></select>')
   +sec(2,'번호 · 날짜',true,'<div class="grid2"><div>'+inp('no',qt()?'견적서 번호':'인보이스 번호',S.no)+'</div><div>'+inp('fNm','담당자 (Project Lead)',S.fNm)+'</div></div><div class="grid2"><div>'+inp('issue','발행일',S.issue,'date')+'</div><div>'+inp('due',qt()?'견적 유효기간':'결제 기한',S.due,'date')+'</div></div>'
@@ -147,7 +170,6 @@ function draw(keep){
   [].forEach.call(m.querySelectorAll('select[data-k]'),function(s){s.value=S[s.getAttribute('data-k')]});
   if(S.ts==='custom'){document.getElementById('ivterms').classList.remove('hide');m.querySelector('[data-k=terms]').value=S.terms}
   m.querySelector('.ivform').addEventListener('input',function(e){var t=e.target,k=t.getAttribute('data-k');
-    if(k==='doc'){S.doc=t.value;S.no=nextNo();S.due=qt()?addTo(S.issue,30):(S.ts==='0'?S.issue:S.ts==='custom'?S.due:addTo(S.issue,+S.ts));window.drawInvoice(true);schedule();return}
     if(k){S[k]=t.value;
       var f=m.querySelector('[data-k=due]'),sel=m.querySelector('[data-k=ts]'),tm=document.getElementById('ivterms');
       if(qt()){}else if(k==='ts'){if(t.value==='custom'){m.querySelector('[data-k=terms]').value=S.terms}else{S.terms=termText(t.value);S.due=t.value==='0'?S.issue:addTo(S.issue,+t.value);f.value=S.due}}
@@ -161,19 +183,30 @@ function draw(keep){
   m.querySelector('.ivform').addEventListener('change',function(e){if(/^(lang|cur|vm|ts)$/.test(e.target.getAttribute('data-k')||''))paint()});
   function redraw(){document.getElementById('ivitems').innerHTML=itemsForm();bind();paint();schedule()}
   function bind(){[].forEach.call(document.querySelectorAll('[data-del]'),function(b){b.onclick=function(){S.items.splice(+b.getAttribute('data-del'),1);if(!S.items.length)S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()}})}
-  document.getElementById('ivdocx').onclick=function(){var b=this;b.disabled=true;var o=b.textContent;b.textContent='만드는 중…';bump();S.status='issued';saveDraft();(window.buffInvoiceDocx?Promise.resolve():loadDocx()).then(function(){return window.buffInvoiceDocx(window.buffInv.get())}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname()+'.docx';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}).catch(function(e){alert('docx 생성 실패: '+e.message)}).then(function(){b.disabled=false;b.textContent=o})};
+  document.getElementById('ivdocx').onclick=function(){var b=this;b.disabled=true;var o=b.textContent,draft=S,filename=fname();b.textContent='만드는 중…';bump();S.status='issued';saveDraft();(window.buffInvoiceDocx?Promise.resolve():loadDocx()).then(function(){if(S===draft)return window.buffInvoiceDocx(window.buffInv.get());throw new Error('작성 화면이 변경되었습니다. 문서를 다시 열어 저장해 주세요.')}).then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename+'.docx';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}).catch(function(e){alert('docx 생성 실패: '+e.message)}).then(function(){b.disabled=false;b.textContent=o})};
   document.getElementById('ivsave').onclick=function(){var b=this,o={};KEYS.forEach(function(k){o[k]=S[k]});b.disabled=true;window.buffRest('POST','invoice_settings','on_conflict=key',{key:'defaults',value:o,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'}).then(function(){DB=o;window.buffToast('기본값을 저장했습니다.')}).catch(function(e){window.buffToast('저장 실패: '+e.message,true)}).then(function(){b.disabled=false})};
   if(document.getElementById('ivacc'))document.getElementById('ivacc').onchange=function(){var v=this.value;if(v==='')return;var src=v==='d'?DB:ACC[+v];AF.forEach(function(k){S[k]=src[k]||'';var el=document.querySelector('.ivform [data-k='+k+']');if(el)el.value=S[k]});if(v!=='d')document.getElementById('ivaccnm').value=src.name||'';paint();schedule()};
   if(document.getElementById('ivaccsave'))document.getElementById('ivaccsave').onclick=function(){var nm=document.getElementById('ivaccnm').value.trim();if(!nm){window.buffToast('계좌 이름을 입력하세요.',true);return}var a={name:nm};AF.forEach(function(k){a[k]=S[k]||''});var L=(ACC||[]).filter(function(x){return x.name!==nm});L.push(a);var b=this;b.disabled=true;window.buffRest('POST','invoice_settings','on_conflict=key',{key:'accounts',value:L,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'}).then(function(){ACC=L;document.getElementById('ivacc').innerHTML=accOpts();window.buffToast('계좌 목록에 저장했습니다: '+nm)}).catch(function(e){window.buffToast('저장 실패: '+e.message,true)}).then(function(){b.disabled=false})};
   if(document.getElementById('ivaccdel'))document.getElementById('ivaccdel').onclick=function(){var sel=document.getElementById('ivacc'),v=sel.value;if(v===''||v==='d'){window.buffToast(v==='d'?'기본 계좌는 공급자 칸의 기본값 저장으로 바꿀 수 있어요.':'삭제할 계좌를 먼저 선택하세요.',true);return}var a=ACC[+v];if(!a||!confirm('저장된 계좌 "'+a.name+'"을(를) 목록에서 삭제할까요? 지금 작성 중인 문서의 입력값은 그대로 남습니다.'))return;var L=ACC.filter(function(x,i){return i!==+v}),b=this;b.disabled=true;window.buffRest('POST','invoice_settings','on_conflict=key',{key:'accounts',value:L,updated_at:new Date().toISOString()},{Prefer:'resolution=merge-duplicates,return=minimal'}).then(function(){ACC=L;sel.innerHTML=accOpts();window.buffToast('계좌를 삭제했습니다: '+a.name)}).catch(function(e){window.buffToast('삭제 실패: '+e.message,true)}).then(function(){b.disabled=false})};
   document.getElementById('ivzoom').onclick=function(){ZOOM=!ZOOM;this.textContent=ZOOM?'페이지 전체 보기':'크게 보기';scale()};
   document.getElementById('ivadd').onclick=function(){S.items.push({desc:'',sub:'',qty:1,unit:'',price:''});redraw()};
-  document.getElementById('ivlist').onclick=function(){saveDraft().then(showList)};
-  document.getElementById('ivreset').onclick=function(){if(confirm('입력한 내용을 지우고 새로 작성할까요?'))window.drawInvoice()};
+  document.getElementById('ivlist').onclick=function(){var request=view;saveDraft().then(function(){if(request===view)return showList()})};
+  document.getElementById('ivreset').onclick=function(){if(confirm('입력한 내용을 지우고 새로 작성할까요?')){clearTimeout(tmr);tmr=null;window.drawInvoice().catch(function(e){window.buffToast(e.message,true)})}};
   document.getElementById('ivprint').onclick=function(){bump();S.status='issued';saveDraft();var old=document.title;document.title=fname();window.print();setTimeout(function(){document.title=old},500)};
   bind();paint();window.addEventListener('resize',scale);if(S.id)stamp('저장된 문서 · '+(S.status==='issued'?'발행':'작성 중'));
   return Promise.resolve();
 }
-window.openInvoiceTab=function(){showList();return Promise.resolve()};
-window.drawInvoice=function(keep){if(DB&&ACC)return draw(keep);return window.buffRest('GET','invoice_settings','select=key,value&key=in.(defaults,accounts)').then(function(rows){rows=rows||[];var d=rows.filter(function(r){return r.key==='defaults'})[0],a=rows.filter(function(r){return r.key==='accounts'})[0];DB=(d&&d.value)||{};ACC=(a&&Array.isArray(a.value))?a.value:[];return draw(keep)})};
+window.closeInvoiceTab=function(){view++;return tmr!==null?saveDraft():queuedSave||saving||Promise.resolve()};
+window.openInvoiceTab=function(type){docType=type;return showList()};
+window.drawInvoice=function(keep){
+  var request=++view;
+  if(DB&&ACC)return draw(keep);
+  return rest('GET','invoice_settings','select=key,value&key=in.(defaults,accounts)').then(function(rows){
+    if(request!==view)return;
+    rows=rows||[];
+    var d=rows.filter(function(r){return r.key==='defaults'})[0],a=rows.filter(function(r){return r.key==='accounts'})[0];
+    DB=(d&&d.value)||{};ACC=(a&&Array.isArray(a.value))?a.value:[];
+    return draw(keep);
+  });
+};
 })();

@@ -43,6 +43,9 @@ nav.tabs .in::-webkit-scrollbar{display:none}
 nav.tabs button{border:0;background:transparent;padding:16px 14px;font-size:15px;font-weight:600;color:var(--mute);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
 nav.tabs button:hover{color:var(--ink)}
 nav.tabs button.on{color:var(--ink);border-bottom-color:var(--coral)}
+nav.tabs .subtabs{border-top:1px solid var(--line)}
+nav.tabs .subtabs[hidden]{display:none}
+nav.tabs .subtabs button{padding-top:10px;padding-bottom:10px;font-size:14px}
 main{max-width:1200px;margin:0 auto;padding:40px 40px 120px}
 .bar{display:flex;align-items:center;gap:12px;margin:0 0 12px}
 .bar h2{margin:0;font-size:36px;font-weight:700;line-height:1.1;letter-spacing:-.02em;flex:1}
@@ -112,12 +115,12 @@ main{max-width:1200px;margin:0 auto;padding:40px 40px 120px}
   </form>
 </section>
 <section id="app" class="hide">
-  <nav class="tabs"><div class="in" id="tabs"></div></nav>
+  <nav class="tabs" aria-label="관리자 메뉴"><div class="in" id="tabs"></div><div class="in subtabs" id="career-tabs" role="group" aria-label="CAREERS 메뉴" hidden></div></nav>
   <main id="main"></main>
 </section>
 <div id="modal"></div>
 <script src="../config.js"></script>
-<script src="admin.js?v=1795797486"></script>
-<script src="invoice.js?v=1795798281"></script>
+<script src="admin.js?v=admin-navigation-1"></script>
+<script src="invoice.js?v=admin-navigation-1"></script>
 </body>
 </html>
