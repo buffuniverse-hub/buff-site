@@ -361,6 +361,28 @@
           }).catch(function(e){err.textContent=e.message;mk.disabled=false});
         };
         btnRow.append(mk);
+        var up=element('button','이미지 업로드 (도장·서명)');up.type='button';up.className='btn line sm';
+        var fi=element('input');fi.type='file';fi.accept='image/png,image/jpeg,image/webp';fi.hidden=true;
+        up.onclick=function(){fi.click()};
+        fi.onchange=function(){
+          var f=fi.files&&fi.files[0];if(!f)return;up.disabled=true;
+          var im=new Image(),url=URL.createObjectURL(f);
+          im.onload=function(){
+            var sc=Math.min(1,700/im.width),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(im.width*sc));cv.height=Math.max(1,Math.round(im.height*sc));
+            var cx=cv.getContext('2d');cx.drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+            var d=cx.getImageData(0,0,cv.width,cv.height),px=d.data;
+            for(var i=0;i<px.length;i+=4){var mn=Math.min(px[i],px[i+1],px[i+2]);if(mn>235)px[i+3]=0;else if(mn>200)px[i+3]=Math.round(px[i+3]*(235-mn)/35)}
+            cx.putImageData(d,0,0);
+            var data=cv.toDataURL('image/png');
+            if(data.length>380000){err.textContent='이미지가 너무 커요. 더 작은 파일을 올려 주세요.';up.disabled=false;return}
+            var nm=prompt('날인 성함',sd?sd.signer_name:'김동준');if(!nm){up.disabled=false;return}
+            var bytes=new Uint8Array(12);crypto.getRandomValues(bytes);var tk='up'+Array.prototype.map.call(bytes,function(b){return 'abcdefghijkmnpqrstuvwxyz23456789'.charAt(b%32)}).join('');
+            window.buffRest('POST','seal_requests','select=id',{token:tk,status:'signed',signer_name:nm.trim(),signature:data,signed_at:new Date().toISOString()},RETURN_ROW).then(function(){window.buffToast('날인 이미지를 등록했어요.');draw()}).catch(function(e){err.textContent=e.message;up.disabled=false});
+          };
+          im.onerror=function(){err.textContent='이미지를 열 수 없어요.';up.disabled=false};
+          im.src=url;
+        };
+        btnRow.append(up,fi);
         if(sd){var del=element('button','등록된 날인 삭제');del.type='button';del.className='btn line sm';del.onclick=function(){if(!confirm('등록된 대표 날인을 삭제할까요?\n이미 서명이 끝난 계약서에는 영향이 없어요.'))return;del.disabled=true;window.buffRest('DELETE','seal_requests','status=eq.signed').then(function(){window.buffToast('날인을 삭제했어요.');sealData=null;try{renderPreview()}catch(x){}draw()}).catch(function(e){err.textContent=e.message;del.disabled=false})};btnRow.append(del)}
         box.append(btnRow);
       });
