@@ -10,15 +10,21 @@
 @font-face{font-family:CP;src:url(admin/vendor/PaperoziBold.ttf) format("truetype");font-weight:700;font-display:swap}
 *{box-sizing:border-box}body{margin:0;background:#ececf0;font-family:CP,sans-serif;color:#1d1d1f;-webkit-text-size-adjust:100%}
 header{background:#0a0a0a;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px}header img{height:22px}header span{font-size:13px;opacity:.8}
-main{max-width:860px;margin:0 auto;padding:16px 12px 120px}
+main{max-width:860px;margin:0 auto;padding:16px 12px 120px}.panel{max-width:210mm;margin-left:auto;margin-right:auto}
 .msg{background:#fff;border-radius:14px;padding:40px 20px;text-align:center;margin:30px 0}
-.doc{background:#fff;border-radius:6px;box-shadow:0 1px 6px rgba(0,0,0,.14);padding:28px 5vw 30px;margin-bottom:14px;overflow-wrap:anywhere}
-.doc h1{font-size:clamp(24px,6vw,34px);letter-spacing:-.03em;margin:0 0 22px}.doc h1 small{font-size:.4em;font-weight:400;margin-left:8px}
-.head{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}.doc p{font-size:14px;line-height:1.65;margin:0 0 6px;white-space:pre-wrap}.doc small{color:#6e6e73;font-weight:400}
-table{border-collapse:collapse;width:100%;margin:14px 0}td,th{border:1px solid #d2d2d7;padding:8px 10px;font-size:13.5px;line-height:1.55;text-align:left;vertical-align:top;white-space:pre-wrap}th{width:28%;background:#f5f5f7}thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a}
-h3{font-size:15px;margin:24px 0 6px}
-.sign-t{border-top:1px solid #d2d2d7;margin-top:28px;padding-top:16px}.sign-t>b{font-size:19px;display:block;margin-bottom:14px}
-.parties{display:grid;grid-template-columns:1fr 1fr;gap:20px}.parties b{display:block;font-size:16px;margin-bottom:6px}.parties .sl{margin-top:16px;border-top:1px solid #1d1d1f;padding-top:6px;text-align:right;color:#6e6e73;font-size:13px;min-height:70px;position:relative}.parties img{position:absolute;right:0;bottom:6px;max-height:64px;max-width:70%}
+.sheets{display:grid;justify-items:center;gap:14px;margin-bottom:14px}
+.pg{position:relative;flex:none;width:210mm;height:297mm;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.16);overflow:hidden;overflow-wrap:anywhere;padding:14mm 14mm 0 15mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pb{height:243mm;overflow:hidden}
+.pg h1{display:flex;align-items:baseline;gap:7px 13px;flex-wrap:wrap;font-size:34pt;line-height:1.05;letter-spacing:-.035em;margin:6mm 0 15mm}.pg h1 small{font-size:.445em;font-weight:400;letter-spacing:.075em;white-space:nowrap}
+.pg .head{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-bottom:12mm}.pg .head>div:last-child{text-align:right}
+.pg p{font-size:9pt;line-height:1.55;margin:0 0 6px;white-space:pre-wrap}.pg .head p{font-size:10pt;margin:0 0 2px}.pg .head .m{margin-bottom:8px}.pg small{color:#6e6e73;font-weight:400}.pg .intro{font-size:10pt;margin-bottom:10mm}
+.pg table{border-collapse:collapse;width:100%;margin:0}.pg td,.pg th{border:1px solid #d2d2d7;padding:8px 11px;font-size:9.5pt;line-height:1.55;text-align:left;vertical-align:middle;white-space:pre-wrap}.pg th{width:27%;background:#f5f5f7}.pg thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-size:8.25pt}
+.cover .pb{display:flex;flex-direction:column}.cover .tw{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding-bottom:16mm}.cover table{flex:1 1 auto;height:100%}
+.pg h3{font-size:10pt;margin:20pt 0 6pt}.pg .pb>section:first-child h3{margin-top:0}.pg section>p{margin:0 0 10px}
+.sign-t{border-top:1px solid #d2d2d7;margin-top:26px;padding-top:14px}.pg .sign-t>p{font-size:13pt;font-weight:700;margin:0 0 16px}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:10mm}.parties b{display:block;font-size:12pt;margin-bottom:8px}.pg .parties p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}
+.sl{margin-top:22mm;border-top:1px solid #1d1d1f;padding-top:6px;text-align:right;color:#6e6e73;font-size:9.5pt;position:relative}.sl img{position:absolute;right:4px;bottom:calc(100% - 1px);max-height:19mm;max-width:75%}
+.brand{position:absolute;left:0;right:0;bottom:0;height:34mm;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;background:#0a0a0a;color:#fff;padding:0 14mm 0 15mm}.brand img{display:block;width:125px;height:auto}.brand div{text-align:right}.pg .brand p{font-size:8pt;margin:0;line-height:1.45}
 .panel{background:#fff;border-radius:14px;padding:18px;margin-bottom:14px}.panel h2{font-size:17px;margin:0 0 12px}
 label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input[type=text]{width:100%;padding:12px;border:1px solid #d2d2d7;border-radius:10px;font:inherit;font-size:16px}
 canvas{width:100%;height:170px;border:1px dashed #86868b;border-radius:10px;background:#fafafc;touch-action:none;display:block}
@@ -26,8 +32,7 @@ canvas{width:100%;height:170px;border:1px dashed #86868b;border-radius:10px;back
 button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a0a0a;color:#fff;font-weight:700;font-size:15px;cursor:pointer}button.line{background:#fff;color:#1d1d1f;border:1px solid #d2d2d7}button:disabled{opacity:.4}
 .err{color:#d70015;font-size:14px;margin-top:10px;min-height:18px}.audit{font-size:12px;color:#6e6e73;line-height:1.6;word-break:break-all}
 .ok{background:#e8f7ec;color:#0a6b2a;border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:15px;font-weight:700}
-@media(max-width:560px){.head,.parties{grid-template-columns:1fr}}
-@media print{body{background:#fff}header,.panel,.noprint{display:none!important}.doc{box-shadow:none;padding:12mm}main{padding:0}}
+@media print{@page{size:A4;margin:0}body{background:#fff}header,.panel,.noprint{display:none!important}main{padding:0;max-width:none}.sheets{display:block}.pg{zoom:1!important;box-shadow:none;margin:0;break-after:page;height:296mm}.pg:last-child{break-after:auto}}
 </style>
 </head>
 <body>
@@ -41,33 +46,47 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
   function rpc(fn,body){var c=window.BUFF_CONFIG;return fetch(c.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:c.key,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.message||'요청에 실패했습니다.');return j})})}
   function msg(t){m.replaceChildren(e('div',t,'msg'))}
   function fmt(d){return new Date(d).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',hour12:false})}
+  var live={img:null,name:null};
   function render(res){
-    var s=res.snapshot,doc=e('div',null,'doc'),h1=e('h1',s.title),sub=e('small',s.subtitle);h1.append(sub);doc.append(h1);
+    var s=res.snapshot,sheets=e('div',null,'sheets'),body;m.append(sheets);
+    function brand(){var b=e('div',null,'brand'),im=e('img'),d=e('div');im.src='admin/vendor/logo_white.png';im.alt='BUFF';s.issuer.forEach(function(l,i){d.append(e('p',(i===0?'위탁자 · ':'')+l))});b.append(im,d);return b}
+    function addPage(first){var pg=e('div',null,'pg'+(first?' cover':''));body=e('div',null,'pb');pg.append(body,brand());sheets.append(pg);return body}
+    function place(n){body.append(n);if(body.children.length>1&&body.scrollHeight>body.clientHeight+1){n.remove();addPage();body.append(n)}}
+    var h1=e('h1',s.title);h1.append(e('small',s.subtitle));
     var head=e('div',null,'head'),a=e('div'),b=e('div'),ph=e('p');ph.append(e('b','수행자 '),e('small','SERVICE PROVIDER'));a.append(ph);
     s.partnerDetails.forEach(function(l){a.append(e('p',l))});
-    s.details.forEach(function(d){var p=e('p');p.append(e('b',d[0]+' '),e('small',d[1]));b.append(p,e('p',d[2]))});
-    head.append(a,b);doc.append(head,e('p',s.intro));
-    var t=e('table'),tb=e('tbody'),hr=e('tr');hr.append(e('th','항목'),e('th','작업확인서'));var th=e('thead');th.append(hr);
-    s.rows.forEach(function(r){var tr=e('tr');tr.append(e('th',r[0]),e('td',r[1]));tb.append(tr)});t.append(th,tb);doc.append(t);
-    s.clauses.forEach(function(c){doc.append(e('h3',c[0]),e('p',c[1]))});
-    var sg=e('div',null,'sign-t');sg.append(e('b',s.signature[0]));
+    s.details.forEach(function(d){var p=e('p');p.append(e('b',d[0]+' '),e('small',d[1]));b.append(p,e('p',d[2],'m'))});
+    head.append(a,b);
+    var tw=e('div',null,'tw'),t=e('table'),tb=e('tbody'),hr=e('tr'),th=e('thead');hr.append(e('th','항목'),e('th','작업확인서'));th.append(hr);
+    s.rows.forEach(function(r){var tr=e('tr');tr.append(e('th',r[0]),e('td',r[1]));tb.append(tr)});t.append(th,tb);tw.append(t);
+    addPage(true);body.append(h1,head,e('p',s.intro,'intro'),tw);addPage();
+    s.clauses.forEach(function(c){var sec=e('section');sec.append(e('h3',c[0]),e('p',c[1]));place(sec)});
+    var sg=e('div',null,'sign-t');sg.append(e('p',s.signature[0]));
     var ps=e('div',null,'parties');
     s.signParties.forEach(function(p,i){
       var box=e('div');box.append(e('b',p.role));p.lines.forEach(function(l){box.append(e('p',l))});
       var sl=e('div',null,'sl');
-      if(i===1&&res.signature){var im=e('img');im.src=res.signature;im.alt='서명';sl.append(im);sl.append(e('span','서명: '+res.signer_name))}
-      else if(i===0)sl.append(e('span','전자 발송 · '+fmt(res.created_at)));
-      else sl.append(e('span','(서명 또는 날인)'));
+      if(i===1){
+        var im=e('img');im.alt='서명';im.hidden=true;sl.append(im);live.img=im;
+        var nm=e('span','(서명 또는 날인)');sl.append(nm);live.name=nm;
+        if(res.signature){im.src=res.signature;im.hidden=false;nm.textContent='서명: '+res.signer_name+' · '+fmt(res.signed_at)}
+      }else sl.append(e('span','전자 발송 · '+fmt(res.created_at)));
       box.append(sl);ps.append(box);
     });
-    sg.append(ps);doc.append(sg);return doc;
+    sg.append(ps);place(sg);
+    return sheets;
   }
+  function fit(){
+    var avail=document.documentElement.clientWidth-24,k=Math.min(1,avail/(210*96/25.4));
+    [].forEach.call(document.querySelectorAll('.pg'),function(p){p.style.zoom=k});
+  }
+  window.addEventListener('resize',fit);
   function pad(){
     var c=e('canvas'),ctx,drawing=false,has=false,last;
     function size(){var r=c.getBoundingClientRect(),k=window.devicePixelRatio||1;c.width=r.width*k;c.height=r.height*k;ctx=c.getContext('2d');ctx.scale(k,k);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0a0a0a';has=false}
     function pos(ev){var r=c.getBoundingClientRect();return[ev.clientX-r.left,ev.clientY-r.top]}
     c.addEventListener('pointerdown',function(ev){drawing=true;last=pos(ev);c.setPointerCapture(ev.pointerId);ctx.beginPath();ctx.arc(last[0],last[1],1.2,0,7);ctx.fill();has=true;c.dispatchEvent(new Event('ink'))});
-    c.addEventListener('pointermove',function(ev){if(!drawing)return;var p=pos(ev);ctx.beginPath();ctx.moveTo(last[0],last[1]);ctx.lineTo(p[0],p[1]);ctx.stroke();last=p});
+    c.addEventListener('pointermove',function(ev){if(!drawing)return;var p=pos(ev);ctx.beginPath();ctx.moveTo(last[0],last[1]);ctx.lineTo(p[0],p[1]);ctx.stroke();last=p;c.dispatchEvent(new Event('ink'))});
     ['pointerup','pointercancel'].forEach(function(n){c.addEventListener(n,function(){drawing=false})});
     return {el:c,init:size,clear:function(){size();c.dispatchEvent(new Event('ink'))},has:function(){return has},data:function(){return c.toDataURL('image/png')}};
   }
@@ -77,7 +96,13 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
     p.append(e('h2','서명하기'),e('label','서명자 성함'),name,e('label','서명 (아래 칸에 손가락이나 마우스로 서명)'),sp.el);
     var clr=e('button','다시 쓰기','line');clr.type='button';clr.style.marginTop='10px';clr.onclick=sp.clear;p.append(clr);
     var lab=e('label',null,'chk');lab.append(agree,e('span','위 계약서의 내용을 모두 확인했으며, 이 전자서명이 직접 서명한 것과 동일한 효력을 가짐에 동의합니다.'));p.append(lab,go,err);
-    function check(){go.disabled=!(name.value.trim()&&sp.has()&&agree.checked)}
+    var raf=0;
+    function liveUpdate(){
+      if(!live.img)return;
+      if(sp.has()){live.img.src=sp.data();live.img.hidden=false}else live.img.hidden=true;
+      live.name.textContent=name.value.trim()?'서명: '+name.value.trim()+' (서명 중)':'(서명 또는 날인)';
+    }
+    function check(){go.disabled=!(name.value.trim()&&sp.has()&&agree.checked);cancelAnimationFrame(raf);raf=requestAnimationFrame(liveUpdate)}
     [name,agree,sp.el].forEach(function(x){x.addEventListener('input',check);x.addEventListener('change',check);x.addEventListener('ink',check)});check();
     go.onclick=function(){
       go.disabled=true;err.textContent='';
@@ -98,11 +123,11 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
       if(res.status==='signed'){
         var ok=e('div','서명 완료 · '+fmt(res.signed_at)+' · '+res.signer_name,'ok');ok.classList.add('noprint');m.append(ok);
       }
-      m.append(render(res));
+      m.append(render(res));fit();
       if(res.status==='signed'){
         var pr=e('button','인쇄 · PDF 저장','line');pr.className='line noprint';pr.onclick=function(){window.print()};m.append(pr);
         m.append(e('p','문서 지문(SHA-256) '+res.doc_hash,'audit noprint'));
-      }else{f=form(res);m.append(f.el);f.init();m.append(e('p','문서 지문(SHA-256) '+res.doc_hash,'audit noprint'))}
+      }else{f=form(res);m.append(f.el);f.init();fit();m.append(e('p','문서 지문(SHA-256) '+res.doc_hash,'audit noprint'))}
     }).catch(function(x){msg(x.message)});
   }
   load();
