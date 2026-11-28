@@ -140,6 +140,7 @@
       details.append(element('summary',title),fieldset);container.append(details);
     }else container.append(fieldset);
   }
+  function scheduleLabel(){return shared.role==='사진'?'촬영 일정':'작업 일정'}
   function schedules(){
     if(!Array.isArray(shared.schedule))shared.schedule=[{}];
     return shared.schedule;
@@ -147,7 +148,7 @@
   function addSchedules(container){
     var block=element('fieldset'),list=element('div'),add=element('button','+ 일정 추가');
     block.className='ct-group';add.type='button';add.className='btn line sm';
-    block.append(element('legend','작업 일정'),list,add);container.append(block);
+    var legend=element('legend',scheduleLabel());legend.id='ct-sched-legend';block.append(legend,list,add);container.append(block);
     function draw(){
       var items=schedules();list.replaceChildren();
       items.forEach(function(item,index){
@@ -187,7 +188,7 @@
     ];
     var rows=[
       ['계약 기간·업무',label(s,'start')+' ~ '+label(s,'end')+'\n'+label(s,'scope')],
-      ['작업 일정',scheduleText()],
+      [scheduleLabel(),scheduleText()],
       ['납품·수정',label(s,'deliverables')+'\n'+label(s,'due')+'까지 · 포함 수정 '+label(s,'revisions')+'회\n원본·편집 파일 '+label(s,'originals')+'\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
       ['용역대금·지급', (fee?Number(fee).toLocaleString('ko-KR')+'원':'________________원')+' / '+label(partner,'settlement')+'\n'+label(s,'payDue')+' · '+label(s,'payment')+'\n경비 '+label(s,'expenses')],
       ['저작재산권 지분',Number.isInteger(share)&&share>=1&&share<=99?'BUFF '+share+'% / 파트너 '+(100-share)+'%':'공동 지분 기재'],
@@ -214,6 +215,7 @@
     if(!resizeBound){resizeBound=true;window.addEventListener('resize',function(){var el=document.getElementById('contract-preview');if(el)fitPages(el)})}
   }
   function renderPreview(){
+    var lg=document.getElementById('ct-sched-legend');if(lg)lg.textContent=scheduleLabel();
     var paper=document.getElementById('contract-preview');
     if(!paper)return;
     var model=contractModel();
