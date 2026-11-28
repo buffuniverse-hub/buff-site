@@ -319,63 +319,58 @@
     var p=navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject();
     p.then(function(){window.buffToast(okMsg)}).catch(function(){window.prompt('복사해 주세요',text)});
   }
-  function inviteText(model,link){
-    return '[BUFF UNIVERSE] '+(value(currentParty(),'partner')||'')+'님, '+(model.project||'프로젝트')+' 용역 계약서입니다.\n아래 링크에서 내용을 확인하시고 전자서명 부탁드립니다.\n'+link;
+  function inviteText(model){
+    var who=value(currentParty(),'partner');
+    return '[BUFF UNIVERSE]\n\n'+(who?who+'님, 안녕하세요.\n':'안녕하세요.\n')+(model.project||'프로젝트')+' 용역 계약서 전자서명을 요청드립니다.\n\n아래 링크에서 계약 내용을 확인하시고\n서명 부탁드립니다. 감사합니다.';
   }
   function openSendDialog(button){
     var model=contractModel(),partner=currentParty(),name=value(partner,'partner');
     if(!name||!model.project){window.buffToast('프로젝트명과 수행자 이름 또는 상호를 먼저 입력해 주세요.',true);return}
-    var ov=element('div'),panel=element('div'),box=element('div'),foot=element('div'),err=element('div');
-    ov.className='ov';panel.className='panel';box.id='fe';foot.className='foot';err.className='err';
-    panel.append(element('h3','전자서명 발송'),box,err,foot);ov.append(panel);document.body.append(ov);
-    var close=element('button','닫기'),make=element('button','서명 링크 만들기');close.type=make.type='button';close.className='btn line';make.className='btn';
-    foot.append(close,make);close.onclick=function(){ov.remove()};
-    var hist=element('div');
-    box.append(element('p','현재 입력된 내용 그대로 고정(스냅샷)해서 서명 링크를 만듭니다. 발송 후 내용을 고치면 새 링크를 다시 만들어야 해요. 링크는 30일간 유효하고, 서명 시각·IP·기기 정보가 함께 기록됩니다.'));
-    var out=element('div');box.append(out,hist);
-    function status(row){return row.status==='signed'?'서명 완료 '+new Date(row.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):row.status==='canceled'?'취소됨':(new Date(row.expires_at)<new Date()?'만료':'서명 대기')}
-    function drawHistory(){
-      return window.buffRest('GET','contract_signings','select=id,token,status,signed_at,signer_name,created_at,expires_at&project=eq.'+encodeURIComponent(model.project)+'&partner=eq.'+encodeURIComponent(name)+'&order=created_at.desc&limit=10').then(function(rows){
-        hist.replaceChildren();if(!rows||!rows.length)return;
-        hist.append(element('h4','발송 내역'));
-        rows.forEach(function(row){
-          var line=element('div'),info=element('span',new Date(row.created_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})+' · '+status(row)+(row.signer_name?' · '+row.signer_name:''));
-          var cp=element('button',row.status==='signed'?'서명본 보기':'링크 복사');cp.type='button';cp.className='btn line sm';cp.style.marginLeft='8px';
-          cp.onclick=function(){if(row.status==='signed')window.open(SIGN_BASE+row.token,'_blank');else copyText(SIGN_BASE+row.token,'링크를 복사했어요.')};
-          line.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px';
-          line.append(info);var acts=element('span');acts.append(cp);
-          if(row.status==='sent'&&new Date(row.expires_at)>new Date()){
-            var cx=element('button','취소');cx.type='button';cx.className='btn danger sm';cx.style.marginLeft='6px';
-            cx.onclick=function(){window.buffRest('PATCH','contract_signings','id=eq.'+row.id,{status:'canceled'}).then(drawHistory).catch(function(e){window.buffToast(e.message,true)})};
-            acts.append(cx);
-          }
-          line.append(acts);hist.append(line);
-        });
-      }).catch(function(){});
+    var ov=element('div'),panel=element('div'),box=element('div'),foot=element('div'),err=element('div'),close=element('button','닫기');
+    ov.className='ov';panel.className='panel';box.id='fe';foot.className='foot';err.className='err';close.type='button';close.className='btn line';
+    panel.append(element('h3','전자서명 요청'),box,err,foot);foot.append(close);ov.append(panel);document.body.append(ov);
+    close.onclick=function(){ov.remove()};
+    var summary=element('div');summary.style.cssText='background:#f5f5f7;border-radius:12px;padding:14px 16px;margin-bottom:16px';
+    var sb=element('b',model.project),ss=element('div',name+' · '+(templates[type]||{}).title);ss.style.cssText='font-size:14px;color:#6e6e73;margin-top:2px';
+    summary.append(sb,ss);box.append(summary);
+    var out=element('div');out.append(element('p','링크를 만드는 중…'));box.append(out);
+    function row(){var r=element('div');r.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';return r}
+    function btn(parent,t,fn,primary){var x=element('button',t);x.type='button';x.className=primary?'btn sm':'btn line sm';x.onclick=fn;parent.append(x);return x}
+    function show(token,signedRow){
+      var link=SIGN_BASE+token;out.replaceChildren();
+      if(signedRow){
+        var ok=element('div','✓ 서명 완료 · '+signedRow.signer_name+' · '+new Date(signedRow.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}));
+        ok.style.cssText='background:#e4f6e9;color:#0a6b2a;border-radius:12px;padding:14px 16px;font-weight:700';out.append(ok);
+        var r0=row();btn(r0,'서명본 보기',function(){window.open(link,'_blank')},true);out.append(r0);return;
+      }
+      var lab=element('label','서명 링크'),input=element('input');input.type='text';input.readOnly=true;input.value=link;input.onfocus=function(){input.select()};
+      out.append(lab,input);
+      var text=inviteText(model),email=value(partner,'email'),r=row();
+      btn(r,'링크 복사',function(){copyText(link,'링크를 복사했어요.')},true);
+      btn(r,'안내 문구 복사',function(){copyText(text,'문구를 복사했어요. 링크는 따로 붙여넣어 주세요.')});
+      btn(r,'이메일로 보내기',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent(text.replace(/\n/g,'\r\n')+'\r\n\r\n'+link)});
+      out.append(r);
+      var hint=element('p','같은 계약서는 링크가 하나로 유지돼요. 여러 번 보내도 한 번만 서명하면 완료됩니다. 내용을 고친 뒤에 다시 열면 새 링크가 만들어지고, 이전 링크는 취소돼요.');
+      hint.style.cssText='font-size:13px;color:#6e6e73;margin-top:14px';out.append(hint);
     }
-    drawHistory();
-    make.onclick=function(){
-      make.disabled=true;err.textContent='';
-      var bytes=new Uint8Array(24);crypto.getRandomValues(bytes);
-      var token=Array.prototype.map.call(bytes,function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
-      sha256(JSON.stringify(model)).then(function(hash){
-        return window.buffRest('POST','contract_signings','select=id',{token:token,contract_id:record?record.id:null,project:model.project,partner:name,snapshot:model,doc_hash:hash},RETURN_ROW);
-      }).then(function(){
-        var link=SIGN_BASE+token,text=inviteText(model,link),email=value(partner,'email');
-        make.remove();out.replaceChildren();
-        var input=element('input');input.type='text';input.readOnly=true;input.value=link;input.onfocus=function(){input.select()};
-        out.append(element('label','서명 링크'),input);
-        var row=element('div');row.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
-        function btn(t,fn){var b=element('button',t);b.type='button';b.className='btn line sm';b.onclick=fn;row.append(b)}
-        btn('링크 복사',function(){copyText(link,'링크를 복사했어요.')});
-        btn('카톡용 문구 복사',function(){copyText(text,'문구를 복사했어요. 카카오톡에 붙여넣어 보내세요.')});
-        if(navigator.share)btn('공유 (카톡 등)',function(){navigator.share({title:'BUFF 용역 계약서',text:text}).catch(function(){})});
-        btn('이메일로 보내기',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent(text)});
-        out.append(row);
-        if(!email)out.append(element('p','수행자 이메일을 입력하면 이메일 수신인이 자동으로 채워져요.'));
-        drawHistory();
-      }).catch(function(e){err.textContent=e.message;make.disabled=false});
-    };
+    sha256(JSON.stringify(model)).then(function(hash){
+      var q='select=id,token,status,doc_hash,signer_name,signed_at,expires_at&project=eq.'+encodeURIComponent(model.project)+'&partner=eq.'+encodeURIComponent(name)+'&status=in.(sent,signed)&order=created_at.desc&limit=20';
+      return window.buffRest('GET','contract_signings',q).then(function(rows){
+        rows=rows||[];
+        var same=rows.filter(function(x){return x.doc_hash===hash});
+        var signed=same.filter(function(x){return x.status==='signed'})[0];
+        if(signed){show(signed.token,signed);return}
+        var live=same.filter(function(x){return x.status==='sent'&&new Date(x.expires_at)>new Date()})[0];
+        if(live){show(live.token);return}
+        var bytes=new Uint8Array(24);crypto.getRandomValues(bytes);
+        var token=Array.prototype.map.call(bytes,function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
+        var stale=rows.filter(function(x){return x.status==='sent'});
+        return window.buffRest('POST','contract_signings','select=id',{token:token,contract_id:record?record.id:null,project:model.project,partner:name,snapshot:model,doc_hash:hash},RETURN_ROW).then(function(){
+          show(token);
+          stale.forEach(function(x){window.buffRest('PATCH','contract_signings','id=eq.'+x.id,{status:'canceled'}).catch(function(){})});
+        });
+      });
+    }).catch(function(e){out.replaceChildren();err.textContent=e.message});
   }
 
   function loadScript(path){
@@ -506,7 +501,7 @@
 
   function drawEditor(){
     var main=document.getElementById('main');
-    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn line" id="ct-send">전자서명 발송</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
+    main.innerHTML='<div class="bar ct-screen"><h2>계약서 작성</h2><div class="ct-tools"><button type="button" class="btn line" id="ct-list">저장 목록</button><button type="button" class="btn line" id="ct-print">인쇄 · PDF</button><button type="button" class="btn line" id="ct-docx">Word (DOCX)</button><button type="button" class="btn line" id="ct-send">전자서명 요청</button><button type="button" class="btn" id="ct-save">저장</button></div></div>'
       +'<p class="hint ct-screen" id="ct-status" role="status"></p><div class="ct-grid"><form class="ct-panel ct-screen" id="ct-form"><div class="ct-field" style="margin-bottom:16px"><label for="ct-template">계약 유형</label><select id="ct-template"></select></div><div id="ct-fields"></div></form><article class="ct-paper" id="contract-preview"></article></div>';
     main.prepend(element('style',css));
     var chooser=document.getElementById('ct-template'),form=document.getElementById('ct-form'),fields=document.getElementById('ct-fields');
