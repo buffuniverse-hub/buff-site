@@ -1,3 +1,5 @@
+/* 홈페이지 기본 배율 90% (데스크톱만). 관리자·서명 페이지는 제외 */
+(function(){if(/^\/(admin|sign)/.test(location.pathname))return;var st=document.createElement('style');st.textContent='@media(min-width:900px){html{zoom:0.9}}';(document.head||document.documentElement).appendChild(st)})();
 /* Supabase 공개용 키(publishable)는 브라우저에 노출되어도 안전합니다. 접근 제어는 DB의 RLS 정책이 합니다. */
 window.BUFF_CONFIG={
   url:'https://cexwmuhsjfxzemnwtwjc.supabase.co',
