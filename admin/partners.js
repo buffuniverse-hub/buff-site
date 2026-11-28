@@ -16,7 +16,7 @@
   function req(method,query,body,headers){return window.buffRest(method,TABLE,query,body,headers)}
   var RET={Prefer:'return=representation'};
   window.buffPartners={
-    list:function(){return req('GET','select=*&order=name.asc')},
+    list:function(){return req('GET','select=*&order=is_new.desc,created_at.desc')},
     /* 이름이 같은 파트너가 있으면 갱신, 없으면 새로 저장 */
     upsert:function(info){
       var name=(info.name||'').trim();if(!name)return Promise.reject(new Error('파트너 이름이 필요합니다.'));
@@ -37,7 +37,7 @@
     var ov=el('div',null,'ov'),panel=el('div',null,'panel'),fe=el('div'),err=el('div',null,'err'),foot=el('div',null,'foot');
     fe.id='fe';panel.append(el('h3',row.id?'파트너 수정':'파트너 추가'),fe,err,foot);ov.append(panel);
     var inputs={};
-    [['name','이름 · 상호','text'],['phone','전화번호','text'],['email','이메일','email']].forEach(function(f){
+    [['name','이름 · 상호','text'],['phone','전화번호','text'],['email','이메일','email'],['portfolio','포트폴리오 링크','text']].forEach(function(f){
       var wrap=el('div',null,'f'),label=el('label',f[1]),input=el('input');input.type=f[2];input.value=row[f[0]]||'';
       if(f[0]==='phone')input.inputMode='tel';
       wrap.append(label,input);fe.append(wrap);inputs[f[0]]=input;
@@ -61,7 +61,7 @@
     cancel.onclick=function(){ov.remove()};
     save.onclick=function(){
       var name=inputs.name.value.trim();if(!name){err.textContent='이름을 입력해 주세요.';return}
-      var body={name:name,phone:fmtPhone(inputs.phone.value),email:inputs.email.value.trim(),variant:vs.value,areas:chosen,memo:memo.value,updated_at:new Date().toISOString()};
+      var body={name:name,phone:fmtPhone(inputs.phone.value),email:inputs.email.value.trim(),variant:vs.value,areas:chosen,memo:memo.value,portfolio:inputs.portfolio.value.trim(),is_new:false,updated_at:new Date().toISOString()};
       save.disabled=true;
       (row.id?req('PATCH','id=eq.'+row.id+'&select=id',body,RET):req('POST','select=id',body,RET)).then(function(){ov.remove();done()})
         .catch(function(e){err.textContent=e.message;save.disabled=false});
@@ -83,7 +83,10 @@
       if(!rows.length){main.append(el('div','아직 저장된 파트너가 없습니다.','empty'));return}
       rows.forEach(function(r){
         var row=el('div',null,'row'),t=el('div',null,'t'),b=el('b',r.name),sub=el('span',(VARIANTS[r.variant]||'')+(r.memo?' · '+r.memo:''));
+        if(r.is_new){var nb=el('span','NEW');nb.style.cssText='margin-left:8px;font-size:11px;font-weight:800;background:#0071e3;color:#fff;border-radius:99px;padding:2px 8px';b.append(nb)}
+        if(r.source){var sb=el('span',r.source+' 신청');sb.style.cssText='margin-left:6px;font-size:11px;font-weight:700;background:#fff2d9;color:#8a5a00;border-radius:99px;padding:2px 8px';b.append(sb)}
         t.append(b,sub);
+        if(r.portfolio){var pl=el('a',r.portfolio);pl.href=/^https?:/.test(r.portfolio)?r.portfolio:'https://'+r.portfolio;pl.target='_blank';pl.rel='noopener';pl.style.cssText='display:block;margin-top:4px;font-size:12px;word-break:break-all';t.append(pl)}
         var areaRow=el('div');areaRow.style.cssText='margin-top:6px;display:flex;flex-wrap:wrap;gap:6px';(r.areas||[]).forEach(function(a){var c=el('span',a);c.style.cssText='font-size:12px;font-weight:700;background:#eef0f5;border-radius:99px;padding:3px 10px';areaRow.append(c)});t.append(areaRow);
         var contact=el('div',null,'t');contact.style.flex='1.4';
         var ph=el('button',r.phone||'전화번호 없음','btn line sm'),em=el('button',r.email||'이메일 없음','btn line sm');

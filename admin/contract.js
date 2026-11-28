@@ -490,24 +490,23 @@
   }
   function drawList(offset){
     var main=document.getElementById('main'),title=element('h2','계약서 목록'),toolbar=element('div'),actions=element('div');
-    var header=element('div'),create=element('button','+ 계약서 작성'),sealBtn=element('button','대표 날인 관리'),toggle=element('button',archivedList?'작성 목록':'보관함');
+    var header=element('div'),create=element('button','+ 계약서 작성'),sealBtn=element('button','대표 날인 관리');
     var list=element('div'),loading=element('p','불러오는 중…');
     header.className='bar';actions.className='ct-tools';toolbar.className='ct-tools';list.className='ct-list';loading.className='muted';
-    create.type=toggle.type=sealBtn.type='button';create.className='btn';toggle.className=sealBtn.className='btn line';sealBtn.onclick=openSealDialog;actions.append(sealBtn,toggle,create);header.append(title,actions);
+    create.type=sealBtn.type='button';create.className='btn';sealBtn.className='btn line';sealBtn.onclick=openSealDialog;actions.append(sealBtn,create);header.append(title,actions);
     main.replaceChildren(element('style',css),header,list,toolbar);list.append(loading);
     create.onclick=function(){var wasArchived=archivedList;clearDraft();archivedList=wasArchived;editing=true;drawEditor()};
-    toggle.onclick=function(){archivedList=!archivedList;drawList(0)};
     var signingsReq=window.buffRest('GET','contract_signings','select=project,partner,status,signed_at,expires_at,created_at&order=created_at.desc&limit=300').catch(function(){return []});
-    return Promise.all([request('GET','select=id,project,partner,variant,revision,updated_at,manual:data->>manualSign&archived=eq.'+archivedList+'&order=updated_at.desc,id.asc&limit=51&offset='+offset),signingsReq]).then(function(res){
+    return Promise.all([request('GET','select=id,project,partner,variant,revision,updated_at,manual:data->>manualSign&order=updated_at.desc,id.asc&limit=51&offset='+offset),signingsReq]).then(function(res){
       var rows=res[0],latest={};(res[1]||[]).forEach(function(sg){var k=sg.project+'\u0000'+sg.partner;if(!latest[k])latest[k]=sg});
       if(!list.isConnected)return;
       rows=rows||[];list.replaceChildren();
-      if(!rows.length)list.append(element('p',archivedList?'보관한 계약서가 없습니다.':'저장된 계약서가 없습니다.'));
+      if(!rows.length)list.append(element('p','저장된 계약서가 없습니다.'));
       rows.slice(0,50).forEach(function(row){
         var item=element('div'),info=element('div'),buttons=element('div');
-        var open=element('button','열기'),archive=element('button',archivedList?'복원':'보관');
-        item.className='ct-list-row';buttons.className='ct-tools';open.type=archive.type='button';
-        open.className='btn line sm';archive.className='btn line sm';
+        var open=element('button','열기');
+        item.className='ct-list-row';buttons.className='ct-tools';open.type='button';
+        open.className='btn line sm';
         info.append(element('b',row.project),element('small',row.partner+' · '+templates[row.variant].title+' · '+new Date(row.updated_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'})));
         var sg=latest[row.project+'\u0000'+row.partner],manual=row.manual||'',chip=element('span'),stateSel=element('select');
         var shown=sg&&sg.status==='signed'?['전자서명 완료','ok']:manual==='stamped'?['서명·날인 완료','ok']:manual==='signed'?['서명 완료','ok']:
@@ -525,13 +524,8 @@
             return patch(cur,{data:data});
           }).then(function(){return drawList(offset)}).catch(function(error){window.buffToast(error.message,true);stateSel.disabled=false;stateSel.value=''});
         };
-        buttons.append(stateSel,open,archive);item.append(info,buttons);list.append(item);
+        buttons.append(stateSel,open);item.append(info,buttons);list.append(item);
         open.onclick=function(){openSaved(row,open)};
-        archive.onclick=function(){
-          archive.disabled=true;
-          patch(row,{archived:!archivedList}).then(function(){if(list.isConnected)return drawList(offset&&rows.length===1?offset-50:offset)})
-            .catch(function(error){window.buffToast(error.message,true);archive.disabled=false});
-        };
       });
       if(offset>0){
         var prev=element('button','이전');prev.className='btn line sm';prev.onclick=function(){drawList(offset-50)};toolbar.append(prev);
