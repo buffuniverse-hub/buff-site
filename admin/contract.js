@@ -364,8 +364,8 @@
     var out=element('div');out.append(element('p','링크를 만드는 중…'));box.append(out);
     function row(){var r=element('div');r.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';return r}
     function btn(parent,t,fn,primary){var x=element('button',t);x.type='button';x.className=primary?'btn sm':'btn line sm';x.onclick=fn;parent.append(x);return x}
-    function show(token,signedRow){
-      var link=SIGN_BASE+token;out.replaceChildren();
+    function show(token,signedRow,keep){
+      var link=SIGN_BASE+token;if(!keep)out.replaceChildren();
       if(signedRow){
         var ok=element('div','✓ 서명 완료 · '+signedRow.signer_name+' · '+new Date(signedRow.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}));
         ok.style.cssText='background:#e4f6e9;color:#0a6b2a;border-radius:12px;padding:14px 16px;font-weight:700';out.append(ok);
@@ -387,23 +387,40 @@
       var hint=element('p','같은 계약서는 링크가 하나로 유지돼요. 여러 번 보내도 한 번만 서명하면 완료됩니다. 내용을 고친 뒤에 다시 열면 새 링크가 만들어지고, 이전 링크는 취소돼요.');
       hint.style.cssText='font-size:13px;color:#6e6e73;margin-top:14px';out.append(hint);
     }
-    sha256(JSON.stringify(model)).then(function(hash){
-      var q='select=id,token,status,doc_hash,signer_name,signed_at,expires_at&project=eq.'+encodeURIComponent(model.project)+'&partner=eq.'+encodeURIComponent(name)+'&status=in.(sent,signed)&order=created_at.desc&limit=20';
+    function ensure(hash,role){
+      var q='select=id,token,status,doc_hash,signer_name,signed_at,expires_at&project=eq.'+encodeURIComponent(model.project)+'&partner=eq.'+encodeURIComponent(name)+'&role=eq.'+role+'&status=in.(sent,signed)&order=created_at.desc&limit=20';
       return window.buffRest('GET','contract_signings',q).then(function(rows){
         rows=rows||[];
         var same=rows.filter(function(x){return x.doc_hash===hash});
         var signed=same.filter(function(x){return x.status==='signed'})[0];
-        if(signed){show(signed.token,signed);return}
+        if(signed)return {token:signed.token,signed:signed};
         var live=same.filter(function(x){return x.status==='sent'&&new Date(x.expires_at)>new Date()})[0];
-        if(live){show(live.token);return}
+        if(live)return {token:live.token};
         var bytes=new Uint8Array(12),AB='abcdefghijkmnpqrstuvwxyz23456789';crypto.getRandomValues(bytes);
         var token=Array.prototype.map.call(bytes,function(b){return AB.charAt(b%32)}).join('');
         var stale=rows.filter(function(x){return x.status==='sent'});
-        return window.buffRest('POST','contract_signings','select=id',{token:token,contract_id:record?record.id:null,project:model.project,partner:name,snapshot:model,doc_hash:hash},RETURN_ROW).then(function(){
-          show(token);
+        return window.buffRest('POST','contract_signings','select=id',{token:token,contract_id:record?record.id:null,project:model.project,partner:name,role:role,snapshot:model,doc_hash:hash},RETURN_ROW).then(function(){
           stale.forEach(function(x){window.buffRest('PATCH','contract_signings','id=eq.'+x.id,{status:'canceled'}).catch(function(){})});
+          return {token:token};
         });
       });
+    }
+    sha256(JSON.stringify(model)).then(function(hash){
+      return Promise.all([ensure(hash,'issuer'),ensure(hash,'partner')]);
+    }).then(function(rs){
+      out.replaceChildren();
+      var iss=rs[0],head=element('b','① 대표 날인 (우리 쪽 · 먼저 받아 주세요)');head.style.cssText='display:block;margin-bottom:8px';out.append(head);
+      var ilink=SIGN_BASE+iss.token;
+      if(iss.signed){var ok=element('div','✓ 날인 완료 · '+iss.signed.signer_name+' · '+new Date(iss.signed.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}));ok.style.cssText='background:#e4f6e9;color:#0a6b2a;border-radius:12px;padding:12px 16px;font-weight:700';out.append(ok)}
+      else{
+        var ii=element('input');ii.type='text';ii.readOnly=true;ii.value=ilink;ii.onfocus=function(){ii.select()};out.append(ii);
+        var ir=row(),cap=(name?'':'');
+        btn(ir,'날인 요청 문구 + 링크 복사',function(){copyText('[BUFF UNIVERSE]\n\n김동준 대표님,\n'+model.project+'\n용역 계약서 날인을\n요청드립니다.\n\n아래 링크에서 내용을 확인하시고\n날인 부탁드립니다.\n\n감사합니다.\n\n(날인 링크)\n'+ilink,'대표 날인 요청 문구와 링크를 복사했어요.')},true);
+        btn(ir,'링크만 복사',function(){copyText(ilink,'링크를 복사했어요.')});out.append(ir);
+      }
+      var sep=element('div');sep.style.cssText='height:1px;background:#e5e5ea;margin:18px 0';out.append(sep);
+      var h2=element('b','② 수행자 서명 요청'+(iss.signed?'':' (날인 후 보내면 갑 날인이 함께 보여요)'));h2.style.cssText='display:block;margin-bottom:8px';out.append(h2);
+      show(rs[1].token,rs[1].signed,true);
     }).catch(function(e){out.replaceChildren();err.textContent=e.message});
   }
 

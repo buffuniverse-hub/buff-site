@@ -75,14 +75,15 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
     s.clauses.forEach(function(c){var sec=e('section');sec.append(e('h3',c[0]),e('p',c[1]));place(sec)});
     var sg=e('div',null,'sign-t');sg.append(e('p',s.signature[0]));
     var ps=e('div',null,'parties');
+    var mine=res.role==='issuer'?0:1;
     s.signParties.forEach(function(p,i){
       var row=e('div',null,'party'),info=e('div');info.append(e('b',p.role));p.lines.forEach(function(l){info.append(e('p',l))});
-      var box=e('div',null,'sbox'),lab=e('span',null,'lab');
-      if(i===1){
-        var im=e('img');im.alt='서명';im.hidden=true;box.append(im);live.img=im;live.box=box;live.lab=lab;
-        if(res.signature){im.src=res.signature;im.hidden=false;lab.textContent='서명: '+res.signer_name+' · '+fmt(res.signed_at)}
-        else{box.classList.add('click');lab.textContent='(서명 또는 날인)';var hint=e('span','✍ 여기를 눌러 서명','hint');box.append(hint);live.hint=hint}
-      }else lab.textContent='전자 발송 · '+fmt(res.created_at);
+      var box=e('div',null,'sbox'),lab=e('span',null,'lab'),im=e('img');im.alt='서명';im.hidden=true;box.append(im);
+      var sig=i===mine?res.signature:(i===0?res.issuer_signature:null),nm=i===mine?res.signer_name:res.issuer_name,at=i===mine?res.signed_at:res.issuer_signed_at;
+      if(sig){im.src=sig;im.hidden=false;lab.textContent='서명: '+nm+' · '+fmt(at)}
+      else if(i===mine){live.img=im;live.box=box;live.lab=lab;box.classList.add('click');lab.textContent='(서명 또는 날인)';var hint=e('span','✍ 여기를 눌러 서명','hint');box.append(hint);live.hint=hint}
+      else lab.textContent=i===0?'(대표 날인 전)':'(서명 또는 날인)';
+      if(i===mine&&sig){live.img=im;live.box=box;live.lab=lab}
       box.append(lab);row.append(info,box);ps.append(row);
     });
     sg.append(ps);place(sg);
@@ -111,7 +112,7 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
     agree.addEventListener('change',check);check();
     function openModal(){
       var mo=e('div',null,'mo'),pn=e('div',null,'panel'),sp=pad(),name=e('input'),ok=e('button','확인'),cancel=e('button','취소','line'),clr=e('button','다시 쓰기','line');
-      name.type='text';name.placeholder='성함';name.autocomplete='name';name.value=st.name;
+      name.type='text';name.placeholder='성함';name.autocomplete='name';name.value=st.name||(res.role==='issuer'?'김동준':'');
       ok.type=cancel.type=clr.type='button';
       pn.append(e('h2','서명'),e('label','서명자 성함'),name,e('label','아래 칸에 손가락이나 마우스로 서명해 주세요'),sp.el);
       var row=e('div',null,'row');row.append(clr,cancel,ok);pn.append(row);mo.append(pn);document.body.append(mo);sp.init();
