@@ -363,9 +363,15 @@
       var lab=element('label','서명 링크'),input=element('input');input.type='text';input.readOnly=true;input.value=link;input.onfocus=function(){input.select()};
       out.append(lab,input);
       var text=inviteText(model),email=value(partner,'email'),r=row();
-      btn(r,'링크 복사',function(){copyText(link,'링크를 복사했어요.')},true);
-      btn(r,'안내 문구 복사',function(){copyText(text,'문구를 복사했어요. 링크는 따로 붙여넣어 주세요.')});
-      btn(r,'이메일로 보내기',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent(text.replace(/\n/g,'\r\n')+'\r\n\r\n'+link)});
+      function iconBtn(label,bg,fg,svg,fn){
+        var x=element('button');x.type='button';x.title=label;x.setAttribute('aria-label',label);
+        x.style.cssText='display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:700;color:#1d1d1f;padding:0';
+        var c=element('span');c.style.cssText='width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:'+bg+';color:'+fg;
+        c.innerHTML=svg;x.append(c,element('span',label));x.onclick=fn;r.append(x);
+      }
+      r.style.gap='20px';
+      iconBtn('카카오톡','#fee500','#191919','<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.4 2 10.6c0 2.7 1.8 5.1 4.6 6.4l-1 3.6c-.1.3.2.5.5.4l4.2-2.8c.6.1 1.1.1 1.7.1 5.5 0 10-3.4 10-7.7S17.5 3 12 3z"/></svg>',function(){copyText(text+'\n'+link,'카톡에 붙여넣을 문구와 링크를 복사했어요.')});
+      iconBtn('이메일','#e8f0fe','#1a56db','<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg>',function(){location.href='mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent('[BUFF UNIVERSE] '+model.project+' 용역 계약서 전자서명 요청')+'&body='+encodeURIComponent(text.replace(/\n/g,'\r\n')+'\r\n\r\n'+link)});
       out.append(r);
       var hint=element('p','같은 계약서는 링크가 하나로 유지돼요. 여러 번 보내도 한 번만 서명하면 완료됩니다. 내용을 고친 뒤에 다시 열면 새 링크가 만들어지고, 이전 링크는 취소돼요.');
       hint.style.cssText='font-size:13px;color:#6e6e73;margin-top:14px';out.append(hint);
