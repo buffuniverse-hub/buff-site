@@ -60,22 +60,29 @@ function wsCss(){
 .wl #works-grid>a>img,.wl #works-grid>a>div{border-radius:12px!important;margin-bottom:10px!important;aspect-ratio:16/9!important}
 .wl #works-grid>a>span:nth-of-type(1){font-size:17px!important;line-height:1.35!important}
 .wl #works-grid>a>span:nth-of-type(n+2){font-size:13.5px!important}
-.wl #works-grid>a:has(.wm)>span:nth-of-type(2){display:none!important}
-.wl .wm{display:block!important}
 .wl .wsec{display:none!important}
 @media(max-width:1000px){.wl #works-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:820px){.wl #works-grid{grid-template-columns:minmax(0,1fr)!important}}
 `;
   document.head.appendChild(style);
 }
-var SPN={lacrosse:'라크로스',basketball:'농구',tabletennis:'탁구',futsal:'풋살',baseball:'야구',football:'축구',flagfootball:'플래그풋볼',rugby:'럭비',other:'기타'},CTN={performance:'공연',event:'행사',product:'제품',other:'기타'};function metaOf(w){var a=(w.sports||[]).map(function(k){return SPN[k]||k});if(!a.length&&w.culture_type)a=[CTN[w.culture_type]||w.culture_type];var y=wYear(w);return a.concat(y?[y]:[]).join(' · ')}
+var SPN={lacrosse:'라크로스',basketball:'농구',tabletennis:'탁구',futsal:'풋살',baseball:'야구',football:'축구',flagfootball:'플래그풋볼',rugby:'럭비',other:'기타'},CTN={performance:'공연',event:'행사',product:'제품',other:'기타'};
+var WORK_CATEGORY_LABELS={marketing:'마케팅 기획',branding:'브랜딩 · 디자인',photo:'사진',video:'영상'};
+function metaOf(w,categories){
+  var sports=(w.sports||[]).map(function(key){return SPN[key]||key});
+  if(!sports.length&&w.culture_type)sports.push(CTN[w.culture_type]||w.culture_type);
+  var services=Object.keys(WORK_CATEGORY_LABELS).filter(function(key){
+    return categories.includes(key);
+  }).map(function(key){return WORK_CATEGORY_LABELS[key]});
+  return [wYear(w)].concat(services,sports).filter(Boolean).join(' · ');
+}
 function worksHtml(r,cat){return r.map(workCard).join('')}
 function workCard(w){
-  return '<a href="'+esc(wHref(w))+'" data-cat="'+esc((w.categories&&w.categories.length?w.categories:[w.category]).join(' '))+'" data-field="'+esc(w.field||'sports')+'" data-ctype="'+esc(w.culture_type||'')+'" data-sport="'+esc((w.sports||[]).join(' '))+'" data-year="'+esc(wYear(w))+'" data-mem="'+esc((w.members||[]).join('|'))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
+  var categories=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category];
+  return '<a href="'+esc(wHref(w))+'" data-cat="'+esc(categories.join(' '))+'" data-field="'+esc(w.field||'sports')+'" data-ctype="'+esc(w.culture_type||'')+'" data-sport="'+esc((w.sports||[]).join(' '))+'" data-year="'+esc(wYear(w))+'" data-mem="'+esc((w.members||[]).join('|'))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
   +'<div style="position: relative; overflow: hidden; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px; aspect-ratio: 16 / 9; width: 100%"><img draggable="false" src="'+esc(thumbOf(w))+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; height: 100%; object-fit: cover; object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"></div>'
   +'<span title="'+esc(w.title)+'" style="pointer-events: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
-  +'<span style="pointer-events: none; font-size: 17px; font-weight: 400; line-height: 1.47; color: #6E6E73">'+esc(tagOf(w))+'</span>'
-  +'<span class="wm" style="display: none; pointer-events: none">'+esc(metaOf(w))+'</span></a>';
+  +'<span class="wm" style="pointer-events: none; font-size: 17px">'+esc(metaOf(w,categories))+'</span></a>';
 }
 function newsCard(n){
   var d=n.published_at?String(n.published_at).slice(0,10).replace(/-/g,'.'):'';
@@ -405,9 +412,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
     var fields={sports:'SPORTS',culture:'LIFESTYLE'};
     var types={performance:'Performance',event:'Event',product:'Product',other:'Other'};
     var people=Object.create(null),controls=Object.create(null);
-    var categories=Array.from(bar.querySelectorAll('button[data-f]')).map(function(button){
-      return [button.getAttribute('data-f'),button.textContent.trim()];
-    }).filter(function(category){return category[0]!=='all'});
+    var categories=Object.entries(WORK_CATEGORY_LABELS);
     function emptyFilters(){return {f:'all',svc:'',sp:'',cu:'',y:'',m:''}}
     var params=new URLSearchParams(location.search),state=emptyFilters();
     var field=params.get('field')==='lifestyle'?'culture':params.get('field');
