@@ -16,7 +16,7 @@
         options=options||{};
         var family=options.bold?'Paperozi Bold':'Paperozi';
         return new D.TextRun({
-          text:text,font:{ascii:family,hAnsi:family,eastAsia:family,cs:family},
+          text:text,highlight:options.highlight,font:{ascii:family,hAnsi:family,eastAsia:family,cs:family},
           size:options.size||18,sizeComplexScript:options.size||18,color:options.color||ink
         });
       }
@@ -33,7 +33,14 @@
           width:{size:cols,type:D.WidthType.DXA},verticalAlign:D.VerticalAlign.CENTER,
           shading:options.fill?{type:D.ShadingType.CLEAR,fill:options.fill,color:'auto'}:undefined,
           margins:{left:140,right:140,top:73,bottom:73},
-          children:text.split('\n').map(function(line){return paragraph(line,Object.assign({line:255},options))})
+          children:text.split('\n').map(function(line){
+            var opts=Object.assign({line:255},options);
+            if(line.indexOf('\u27E6')<0)return paragraph(line,opts);
+            var runs=line.split(/(\u27E6[^\u27E7]*\u27E7)/).filter(Boolean).map(function(part){
+              return part.charAt(0)==='\u27E6'?run(part.slice(1,-1),Object.assign({},opts,{highlight:'yellow'})):run(part,opts);
+            });
+            return paragraph(runs,opts);
+          })
         });
       }
       var line={style:D.BorderStyle.SINGLE,size:4,color:'8E8E93'};

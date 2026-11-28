@@ -63,6 +63,7 @@
     '.ct-page p,.ct-page td,.ct-page th{font-size:9pt;line-height:1.55;white-space:pre-wrap}',
     '.ct-page p{margin:0 0 6px}.ct-page section>p{margin:0 0 10px}.ct-page table{border-collapse:collapse;width:100%;margin:14px 0}',
     '.ct-page td,.ct-page th{padding:7px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}',
+    '.ct-page mark{background:#ffe94d;color:inherit;padding:0 2px;border-radius:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
     '.ct-page th{width:27%;background:#f5f5f7}.ct-page thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-size:8.25pt}',
     '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{margin-top:20px;padding-top:6px;border-top:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:9.5pt}',
     '.ct-brand{position:absolute;left:0;right:0;bottom:0;height:34mm;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;box-sizing:border-box;background:#0a0a0a;color:#fff;padding:0 14mm 0 15mm}',
@@ -96,6 +97,12 @@
     ];
   }
   function currentParty(){return parties[type]||(parties[type]={});}
+  function markText(node,text){
+    String(text).split(/(\u27E6[^\u27E7]*\u27E7)/).forEach(function(part){
+      if(!part)return;
+      if(part.charAt(0)==='\u27E6'){var m=document.createElement('mark');m.textContent=part.slice(1,-1);node.append(m)}else node.append(document.createTextNode(part));
+    });
+  }
   function pad(n){return ('0'+n).slice(-2)}
   function todayIso(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
   function parseDate(raw){
@@ -220,7 +227,7 @@
     var rows=[
       ['계약 기간·업무',label(s,'start')+' ~ '+label(s,'end')+'\n'+label(s,'scope')],
       [scheduleLabel(),scheduleText()],
-      ['납품·수정',label(s,'deliverables')+'\n'+label(s,'due')+'까지 · 포함 수정 '+label(s,'revisions')+'회\n원본·편집 파일 '+label(s,'originals')+'\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
+      ['납품·수정','\u27E6'+label(s,'deliverables')+'\u27E7\n'+label(s,'due')+'까지 · \u27E6포함 수정 '+label(s,'revisions')+'회\u27E7\n\u27E6원본·편집 파일 '+label(s,'originals')+'\u27E7\n'+(link||'BUFF 지정 업로드 링크 별도 안내')],
       ['용역대금·지급', (fee?Number(fee).toLocaleString('ko-KR')+'원':'________________원')+' / '+label(partner,'settlement')+'\n'+label(s,'payDue')+' · '+label(s,'payment')+'\n경비 '+label(s,'expenses')],
       ['저작재산권 지분',Number.isInteger(share)&&share>=1&&share<=99?'BUFF '+share+'% / 파트너 '+(100-share)+'%':'공동 지분 기재'],
       ['BUFF·고객사 이용',label(s,'use')+'\n이용 기간 제한 없음'],
@@ -257,7 +264,7 @@
     itemHead.append(element('small','ITEM'));detailHead.append(element('small','PROJECT DETAILS'));
     headRow.append(itemHead,detailHead);
     head.append(headRow);
-    model.rows.forEach(function(row){var tr=element('tr'),th=element('th',row[0]);th.scope='row';tr.append(th,element('td',row[1]));body.append(tr)});
+    model.rows.forEach(function(row){var tr=element('tr'),th=element('th',row[0]);th.scope='row';var td=element('td');markText(td,row[1]);tr.append(th,td);body.append(tr)});
     table.append(head,body);
     var signature=element('div');signature.className='ct-signature';
     signature.append(element('p',model.signature[0]));
@@ -384,7 +391,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-5')})
+      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-20')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
