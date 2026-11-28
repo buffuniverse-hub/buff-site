@@ -117,7 +117,7 @@ window.buffRest=rest;window.buffToast=toast;
 })();
 var TABS=[
   ['home','메인'],['news','NEWS'],['works','WORKS'],['clients','CLIENTS'],
-  ['career_positions','CAREERS'],['team_members','ABOUT US'],['invoice','인보이스'],['quotation','견적서'],['contract','계약서']
+  ['career_positions','CAREERS'],['team_members','ABOUT US'],['invoice','인보이스'],['quotation','견적서'],['contract','계약서'],['partners','파트너 관리']
 ];
 var CAREER_TABS=[['career_positions','채용 공고'],['settings','페이지 문구']];
 var DOC_TABS={invoice:'inv',quotation:'qt'};
@@ -146,6 +146,7 @@ function go(k){
     if(request!==navigation)return;
     if(documents)return window.openInvoiceTab(documents);
     if(k==='contract')return window.openContractTab();
+    if(k==='partners')return window.openPartnersTab();
     if(k==='settings')return drawSettings();
     if(k==='home')return drawHome();
     return drawList(k);

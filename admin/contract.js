@@ -2,9 +2,9 @@
   'use strict';
 
   var templates={
-    freelance:{title:'개인 프리랜서',fields:[['partner','성명'],['contact','연락처']],settlement:['세전 총액 (원천징수 해당 시 공제)','실수령액 (원천징수 해당 시 세전 환산)','원천징수 대상 아님']},
-    business:{title:'개인사업자',fields:[['partner','상호'],['representative','대표자'],['registration','사업자등록번호'],['address','사업장 주소'],['contact','연락처']],settlement:['부가세 별도','부가세 포함','부가세 해당 없음','원천징수 대상 (세전 총액)','원천징수 대상 (실수령액)']},
-    company:{title:'법인사업자',fields:[['partner','법인 상호'],['representative','대표자'],['registration','사업자등록번호'],['address','본점 주소'],['signer','서명자 성명·직위 (대표자 대리 시)'],['contact','연락처']],settlement:['부가세 별도','부가세 포함','부가세 해당 없음']}
+    freelance:{title:'개인 프리랜서',fields:[['partner','성명'],['contact','전화번호'],['email','이메일']],settlement:['세전 총액 (원천징수 해당 시 공제)','실수령액 (원천징수 해당 시 세전 환산)','원천징수 대상 아님']},
+    business:{title:'개인사업자',fields:[['partner','상호'],['representative','대표자'],['registration','사업자등록번호'],['address','사업장 주소'],['contact','전화번호'],['email','이메일']],settlement:['부가세 별도','부가세 포함','부가세 해당 없음','원천징수 대상 (세전 총액)','원천징수 대상 (실수령액)']},
+    company:{title:'법인사업자',fields:[['partner','법인 상호'],['representative','대표자'],['registration','사업자등록번호'],['address','본점 주소'],['signer','서명자 성명·직위 (대표자 대리 시)'],['contact','전화번호'],['email','이메일']],settlement:['부가세 별도','부가세 포함','부가세 해당 없음']}
   };
   var groups=[
     ['프로젝트와 작업',[
@@ -13,8 +13,8 @@
     ]],
     ['납품과 보수',[
       ['deliverables','납품물·수량·형식','textarea'],['due','납품일','date'],
-      ['fee','보수 (원)','number'],['payDue','지급일','date'],
-      ['payment','지급 방식',['계좌이체','현금 지급']],['settlement','정산 기준']
+      ['fee','보수 (원)','number'],['settlement','정산 기준'],
+      ['payment','지급 방식',['계좌이체','현금 지급']],['payDue','지급일','date']
     ]],
     ['이용 조건',[
       ['use','BUFF·고객사 이용 매체·지역','textarea'],['credit','파트너 크레딧']
@@ -152,7 +152,7 @@
       var items=schedules();list.replaceChildren();
       items.forEach(function(item,index){
         var row=element('div');row.className='ct-schedule';
-        var fields=[['date','날짜','date'],['place','장소 (또는 원격)'],['startTime','시작 시간','time'],['endTime','종료 시간','time']];
+        var fields=[['date','날짜','date'],['startTime','시작 시간','time'],['endTime','종료 시간','time'],['place','장소 (또는 원격)']];
         addFields(row,'일정 '+(index+1),fields,item,false,'schedule-'+index+'-');
         if(items.length>1){
           var actions=element('div'),remove=element('button','일정 삭제');
@@ -365,6 +365,7 @@
     var operation=previous?patch(previous,body):request('POST','select=id,revision',body,RETURN_ROW).then(function(rows){return rows&&rows[0]});
     return operation.then(function(row){
       if(!row)throw new Error('저장 결과를 확인하지 못했습니다.');
+      if(window.buffPartners&&(value(partner,'contact')||value(partner,'email')))window.buffPartners.upsert({name:name,phone:partner.contact,email:partner.email,variant:selected}).catch(function(){});
       if(shared===data){
         record=row;
         dirty=JSON.stringify(body.data)!==JSON.stringify({fields:shared,partner:currentParty()})||type!==selected;
@@ -394,7 +395,29 @@
     function drawFields(){
       var template=templates[type],partner=currentParty();
       fields.replaceChildren();
+      var pick=element('div'),pickSel=element('select'),pickLabel=element('label','저장된 파트너 불러오기');
+      pick.className='ct-field';pickLabel.htmlFor='ct-pick';pickSel.id='ct-pick';pickSel.append(element('option','선택 안 함'));
+      pick.append(pickLabel,pickSel);fields.append(pick);
+      if(window.buffPartners)window.buffPartners.list().then(function(rows){
+        if(!pickSel.isConnected)return;
+        rows.forEach(function(r,i){var o=element('option',r.name+(r.phone?' · '+r.phone:''));o.value=i;pickSel.append(o)});
+        pickSel.onchange=function(){
+          var r=rows[pickSel.value];if(!r)return;
+          if(r.variant&&templates[r.variant])type=r.variant;
+          var p=currentParty();p.partner=r.name;p.contact=r.phone||'';p.email=r.email||'';
+          chooser.value=type;dirty=true;drawFields();
+        };
+      }).catch(function(){});
       addFields(fields,'수행자',template.fields,partner);
+      var keep=element('button','파트너 정보 저장 (이름·전화·이메일)');keep.type='button';keep.className='btn line sm';keep.style.margin='-6px 0 16px';
+      keep.onclick=function(){
+        var p=currentParty();
+        if(!value(p,'partner')){window.buffToast('수행자 이름 또는 상호를 먼저 입력해 주세요.',true);return}
+        keep.disabled=true;
+        window.buffPartners.upsert({name:p.partner,phone:p.contact,email:p.email,variant:type}).then(function(){window.buffToast('파트너 관리에 저장했어요.')})
+          .catch(function(e){window.buffToast(e.message,true)}).finally(function(){keep.disabled=false});
+      };
+      fields.append(keep);
       groups.forEach(function(group,index){
         var inputs=group[1].map(function(field){return field[0]==='settlement'?['settlement','정산 기준',template.settlement]:field});
         addFields(fields,group[0],inputs,shared,group[2]);
