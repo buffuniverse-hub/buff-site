@@ -62,6 +62,7 @@
     '.ct-page p,.ct-page td,.ct-page th{font-size:9pt;line-height:1.55;white-space:pre-wrap}',
     '.ct-page p{margin:0 0 6px}.ct-page section>p{margin:0 0 10px}.ct-page table{border-collapse:collapse;width:100%;margin:14px 0}',
     '.ct-page td,.ct-page th{padding:7px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}',
+    '.ct-tight h2{font-size:28pt!important;margin:0 0 8mm!important}.ct-tight .ct-doc-head{margin-bottom:6mm!important}.ct-tight .ct-intro{margin-bottom:6mm!important}.ct-tight td,.ct-tight th{padding:5px 9px!important;font-size:8.75pt!important}',
     '.ct-page mark{background:#ffe94d;color:inherit;padding:0 2px;border-radius:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
     '.ct-page th{width:27%;background:#f5f5f7}.ct-page thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-size:8.25pt}',
     '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{margin-top:20px;padding-top:6px;border-top:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:9.5pt}',
@@ -311,7 +312,17 @@
       if(body.children.length>1&&body.scrollHeight>body.clientHeight+1){node.remove();addPage();body.append(node)}
     }
     addPage();body.parentNode.classList.add('ct-cover');var wrap=element('div');wrap.className='ct-tablewrap';wrap.append(table);body.append(title,info,intro,wrap);
-    addPage();
+    var coverPage=body.parentNode,spilled=false;
+    function over(){return body.scrollHeight>body.clientHeight+1}
+    if(over())coverPage.classList.add('ct-tight');
+    if(over()){
+      spilled=true;coverPage.classList.remove('ct-cover','ct-tight');wrap.remove();
+      var head=table.tHead,rows=[].slice.call(table.tBodies[0].rows);
+      var chunk=function(){var c=element('table'),tb=element('tbody');c.append(head.cloneNode(true),tb);c.style.margin='0 0 14px';body.append(c);return tb};
+      var tb=chunk();
+      rows.forEach(function(r){tb.append(r);if(tb.rows.length>1&&over()){r.remove();addPage();tb=chunk();tb.append(r)}});
+    }
+    if(!spilled)addPage();
     model.clauses.forEach(function(clause){
       var section=element('section');
       section.append(element('h3',clause[0]),element('p',clause[1]));
