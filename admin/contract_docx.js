@@ -17,14 +17,14 @@
         var family=options.bold?'Paperozi Bold':'Paperozi';
         return new D.TextRun({
           text:text,font:{ascii:family,hAnsi:family,eastAsia:family,cs:family},
-          size:options.size||20,sizeComplexScript:options.size||20,color:options.color||ink
+          size:options.size||19,sizeComplexScript:options.size||19,color:options.color||ink
         });
       }
       function paragraph(text,options){
         options=options||{};
         return new D.Paragraph({
           heading:options.heading,keepNext:options.keepNext,alignment:options.align,
-          children:Array.isArray(text)?text:[run(text,options)],spacing:{before:options.before||0,after:options.after||0,line:options.line||292}
+          children:Array.isArray(text)?text:[run(text,options)],spacing:{before:options.before||0,after:options.after||0,line:options.line||270}
         });
       }
       function cell(text,cols,options){
@@ -69,16 +69,16 @@
         rows:[new D.TableRow({children:[metaCell(partner,partnerWidth),metaCell(details,width-partnerWidth)]})]
       });
       var children=[
-        paragraph([run(model.title,{size:68,bold:true}),run('   '+model.subtitle,{size:32})],
+        paragraph([run(model.title,{size:56,bold:true}),run('   '+model.subtitle,{size:27})],
           {heading:D.HeadingLevel.TITLE,line:300,after:340,keepNext:true}),
         header,paragraph(model.intro,{before:160,after:140,keepNext:true}),table
       ];
       model.clauses.forEach(function(clause){
-        children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:23,before:175,after:55,keepNext:true}));
+        children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:21,before:160,after:55,keepNext:true}));
         clause[1].split('\n\n').forEach(function(block){children.push(paragraph(block,{after:70}))});
       });
       model.signature.forEach(function(text,index){
-        children.push(paragraph(text,{before:index===0?280:125,bold:index===0,keepNext:index<model.signature.length-1}));
+        children.push(paragraph(text,{before:index===0?180:85,bold:index===0,keepNext:index<model.signature.length-1}));
       });
       var logo=new D.Paragraph({children:[
         new D.ImageRun({type:'png',data:assets[2],transformation:{width:96,height:30},altText:{title:'BUFF',description:'BUFF 로고',name:'BUFF'}})
@@ -101,7 +101,7 @@
       var doc=new D.Document({
         creator:'BUFF UNIVERSE',title:'BUFF '+model.subtitle,
         fonts:[{name:'Paperozi',data:assets[0],characterSet:D.CharacterSet.HANGUL},{name:'Paperozi Bold',data:assets[1],characterSet:D.CharacterSet.HANGUL}],
-        styles:{default:{document:{run:{font:{ascii:'Paperozi',hAnsi:'Paperozi',eastAsia:'Paperozi',cs:'Paperozi'},color:ink,size:20}},title:{run:{color:black}}}},
+        styles:{default:{document:{run:{font:{ascii:'Paperozi',hAnsi:'Paperozi',eastAsia:'Paperozi',cs:'Paperozi'},color:ink,size:19}},title:{run:{color:black}}}},
         sections:[{properties:{page:{size:{width:pageWidth,height:16838},margin:{left:margin,right:margin,top:840,bottom:1450,footer:0}}},footers:{default:footer},children:children}]
       });
       return D.Packer.toBlob(doc);

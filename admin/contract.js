@@ -45,7 +45,7 @@
     '.ct-field label{font-size:13px;font-weight:600}.ct-field input,.ct-field select,.ct-field textarea{width:100%;min-width:0}',
     '.ct-field textarea{min-height:66px;resize:vertical}',
     '.ct-paper{--ct-inset:clamp(18px,3vw,36px);overflow:hidden;overflow-wrap:anywhere;font-family:ContractPaper,Paperozi,sans-serif;color:#1d1d1f;padding:var(--ct-inset)}',
-    '.ct-paper h2{display:flex;align-items:baseline;gap:7px 13px;flex-wrap:wrap;font-size:clamp(24px,3.15vw,44px);line-height:1.05;letter-spacing:-.035em;margin:0 0 24px}',
+    '.ct-paper h2{display:flex;align-items:baseline;gap:7px 13px;flex-wrap:wrap;font-size:clamp(22px,2.6vw,36px);line-height:1.05;letter-spacing:-.035em;margin:0 0 20px}',
     '.ct-paper .ct-subtitle{font-size:.47em;font-weight:400;letter-spacing:.075em;white-space:nowrap}',
     '.ct-doc-head{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin:0 0 19px}.ct-doc-head section:last-child{text-align:right}',
     '.ct-paper .ct-doc-head p{margin:0 0 2px}.ct-paper .ct-doc-head .ct-meta{margin-bottom:8px}',
@@ -55,14 +55,14 @@
     '.ct-brand{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;background:#0a0a0a;color:#fff;padding:16px var(--ct-inset);margin:23px calc(-1 * var(--ct-inset)) calc(-1 * var(--ct-inset));break-inside:avoid}',
     '.ct-brand img{display:block;width:96px;height:30px;object-fit:contain}.ct-brand div{text-align:right}.ct-paper .ct-brand p{font-size:11px;margin:0;line-height:1.45}',
     '.ct-list{display:grid;gap:8px}.ct-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 15px}.ct-list-row b,.ct-list-row small{display:block}.ct-list-row small{color:var(--mute);margin-top:3px}.ct-tools label{display:flex;align-items:center;gap:6px;font-size:14px}',
-    '.ct-paper h3{font-size:16px;margin:14px 0 4px}',
-    '.ct-paper p,.ct-paper td,.ct-paper th{font-size:14px;line-height:1.55;white-space:pre-wrap}',
+    '.ct-paper h3{font-size:14px;margin:12px 0 4px}',
+    '.ct-paper p,.ct-paper td,.ct-paper th{font-size:13px;line-height:1.55;white-space:pre-wrap}',
     '.ct-paper p{margin:0 0 6px}.ct-paper table{border-collapse:collapse;width:100%;margin:14px 0}',
     '.ct-paper td,.ct-paper th{padding:7px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}',
     '.ct-paper th{width:27%;background:#f5f5f7}.ct-signature{border-top:1px solid var(--line);padding-top:10px;margin-top:18px}',
     '@media(max-width:900px){.ct-grid{grid-template-columns:minmax(0,1fr)}}',
     '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel{padding:15px}.ct-paper{--ct-inset:15px}.ct-brand img{width:66px;height:auto}}',
-    '@media print{@page{size:A4;margin:16mm}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0;overflow:visible}.ct-brand{margin:18px 0 0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:20px}.ct-paper p,.ct-paper td,.ct-paper th{font-size:10pt}}'
+    '@media print{@page{size:A4;margin:16mm}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0;overflow:visible}.ct-brand{margin:18px 0 0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:18pt}.ct-paper h3{font-size:10.5pt}.ct-paper p,.ct-paper td,.ct-paper th{font-size:9.5pt}.ct-paper .ct-brand p{font-size:8pt}}'
   ].join('\n');
 
   function element(tag,text){
@@ -226,7 +226,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=invoice-layout-1')})
+      .then(function(){return loadScript('contract_docx.js?v=compact-type-1')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
