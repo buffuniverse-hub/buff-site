@@ -435,7 +435,7 @@
     var operation=previous?patch(previous,body):request('POST','select=id,revision',body,RETURN_ROW).then(function(rows){return rows&&rows[0]});
     return operation.then(function(row){
       if(!row)throw new Error('저장 결과를 확인하지 못했습니다.');
-      if(window.buffPartners&&(value(partner,'contact')||value(partner,'email')))window.buffPartners.upsert({name:name,phone:partner.contact,email:partner.email,variant:selected}).catch(function(){});
+      if(window.buffPartners&&name)window.buffPartners.upsert({name:name,phone:partner.contact,email:partner.email,variant:selected}).catch(function(){});
       if(shared===data){
         record=row;
         dirty=JSON.stringify(body.data)!==JSON.stringify({fields:shared,partner:currentParty()})||type!==selected;
@@ -466,7 +466,7 @@
       var template=templates[type],partner=currentParty();
       fields.replaceChildren();
       var pick=element('div'),pickSel=element('select'),pickLabel=element('label','저장된 파트너 불러오기');
-      pick.className='ct-field';pick.style.marginBottom='22px';pickLabel.htmlFor='ct-pick';pickSel.id='ct-pick';pickSel.append(element('option','선택 안 함'));
+      pick.className='ct-field';pickLabel.htmlFor='ct-pick';pickSel.id='ct-pick';pickSel.append(element('option','선택 안 함'));
       pick.append(pickLabel,pickSel);fields.append(pick);
       if(window.buffPartners)window.buffPartners.list().then(function(rows){
         if(!pickSel.isConnected)return;
@@ -479,15 +479,22 @@
         };
       }).catch(function(){});
       addFields(fields,'수행자',template.fields,partner);
-      var keep=element('button','파트너 정보 저장 (이름·전화·이메일)');keep.type='button';keep.className='btn line sm';keep.style.margin='-6px 0 16px';
+      var group=fields.lastElementChild,gridEl=group.querySelector('.ct-fields');
+      pick.style.marginBottom='14px';group.insertBefore(pick,gridEl);
+      var phoneBox=group.querySelector('#ct-contact'),mailBox=group.querySelector('#ct-email');
+      if(phoneBox){phoneBox.inputMode='tel';phoneBox.placeholder='010-0000-0000';phoneBox.addEventListener('change',function(){
+        if(phoneBox.value.indexOf('@')>=0&&mailBox&&!mailBox.value){mailBox.value=phoneBox.value.trim();phoneBox.value='';partner.email=mailBox.value;partner.contact='';mailBox.dispatchEvent(new Event('input',{bubbles:true}));phoneBox.dispatchEvent(new Event('input',{bubbles:true}));window.buffToast('이메일 주소라서 이메일 칸으로 옮겼어요.')}
+      })}
+      if(mailBox){mailBox.type='email';mailBox.placeholder='name@example.com';mailBox.parentNode.classList.add('ct-wide')}
+      var keep=element('button','＋ 이 수행자를 파트너로 등록');keep.type='button';keep.className='btn sm';keep.style.marginTop='14px';
       keep.onclick=function(){
         var p=currentParty();
         if(!value(p,'partner')){window.buffToast('수행자 이름 또는 상호를 먼저 입력해 주세요.',true);return}
         keep.disabled=true;
-        window.buffPartners.upsert({name:p.partner,phone:p.contact,email:p.email,variant:type}).then(function(){window.buffToast('파트너 관리에 저장했어요.')})
+        window.buffPartners.upsert({name:p.partner,phone:p.contact,email:p.email,variant:type}).then(function(){keep.textContent='✓ 파트너로 등록됨 (다시 누르면 정보 갱신)';window.buffToast('파트너 관리에 등록했어요.')})
           .catch(function(e){window.buffToast(e.message,true)}).finally(function(){keep.disabled=false});
       };
-      fields.append(keep);
+      group.append(keep);
       groups.forEach(function(group,index){
         var inputs=group[1].map(function(field){return field[0]==='settlement'?['settlement','정산 기준',template.settlement]:field});
         addFields(fields,group[0],inputs,shared,group[2]);
