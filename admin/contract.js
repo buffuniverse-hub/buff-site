@@ -65,7 +65,7 @@
     '.ct-tight h2{font-size:28pt!important;margin:0 0 8mm!important}.ct-tight .ct-doc-head{margin-bottom:6mm!important}.ct-tight .ct-intro{margin-bottom:6mm!important}.ct-tight td,.ct-tight th{padding:5px 9px!important;font-size:8.75pt!important}',
     '.ct-page mark{background:#ffe94d;color:inherit;padding:0 2px;border-radius:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
     '.ct-page th{width:27%;background:#f5f5f7}.ct-page thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-size:8.25pt}',
-    '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{margin-top:20px;padding-top:6px;border-top:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:9.5pt}',
+    '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:block}.ct-sign-grid .ct-party{display:grid;grid-template-columns:minmax(0,1fr) 64mm;gap:8mm;align-items:end;padding:5mm 0;border-top:1px solid #e5e5ea}.ct-sign-grid .ct-party:first-child{border-top:0;padding-top:0}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{position:relative;height:27mm;margin:0;border:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:8.5pt}.ct-sign-line span{position:absolute;right:6px;bottom:4px}',
     '.ct-brand{position:absolute;left:0;right:0;bottom:0;height:34mm;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;box-sizing:border-box;background:#0a0a0a;color:#fff;padding:0 14mm 0 15mm}',
     '.ct-brand img{display:block;width:125px;height:auto}.ct-brand div{text-align:right}.ct-page .ct-brand p{font-size:8pt;margin:0;line-height:1.45}',
     '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel{padding:15px}}',
@@ -280,7 +280,7 @@
     var signature=element('div');signature.className='ct-signature';
     signature.append(element('p',model.signature[0]));
     var parties=element('div');parties.className='ct-sign-grid';
-    model.signParties.forEach(function(party){var box=element('div'),head=element('b',party.role);box.append(head);party.lines.forEach(function(line){box.append(element('p',line))});var sig=element('p','(서명 또는 날인)');sig.className='ct-sign-line';box.append(sig);parties.append(box)});
+    model.signParties.forEach(function(party){var row=element('div'),box=element('div'),head=element('b',party.role);row.className='ct-party';box.append(head);party.lines.forEach(function(line){box.append(element('p',line))});var sig=element('div');sig.className='ct-sign-line';sig.append(element('span','(서명 또는 날인)'));row.append(box,sig);parties.append(row)});
     signature.append(parties);
     var title=element('h2',model.title),subtitle=element('span',model.subtitle);
     subtitle.className='ct-subtitle';title.append(subtitle);

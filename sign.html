@@ -23,17 +23,17 @@ main{max-width:860px;margin:0 auto;padding:16px 12px 120px}.panel{max-width:210m
 .tight h1{font-size:28pt;margin:2mm 0 8mm}.tight .head{margin-bottom:6mm}.tight .intro{margin-bottom:6mm}.tight td,.tight th{padding:5px 9px;font-size:8.75pt}.cover .pb{display:flex;flex-direction:column}.cover .tw{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding-bottom:16mm}.cover table{flex:1 1 auto;height:100%}
 .pg h3{font-size:10pt;margin:20pt 0 6pt}.pg .pb>section:first-child h3{margin-top:0}.pg section>p{margin:0 0 10px}
 .sign-t{border-top:1px solid #d2d2d7;margin-top:26px;padding-top:14px}.pg .sign-t>p{font-size:13pt;font-weight:700;margin:0 0 16px}
-.parties{display:grid;grid-template-columns:1fr 1fr;gap:10mm}.parties b{display:block;font-size:12pt;margin-bottom:8px}.pg .parties p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}
-.sl{margin-top:22mm;border-top:1px solid #1d1d1f;padding-top:6px;text-align:right;color:#6e6e73;font-size:9.5pt;position:relative}.sl img{position:absolute;right:4px;bottom:calc(100% - 1px);max-height:19mm;max-width:75%}
+.party{display:grid;grid-template-columns:minmax(0,1fr) 64mm;gap:8mm;align-items:end;padding:5mm 0;border-top:1px solid #e5e5ea}.party:first-child{border-top:0;padding-top:0}.party b{display:block;font-size:12pt;margin-bottom:8px}.pg .party p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}
+.sbox{position:relative;height:27mm;border:1px solid #1d1d1f;background:#fff}.sbox img{position:absolute;inset:3mm 3mm 7mm;width:calc(100% - 6mm);height:calc(100% - 10mm);object-fit:contain}.sbox .lab{position:absolute;right:6px;bottom:4px;font-size:8.5pt;color:#6e6e73}.sbox .hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:700;color:#0071e3}.sbox [hidden]{display:none!important}.sbox.click{border:2px dashed #0071e3;background:#f2f8ff;cursor:pointer}.sbox.click:hover{background:#e6f1ff}.sbox.click.done{border:1px solid #1d1d1f;background:#fff}
 .brand{position:absolute;left:0;right:0;bottom:0;height:34mm;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;background:#0a0a0a;color:#fff;padding:0 14mm 0 15mm}.brand img{display:block;width:125px;height:auto}.brand div{text-align:right}.pg .brand p{font-size:8pt;margin:0;line-height:1.45}
-.panel{background:#fff;border-radius:14px;padding:18px;margin-bottom:14px}.panel h2{font-size:17px;margin:0 0 12px}
+.panel{background:#fff;border-radius:14px;padding:18px;margin-bottom:14px}.mo{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}.mo .panel{width:100%;max-width:520px;margin:0}.panel h2{font-size:17px;margin:0 0 12px}
 label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input[type=text]{width:100%;padding:12px;border:1px solid #d2d2d7;border-radius:10px;font:inherit;font-size:16px}
 canvas{width:100%;height:170px;border:1px dashed #86868b;border-radius:10px;background:#fafafc;touch-action:none;display:block}
 .row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}.chk{display:flex;gap:8px;align-items:flex-start;font-size:14px;font-weight:400;line-height:1.5}.chk input{margin-top:3px;width:18px;height:18px}
 button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a0a0a;color:#fff;font-weight:700;font-size:15px;cursor:pointer}button.line{background:#fff;color:#1d1d1f;border:1px solid #d2d2d7}button:disabled{opacity:.4}
 .err{color:#d70015;font-size:14px;margin-top:10px;min-height:18px}.audit{font-size:12px;color:#6e6e73;line-height:1.6;word-break:break-all}
 .ok{background:#e8f7ec;color:#0a6b2a;border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:15px;font-weight:700}
-@media print{@page{size:A4;margin:0}body{background:#fff}header,.panel,.noprint{display:none!important}main{padding:0;max-width:none}.sheets{display:block}.pg{zoom:1!important;box-shadow:none;margin:0;break-after:page;height:296mm}.pg:last-child{break-after:auto}}
+@media print{.sbox.click{border:1px solid #1d1d1f!important;background:#fff!important;cursor:auto}.sbox .hint{display:none}@page{size:A4;margin:0}body{background:#fff}header,.panel,.noprint{display:none!important}main{padding:0;max-width:none}.sheets{display:block}.pg{zoom:1!important;box-shadow:none;margin:0;break-after:page;height:296mm}.pg:last-child{break-after:auto}}
 </style>
 </head>
 <body>
@@ -76,14 +76,14 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
     var sg=e('div',null,'sign-t');sg.append(e('p',s.signature[0]));
     var ps=e('div',null,'parties');
     s.signParties.forEach(function(p,i){
-      var box=e('div');box.append(e('b',p.role));p.lines.forEach(function(l){box.append(e('p',l))});
-      var sl=e('div',null,'sl');
+      var row=e('div',null,'party'),info=e('div');info.append(e('b',p.role));p.lines.forEach(function(l){info.append(e('p',l))});
+      var box=e('div',null,'sbox'),lab=e('span',null,'lab');
       if(i===1){
-        var im=e('img');im.alt='서명';im.hidden=true;sl.append(im);live.img=im;
-        var nm=e('span','(서명 또는 날인)');sl.append(nm);live.name=nm;
-        if(res.signature){im.src=res.signature;im.hidden=false;nm.textContent='서명: '+res.signer_name+' · '+fmt(res.signed_at)}
-      }else sl.append(e('span','전자 발송 · '+fmt(res.created_at)));
-      box.append(sl);ps.append(box);
+        var im=e('img');im.alt='서명';im.hidden=true;box.append(im);live.img=im;live.box=box;live.lab=lab;
+        if(res.signature){im.src=res.signature;im.hidden=false;lab.textContent='서명: '+res.signer_name+' · '+fmt(res.signed_at)}
+        else{box.classList.add('click');lab.textContent='(서명 또는 날인)';var hint=e('span','✍ 여기를 눌러 서명','hint');box.append(hint);live.hint=hint}
+      }else lab.textContent='전자 발송 · '+fmt(res.created_at);
+      box.append(lab);row.append(info,box);ps.append(row);
     });
     sg.append(ps);place(sg);
     return sheets;
@@ -103,25 +103,35 @@ button{font:inherit;border:0;border-radius:12px;padding:13px 20px;background:#0a
     return {el:c,init:size,clear:function(){size();c.dispatchEvent(new Event('ink'))},has:function(){return has},data:function(){return c.toDataURL('image/png')}};
   }
   function form(res){
-    var p=e('div',null,'panel noprint'),sp=pad(),name=e('input'),agree=e('input'),go=e('button','서명 완료'),err=e('div',null,'err');
-    name.type='text';name.placeholder='성함';name.autocomplete='name';agree.type='checkbox';
-    p.append(e('h2','서명하기'),e('label','서명자 성함'),name,e('label','서명 (아래 칸에 손가락이나 마우스로 서명)'),sp.el);
-    var clr=e('button','다시 쓰기','line');clr.type='button';clr.style.marginTop='10px';clr.onclick=sp.clear;p.append(clr);
+    var p=e('div',null,'panel noprint'),agree=e('input'),go=e('button','서명 완료'),err=e('div',null,'err'),st={name:'',data:''};
+    agree.type='checkbox';
+    p.append(e('h2','서명하기'),e('p','계약서 아래쪽 파란 점선 칸을 눌러 서명해 주세요.'));
     var lab=e('label',null,'chk');lab.append(agree,e('span','위 계약서의 내용을 모두 확인했으며, 이 전자서명이 직접 서명한 것과 동일한 효력을 가짐에 동의합니다.'));p.append(lab,go,err);
-    var raf=0;
-    function liveUpdate(){
-      if(!live.img)return;
-      if(sp.has()){live.img.src=sp.data();live.img.hidden=false}else live.img.hidden=true;
-      live.name.textContent=name.value.trim()?'서명: '+name.value.trim()+' (서명 중)':'(서명 또는 날인)';
+    function check(){go.disabled=!(st.name&&st.data&&agree.checked)}
+    agree.addEventListener('change',check);check();
+    function openModal(){
+      var mo=e('div',null,'mo'),pn=e('div',null,'panel'),sp=pad(),name=e('input'),ok=e('button','확인'),cancel=e('button','취소','line'),clr=e('button','다시 쓰기','line');
+      name.type='text';name.placeholder='성함';name.autocomplete='name';name.value=st.name;
+      ok.type=cancel.type=clr.type='button';
+      pn.append(e('h2','서명'),e('label','서명자 성함'),name,e('label','아래 칸에 손가락이나 마우스로 서명해 주세요'),sp.el);
+      var row=e('div',null,'row');row.append(clr,cancel,ok);pn.append(row);mo.append(pn);document.body.append(mo);sp.init();
+      function chk(){ok.disabled=!(name.value.trim()&&sp.has())}
+      [name,sp.el].forEach(function(x){x.addEventListener('input',chk);x.addEventListener('ink',chk)});chk();
+      clr.onclick=sp.clear;cancel.onclick=function(){mo.remove()};
+      ok.onclick=function(){
+        st.name=name.value.trim();st.data=sp.data();mo.remove();
+        live.img.src=st.data;live.img.hidden=false;live.lab.textContent='서명: '+st.name;
+        if(live.hint)live.hint.hidden=true;live.box.classList.add('done');check();
+      };
+      name.focus();
     }
-    function check(){go.disabled=!(name.value.trim()&&sp.has()&&agree.checked);cancelAnimationFrame(raf);raf=requestAnimationFrame(liveUpdate)}
-    [name,agree,sp.el].forEach(function(x){x.addEventListener('input',check);x.addEventListener('change',check);x.addEventListener('ink',check)});check();
+    live.box.onclick=openModal;
     go.onclick=function(){
       go.disabled=true;err.textContent='';
-      rpc('submit_signing',{p_token:token,p_name:name.value.trim(),p_signature:sp.data(),p_agent:navigator.userAgent}).then(function(){load()})
+      rpc('submit_signing',{p_token:token,p_name:st.name,p_signature:st.data,p_agent:navigator.userAgent}).then(function(){load()})
         .catch(function(x){err.textContent=x.message;go.disabled=false});
     };
-    return {el:p,init:sp.init};
+    return {el:p,init:function(){}};
   }
   function load(){
     if(!token)return msg('올바르지 않은 서명 링크입니다.');
