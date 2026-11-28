@@ -78,7 +78,7 @@ function workCardMeta(w,categories){
   var services=Object.keys(WORK_CARD_CATEGORY_LABELS).filter(function(key){
     return categories.includes(key);
   }).map(function(key){return WORK_CARD_CATEGORY_LABELS[key]});
-  return [wYear(w)].concat(services,kinds).filter(Boolean).join(', ');
+  return [wYear(w)].concat(services,kinds).filter(Boolean).join(' · ');
 }
 function worksHtml(r){return r.map(function(w){return workCard(w,true)}).join('')}
 function workCard(w,showMeta){
