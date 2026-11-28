@@ -55,14 +55,14 @@
     '.ct-brand{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;background:#0a0a0a;color:#fff;min-height:clamp(76px,12vw,126px);padding:16px var(--ct-inset);margin:23px calc(-1 * var(--ct-inset)) calc(-1 * var(--ct-inset));break-inside:avoid}',
     '.ct-brand img{display:block;width:clamp(78px,10vw,125px);height:auto;object-fit:contain}.ct-brand div{text-align:right}.ct-paper .ct-brand p{font-size:11px;margin:0;line-height:1.45}',
     '.ct-list{display:grid;gap:8px}.ct-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 15px}.ct-list-row b,.ct-list-row small{display:block}.ct-list-row small{color:var(--mute);margin-top:3px}.ct-tools label{display:flex;align-items:center;gap:6px;font-size:14px}',
-    '.ct-paper h3{font-size:14px;margin:12px 0 4px}',
+    '.ct-paper h3{font-size:14px;margin:28px 0 8px}.ct-paper section>p{margin:0 0 10px}',
     '.ct-paper p,.ct-paper td,.ct-paper th{font-size:12px;line-height:1.55;white-space:pre-wrap}',
     '.ct-paper p{margin:0 0 6px}.ct-paper table{border-collapse:collapse;width:100%;margin:14px 0}',
     '.ct-paper td,.ct-paper th{padding:7px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}',
     '.ct-paper th{width:27%;background:#f5f5f7}.ct-signature{border-top:1px solid var(--line);padding-top:10px;margin-top:18px}',
     '@media(max-width:900px){.ct-grid{grid-template-columns:minmax(0,1fr)}}',
     '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel{padding:15px}.ct-paper{--ct-inset:15px}.ct-brand img{width:66px;height:auto}}',
-    '@media print{@page{size:A4;margin:14mm 14mm 16mm 15mm}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{border:0;padding:0;overflow:visible}.ct-brand{margin:18px 0 0}.ct-paper tr,.ct-paper section,.ct-signature{break-inside:avoid}.ct-paper h2{font-size:27pt}.ct-paper h3{font-size:10pt}.ct-paper p,.ct-paper td,.ct-paper th{font-size:9pt}.ct-paper thead th{font-size:8.25pt}.ct-paper .ct-brand p{font-size:8pt}}'
+    '@media print{@page{size:A4;margin:0}body{background:white}.ct-paper{-webkit-print-color-adjust:exact;print-color-adjust:exact}header.top,nav.tabs,.ct-screen{display:none!important}main{padding:0!important;max-width:none!important}.ct-grid{display:block}.ct-paper{display:block;box-sizing:border-box;width:100%;border:0;padding:14mm 14mm 40mm 15mm;overflow:visible;-webkit-box-decoration-break:clone;box-decoration-break:clone}.ct-brand{position:fixed;left:0;right:0;bottom:0;height:34mm;min-height:0;margin:0;padding:0 14mm 0 15mm;box-sizing:border-box;border-radius:0}.ct-brand img{width:125px}.ct-paper tr,.ct-paper section{break-inside:avoid}.ct-paper h3{break-after:avoid}.ct-paper h2{font-size:27pt}.ct-paper h3{font-size:10pt;margin:20pt 0 6pt}.ct-paper p,.ct-paper td,.ct-paper th{font-size:9pt}.ct-paper thead th{font-size:8.25pt}.ct-paper .ct-brand p{font-size:8pt}}'
   ].join('\n');
 
   function element(tag,text){
@@ -226,7 +226,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-1')})
+      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-2')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);

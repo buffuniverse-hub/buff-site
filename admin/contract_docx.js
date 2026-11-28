@@ -74,8 +74,8 @@
         header,paragraph(model.intro,{before:160,after:140,keepNext:true}),table
       ];
       model.clauses.forEach(function(clause){
-        children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:20,before:160,after:55,keepNext:true}));
-        clause[1].split('\n\n').forEach(function(block){children.push(paragraph(block,{after:70}))});
+        children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:20,before:380,after:110,keepNext:true}));
+        clause[1].split('\n\n').forEach(function(block){children.push(paragraph(block,{after:130}))});
       });
       model.signature.forEach(function(text,index){
         children.push(paragraph(text,{before:index===0?180:85,bold:index===0,keepNext:index<model.signature.length-1}));
