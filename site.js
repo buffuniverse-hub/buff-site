@@ -40,7 +40,10 @@ function wsCss(){
 .wselect:hover,.wchoice[open] .wselect{border-color:#1D1D1F}
 .wselect.on{background:#000;color:#fff;border-color:#000}
 .wmenu{position:absolute;inset-block-start:calc(100% + 8px);inset-inline-start:50%;transform:translateX(-50%);box-sizing:border-box;width:max(100%,190px);max-height:min(280px,50vh);overflow:auto;overscroll-behavior:contain;padding:5px;border:1px solid #E0E0E5;border-radius:14px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.13)}
-.wgroup{padding:9px 9px 4px;margin:0;color:#6E6E73;font-size:11px;font-weight:700;line-height:1.3}
+.wmenu:has(.woption-group){scroll-padding-top:36px}
+.woption-group{margin-top:5px;padding-top:5px;border-top:1px solid #E0E0E5}
+.wgroup{position:sticky;top:0;z-index:1;margin:0 0 3px;padding:7px 9px;border-radius:6px;background:#F1F1F3;color:#424245;font-size:11px;font-weight:700;line-height:1.3}
+.woption-group .woption{padding-inline-start:12px}
 .woption{display:block;box-sizing:border-box;width:100%;min-height:38px;border:0;border-radius:8px;padding:8px 10px;background:transparent;color:#1D1D1F;text-align:start;font-size:13px;font-weight:500;line-height:1.35;overflow-wrap:anywhere;cursor:pointer}
 .woption:hover,.woption:focus-visible{background:#F1F1F3}
 .woption[aria-pressed="true"]{background:#000;color:#fff;font-weight:700}
@@ -68,21 +71,13 @@ function wsCss(){
 }
 var SPN={lacrosse:'라크로스',basketball:'농구',tabletennis:'탁구',futsal:'풋살',baseball:'야구',football:'축구',flagfootball:'플래그풋볼',rugby:'럭비',other:'기타'},CTN={performance:'공연',event:'행사',product:'제품',other:'기타'};
 var WORK_CATEGORY_LABELS={marketing:'마케팅 기획',branding:'브랜딩 · 디자인',photo:'사진',video:'영상'};
-function metaOf(w,categories){
-  var sports=(w.sports||[]).map(function(key){return SPN[key]||key});
-  if(!sports.length&&w.culture_type)sports.push(CTN[w.culture_type]||w.culture_type);
-  var services=Object.keys(WORK_CATEGORY_LABELS).filter(function(key){
-    return categories.includes(key);
-  }).map(function(key){return WORK_CATEGORY_LABELS[key]});
-  return [wYear(w)].concat(services,sports).filter(Boolean).join(' · ');
-}
 function worksHtml(r,cat){return r.map(workCard).join('')}
 function workCard(w){
   var categories=Array.isArray(w.categories)&&w.categories.length?w.categories:[w.category];
   return '<a href="'+esc(wHref(w))+'" data-cat="'+esc(categories.join(' '))+'" data-field="'+esc(w.field||'sports')+'" data-ctype="'+esc(w.culture_type||'')+'" data-sport="'+esc((w.sports||[]).join(' '))+'" data-year="'+esc(wYear(w))+'" data-mem="'+esc((w.members||[]).join('|'))+'" style="flex: 1 1 480px; min-width: 0; text-decoration: none; display: flex; flex-direction: column; align-items: stretch; text-align: center; gap: 8px; cursor: pointer">'
   +'<div style="position: relative; overflow: hidden; border-radius: 18px; background: #F5F5F7; margin-bottom: 16px; aspect-ratio: 16 / 9; width: 100%"><img draggable="false" src="'+esc(thumbOf(w))+'" alt="'+esc(w.title)+'" style="pointer-events: none; display: block; width: 100%; height: 100%; object-fit: cover; object-position: '+tx(w)+'% '+ty(w)+'%; transform: scale('+tz(w)/100+'); transform-origin: '+tx(w)+'% '+ty(w)+'%"></div>'
   +'<span title="'+esc(w.title)+'" style="pointer-events: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 24px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: #1D1D1F">'+esc(w.title)+'</span>'
-  +'<span class="wm" style="pointer-events: none; font-size: 17px">'+esc(metaOf(w,categories))+'</span></a>';
+  +'<span class="wm" style="pointer-events: none; font-size: 17px">'+esc(tagOf(w))+'</span></a>';
 }
 function newsCard(n){
   var d=n.published_at?String(n.published_at).slice(0,10).replace(/-/g,'.'):'';
@@ -408,9 +403,8 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
     var grid=document.getElementById('works-grid'),bar=document.querySelector('.wf');
     if(!grid||!bar||bar._w)return;
     bar._w=1;wsCss();
-    var T={"filters":"작업 필터","field":"분야","category":"분류","kind":"종목 · 유형","year":"연도","people":"인물","sport":"종목","type":"유형","sports":"SPORTS · 종목","culture":"LIFESTYLE · 유형","reset":"초기화","all":"전체","english":false};
+    var T={"filters":"작업 필터","field":"분야","category":"분류","kind":"종목 · 유형","year":"연도","people":"인물","sport":"종목","type":"유형","sports":"스포츠 종목","culture":"라이프스타일 유형","reset":"초기화","all":"전체","english":false};
     var fields={sports:'SPORTS',culture:'LIFESTYLE'};
-    var types={performance:'Performance',event:'Event',product:'Product',other:'Other'};
     var people=Object.create(null),controls=Object.create(null);
     var categories=Object.entries(WORK_CATEGORY_LABELS);
     function emptyFilters(){return {f:'all',svc:'',sp:'',cu:'',y:'',m:''}}
@@ -503,8 +497,14 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
       }
       var items=[option([initialValue,T.all])];
       groups.forEach(function(group){
-        if(group.label)items.push(node('p','wgroup',group.label));
-        items.push(...group.options.map(option));
+        var options=group.options.map(option);
+        if(!group.label){items.push(...options);return}
+        var section=node('div','woption-group');
+        section.setAttribute('role','group');
+        section.setAttribute('aria-label',group.label);
+        var heading=node('p','wgroup',group.label);
+        heading.setAttribute('aria-hidden','true');
+        section.append(heading,...options);items.push(section);
       });
       var isSelected=selection!==initialValue&&selectedLabel!==undefined;
       control.label.textContent=isSelected?selectedLabel:initialLabel;
@@ -537,7 +537,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fit
         });
       }
       if(state.f!=='culture')addKinds('sp','data-sport',' ',SPN,T.sports,state.sp);
-      if(state.f!=='sports')addKinds('cu','data-ctype','|',types,T.culture,state.cu);
+      if(state.f!=='sports')addKinds('cu','data-ctype','|',CTN,T.culture,state.cu);
       var kindLabel=state.f==='sports'?T.sport:state.f==='culture'?T.type:T.kind;
       showOptions('kind',state.sp?'sp:'+state.sp:state.cu?'cu:'+state.cu:'',kindLabel,'',kinds);
       var years=facetValues(inField,'data-year','|',state.y).sort().reverse();
