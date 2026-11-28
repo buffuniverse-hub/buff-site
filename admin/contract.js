@@ -346,7 +346,7 @@
       box.replaceChildren();
       var t=element('b','대표 날인 (일회용 링크)');t.style.cssText='display:block;margin-bottom:8px';box.append(t);
       loadSeal().then(function(sd){
-        if(sd){var c=element('div');c.style.cssText='border:1px solid #d2d2d7;border-radius:12px;padding:12px;margin-bottom:14px;background:#fff';var im=element('img');im.src=sd.signature;im.style.cssText='max-height:90px;display:block;margin-bottom:6px';c.append(im,element('span','등록됨 · '+sd.signer_name+' · '+new Date(sd.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})));box.append(c);renderPreview()}
+        if(sd){var c=element('div');c.style.cssText='border:1px solid #d2d2d7;border-radius:12px;padding:12px;margin-bottom:14px;background:#fff';var im=element('img');im.src=sd.signature;im.style.cssText='max-height:90px;display:block;margin-bottom:6px';c.append(im,element('span','등록됨 · '+sd.signer_name+' · '+new Date(sd.signed_at).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'})));box.append(c);try{renderPreview()}catch(x){}}
         else box.append(element('p','아직 등록된 날인이 없어요. 링크를 대표님께 보내 한 번만 받아두면 이후 모든 계약서 갑 칸에 자동으로 들어가요.'));
         var btnRow=element('div');btnRow.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
         var mk=element('button',sd?'새 날인 요청 링크 만들기':'날인 요청 링크 만들기');mk.type='button';mk.className='btn sm';
@@ -360,7 +360,9 @@
             r2.append(cp);box.append(r2,element('p','이 링크는 한 번만 쓸 수 있고 7일 뒤 만료돼요.'));
           }).catch(function(e){err.textContent=e.message;mk.disabled=false});
         };
-        btnRow.append(mk);box.append(btnRow);
+        btnRow.append(mk);
+        if(sd){var del=element('button','등록된 날인 삭제');del.type='button';del.className='btn line sm';del.onclick=function(){if(!confirm('등록된 대표 날인을 삭제할까요?\n이미 서명이 끝난 계약서에는 영향이 없어요.'))return;del.disabled=true;window.buffRest('DELETE','seal_requests','status=eq.signed').then(function(){window.buffToast('날인을 삭제했어요.');sealData=null;try{renderPreview()}catch(x){}draw()}).catch(function(e){err.textContent=e.message;del.disabled=false})};btnRow.append(del)}
+        box.append(btnRow);
       });
     }
     draw();foot.append(close);panel.append(element('h2','대표 날인'),box,err,foot);ov.append(panel);document.body.append(ov);
@@ -488,10 +490,10 @@
   }
   function drawList(offset){
     var main=document.getElementById('main'),title=element('h2','계약서 목록'),toolbar=element('div'),actions=element('div');
-    var header=element('div'),create=element('button','+ 계약서 작성'),toggle=element('button',archivedList?'작성 목록':'보관함');
+    var header=element('div'),create=element('button','+ 계약서 작성'),sealBtn=element('button','대표 날인 관리'),toggle=element('button',archivedList?'작성 목록':'보관함');
     var list=element('div'),loading=element('p','불러오는 중…');
     header.className='bar';actions.className='ct-tools';toolbar.className='ct-tools';list.className='ct-list';loading.className='muted';
-    create.type=toggle.type='button';create.className='btn';toggle.className='btn line';actions.append(toggle,create);header.append(title,actions);
+    create.type=toggle.type=sealBtn.type='button';create.className='btn';toggle.className=sealBtn.className='btn line';sealBtn.onclick=openSealDialog;actions.append(sealBtn,toggle,create);header.append(title,actions);
     main.replaceChildren(element('style',css),header,list,toolbar);list.append(loading);
     create.onclick=function(){var wasArchived=archivedList;clearDraft();archivedList=wasArchived;editing=true;drawEditor()};
     toggle.onclick=function(){archivedList=!archivedList;drawList(0)};
