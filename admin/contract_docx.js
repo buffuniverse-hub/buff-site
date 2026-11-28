@@ -77,8 +77,11 @@
         children.push(paragraph(clause[0],{heading:D.HeadingLevel.HEADING_2,bold:true,size:20,before:clauseIndex?380:0,after:110,keepNext:true,pageBreakBefore:clauseIndex===0}));
         clause[1].split('\n\n').forEach(function(block){children.push(paragraph(block,{after:130}))});
       });
-      model.signature.forEach(function(text,index){
-        children.push(paragraph(text,{before:index===0?180:85,bold:index===0,keepNext:index<model.signature.length-1}));
+      children.push(paragraph(model.signature[0],{before:360,after:200,bold:true,size:26,keepNext:true}));
+      model.signParties.forEach(function(party,index){
+        children.push(paragraph(party.role,{before:index?260:0,after:90,bold:true,size:24,keepNext:true}));
+        party.lines.forEach(function(text){children.push(paragraph(text,{after:50,size:21,keepNext:true}))});
+        children.push(paragraph('(서명 또는 날인) ______________________',{before:240,size:20,align:right,color:'6E6E73'}));
       });
       var issuer=model.issuer.map(function(text,index){
         return paragraph((index===0?'위탁자 · ':'')+text,{size:index===0?18:16,bold:index===0,color:index===0?white:'E5E5EA',align:right,line:225});

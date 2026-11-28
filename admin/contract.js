@@ -60,7 +60,7 @@
     '.ct-page p{margin:0 0 6px}.ct-page section>p{margin:0 0 10px}.ct-page table{border-collapse:collapse;width:100%;margin:14px 0}',
     '.ct-page td,.ct-page th{padding:7px 8px;border:1px solid var(--line);text-align:left;vertical-align:top}',
     '.ct-page th{width:27%;background:#f5f5f7}.ct-page thead th{background:#0a0a0a;color:#fff;border-color:#0a0a0a;font-size:8.25pt}',
-    '.ct-signature{border-top:1px solid var(--line);padding-top:10px;margin-top:18px}',
+    '.ct-signature{border-top:1px solid var(--line);padding-top:14px;margin-top:26px}.ct-page .ct-signature>p{font-size:13pt;font-weight:700;margin:0 0 16px}.ct-sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm}.ct-sign-grid b{display:block;font-size:12pt;margin-bottom:8px}.ct-page .ct-sign-grid p{font-size:10.5pt;line-height:1.6;margin:0 0 3px}.ct-page .ct-sign-grid .ct-sign-line{margin-top:20px;padding-top:6px;border-top:1px solid #1d1d1f;text-align:right;color:#6e6e73;font-size:9.5pt}',
     '.ct-brand{position:absolute;left:0;right:0;bottom:0;height:34mm;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;box-sizing:border-box;background:#0a0a0a;color:#fff;padding:0 14mm 0 15mm}',
     '.ct-brand img{display:block;width:125px;height:auto}.ct-brand div{text-align:right}.ct-page .ct-brand p{font-size:8pt;margin:0;line-height:1.45}',
     '@media(max-width:410px){.ct-fields{grid-template-columns:minmax(0,1fr)}.ct-panel{padding:15px}}',
@@ -199,7 +199,11 @@
       title:'SERVICE AGREEMENT',subtitle:'용역 계약서',partnerDetails:partnerDetails,details:details,issuer:issuer.split('\n'),
       intro:'하단에 표시한 위탁자 BUFF와 위 수행자는 아래 조건에 따라 제작 용역 계약을 체결합니다. 작업확인서는 계약의 일부입니다.',
       rows:rows,clauses:clauses(),project:value(s,'project'),
-      signature:['체결일 '+label(s,'contractDate'),'위탁자  버프유니버스 · 김동준  (서명 또는 날인) __________________','수행자  '+(value(partner,'signer')||value(partner,'representative')||label(partner,'partner'))+'  (서명 또는 날인) __________________']
+      signature:['체결일 '+label(s,'contractDate')],
+      signParties:[
+        {role:'위탁자 (갑)',lines:['버프유니버스(BUFF UNIVERSE)','대표자 김동준','사업자등록번호 295-24-02126','서울특별시 관악구 남부순환로 1921-1, 202-E4호(봉천동, 범산빌딩)'],sign:'서명 또는 날인'},
+        {role:'수행자 (을)',lines:partnerDetails.concat(value(partner,'signer')||value(partner,'representative')?[]:[]),sign:'서명 또는 날인'}
+      ]
     };
   }
 
@@ -223,7 +227,10 @@
     model.rows.forEach(function(row){var tr=element('tr'),th=element('th',row[0]);th.scope='row';tr.append(th,element('td',row[1]));body.append(tr)});
     table.append(head,body);
     var signature=element('div');signature.className='ct-signature';
-    model.signature.forEach(function(line){signature.append(element('p',line))});
+    signature.append(element('p',model.signature[0]));
+    var parties=element('div');parties.className='ct-sign-grid';
+    model.signParties.forEach(function(party){var box=element('div'),head=element('b',party.role);box.append(head);party.lines.forEach(function(line){box.append(element('p',line))});var sig=element('p','(서명 또는 날인)');sig.className='ct-sign-line';box.append(sig);parties.append(box)});
+    signature.append(parties);
     var title=element('h2',model.title),subtitle=element('span',model.subtitle);
     subtitle.className='ct-subtitle';title.append(subtitle);
     var info=element('div'),party=element('section'),details=element('section'),partyHeading=element('p');
@@ -279,7 +286,7 @@
     var old=button.textContent;
     button.disabled=true;button.textContent='만드는 중…';
     if(!docxLoad)docxLoad=(window.docx?Promise.resolve():loadScript('vendor/docx.iife.js'))
-      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-3')})
+      .then(function(){return loadScript('contract_docx.js?v=pdf-reference-5')})
       .catch(function(error){docxLoad=null;throw error});
     return docxLoad.then(function(){return window.buffContractDocx(model)}).then(function(blob){
       var project=model.project.replace(/[\\/:*?"<>|]/g,'_').slice(0,90);
